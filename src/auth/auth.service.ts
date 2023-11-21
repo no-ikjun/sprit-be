@@ -1,5 +1,9 @@
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
-import { KakaoRequestDto, KakaoUserDataDto } from './dto/auth.dto';
+import {
+  KakaoRequestDto,
+  KakaoUserDataDto,
+  LoginUserDto,
+} from './dto/auth.dto';
 import { LoginResponseType } from 'src/global/types/response.type';
 import { AxiosResponse } from 'axios';
 import { UserService } from 'src/user/user.service';
@@ -11,6 +15,7 @@ import { DataSource } from 'typeorm';
 import { UserRegisterType } from 'src/global/types/user.enum';
 import { User } from 'src/global/entities/user.entity';
 import { UserRepository } from 'src/user/user.repository';
+import * as bcrypt from 'bcrypt';
 
 @Injectable()
 export class AuthService {
@@ -23,6 +28,28 @@ export class AuthService {
     private readonly dataSource: DataSource,
   ) {}
 
+  async login(data: LoginUserDto): Promise<LoginResponseType> {
+    await this.dataSource.transaction(async (transctionEntityManager) => {
+      const user = await this.userRepository.findOneByUserId(
+        transctionEntityManager,
+        data.user_id,
+      );
+      if (!user)
+        throw new HttpException('User not found', HttpStatus.BAD_REQUEST);
+      const isPasswordValid = await bcrypt.compare(
+        data.user_password,
+        user.user_password,
+      );
+      if (!isPasswordValid)
+        throw new HttpException('Password not match', HttpStatus.UNAUTHORIZED);
+    });
+    const accessToken = await this.userRepository.getJwtAccessToken(
+      data.user_id,
+      UserRegisterType.LOCAL,
+    );
+    return { access_token: accessToken, new_user: false };
+  }
+
   async kakaoLogin(data: KakaoRequestDto): Promise<LoginResponseType> {
     const kakaoUserData: KakaoUserDataDto = await this.getKaKaoUserData(
       data.access_token,
@@ -31,7 +58,6 @@ export class AuthService {
       async (transctionEntityManager) => {
         const user = await this.userService.findByUserId(kakaoUserData.user_id);
         if (user) {
-          console.log(user);
           const accessToken = await this.getJwtAccessToken(
             user.user_id,
             UserRegisterType.KAKAO,

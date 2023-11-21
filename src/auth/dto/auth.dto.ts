@@ -1,40 +1,27 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { IsString } from 'class-validator';
 
+export class LoginUserDto {
+  @IsString()
+  user_id: string;
+
+  @IsString()
+  user_password: string;
+}
+
 export class KakaoRequestDto {
-  @ApiProperty({
-    example:
-      'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJodHRwczovL2V4YW1wbGUuYXV0aDAuY29tLyIsImF1ZCI6Imh0dHBzOi8vYXBpLmV4YW1wbGUuY29tL2NhbGFuZGFyL3YxLyIsInN1YiI6InVzcl8xMjMiLCJpYXQiOjE0NTg3ODU3OTYsImV4cCI6MTQ1ODg3MjE5Nn0.CA7eaHjIHz5NxeIJoFK9krqaeZrPLwmMmgI_XiQiIkQ',
-    description: '엑세스 토큰',
-  })
   @IsString()
   access_token: string;
 
-  @ApiProperty({
-    example: '2023-11-20T12:17:30.250',
-    description: '만료 시간',
-  })
   @IsString()
   expires_at: string;
 
-  @ApiProperty({
-    example: 'refresh_token',
-    description: '리프레시 토큰',
-  })
   @IsString()
   refresh_token: string;
 
-  @ApiProperty({
-    example: '2021-11-20T12:17:30.250',
-    description: '리프레시 토큰 만료 시간',
-  })
   @IsString()
   refresh_token_expires_at: string;
 
-  @ApiProperty({
-    example: 'id_token',
-    description: '아이디 토큰',
-  })
   @IsString()
   id_token: string;
 }
@@ -53,4 +40,24 @@ export class KakaoUserDataDto {
   })
   @IsString()
   user_nickname: string;
+}
+
+export class AppleRequestDto {
+  @IsString()
+  user_identifier: string;
+
+  @IsString()
+  given_name: string;
+
+  @IsString()
+  family_name: string;
+
+  @IsString()
+  authorization_code: string;
+
+  @IsString()
+  email: string;
+
+  @IsString()
+  identity_token: string;
 }

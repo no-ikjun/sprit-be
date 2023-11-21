@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { CreateUserDto } from './dto/user.dto';
 import { DataSource } from 'typeorm';
 import { UserRepository } from './user.repository';
@@ -19,7 +19,8 @@ export class UserService {
         transctionEntityManager,
         data.user_id,
       );
-      if (user) throw new Error('이미 존재하는 아이디입니다.');
+      if (user)
+        throw new HttpException('Duplicate user id', HttpStatus.BAD_REQUEST);
       await this.userRepository.setNewUser(transctionEntityManager, data);
     });
     const accessToken = await this.userRepository.getJwtAccessToken(
