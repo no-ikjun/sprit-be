@@ -3,9 +3,9 @@ import * as crypto from 'crypto';
 export const generateRamdomId = (...suffix: string[]): string => {
   let result = '';
   suffix.map((str) => {
-    result += '-' + str;
+    result = result + '-' + str;
   });
-  return result;
+  return result.substring(1);
 };
 
 export const getRandomString = (length: number): string => {

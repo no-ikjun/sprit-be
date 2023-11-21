@@ -9,7 +9,4 @@ export class CreateUserDto {
 
   @IsString()
   user_nickname: string;
-
-  @IsString()
-  register_type: string;
 }

@@ -25,12 +25,13 @@ export class AuthService {
 
   async kakaoLogin(data: KakaoRequestDto): Promise<LoginResponseType> {
     const kakaoUserData: KakaoUserDataDto = await this.getKaKaoUserData(
-      data.accessToken,
+      data.access_token,
     );
     return await this.dataSource.transaction(
       async (transctionEntityManager) => {
         const user = await this.userService.findByUserId(kakaoUserData.user_id);
         if (user) {
+          console.log(user);
           const accessToken = await this.getJwtAccessToken(
             user.user_id,
             UserRegisterType.KAKAO,
@@ -72,7 +73,7 @@ export class AuthService {
     });
     return {
       user_id: response.id,
-      user_nickname: response.properties.nickname,
+      user_nickname: response.kakao_account.profile.nickname,
     };
   }
 

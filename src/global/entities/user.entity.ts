@@ -16,4 +16,7 @@ export class User {
 
   @Column()
   register_type: string;
+
+  @Column()
+  registered_at: Date;
 }

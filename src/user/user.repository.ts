@@ -5,10 +5,17 @@ import { CreateUserDto } from './dto/user.dto';
 import { generateRamdomId, getRandomString, getToday } from 'src/global/utils';
 import { KakaoUserDataDto } from 'src/auth/dto/auth.dto';
 import { UserRegisterType } from 'src/global/types/user.enum';
+import { JwtService } from '@nestjs/jwt';
+import { ConfigService } from '@nestjs/config';
+import * as bcrypt from 'bcrypt';
 
 @Injectable()
 export class UserRepository {
-  constructor(private readonly dataSource: DataSource) {}
+  constructor(
+    private readonly dataSource: DataSource,
+    private readonly jwtService: JwtService,
+    private readonly configService: ConfigService,
+  ) {}
 
   async findOneByUserUuid(
     transctionEntityManager: EntityManager,
@@ -39,12 +46,14 @@ export class UserRepository {
       getToday(),
       getRandomString(8),
     );
+    await this.encryptPassword(userData);
     await transctionEntityManager.save(User, {
       user_uuid: user_uuid,
       user_nickname: userData.user_nickname,
       user_id: userData.user_id,
       user_password: userData.user_password,
-      register_type: userData.register_type,
+      register_type: UserRegisterType.LOCAL,
+      registered_at: new Date(),
     });
   }
 
@@ -61,8 +70,32 @@ export class UserRepository {
     kakaoUser.user_uuid = user_uuid;
     kakaoUser.user_nickname = kakaoUserDto.user_nickname;
     kakaoUser.user_id = kakaoUserDto.user_id;
+    kakaoUser.user_password = '';
     kakaoUser.register_type = UserRegisterType.KAKAO;
+    kakaoUser.registered_at = new Date();
     await transactionentityManager.save(User, kakaoUser);
     return user_uuid;
+  }
+
+  public async getJwtAccessToken(
+    user_id: string,
+    login_type: UserRegisterType,
+  ): Promise<string> {
+    const payload = { user_id: user_id, login_type: login_type };
+    const jwtAccessTokenSecret = this.configService.get(
+      'JWT_ACCESS_TOKEN_SECRET',
+    );
+    const jwtAccessTokenExpire = this.configService.get(
+      'JWT_ACCESS_TOKEN_EXPIRATION_TIME',
+    );
+    return this.jwtService.sign(payload, {
+      secret: jwtAccessTokenSecret,
+      expiresIn: jwtAccessTokenExpire,
+    });
+  }
+
+  async encryptPassword(user: CreateUserDto): Promise<CreateUserDto> {
+    user.user_password = await bcrypt.hash(user.user_password, 10);
+    return user;
   }
 }

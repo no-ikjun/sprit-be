@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsNotEmpty, IsString } from 'class-validator';
+import { IsString } from 'class-validator';
 
 export class KakaoRequestDto {
   @ApiProperty({
@@ -8,7 +8,35 @@ export class KakaoRequestDto {
     description: '엑세스 토큰',
   })
   @IsString()
-  accessToken: string;
+  access_token: string;
+
+  @ApiProperty({
+    example: '2023-11-20T12:17:30.250',
+    description: '만료 시간',
+  })
+  @IsString()
+  expires_at: string;
+
+  @ApiProperty({
+    example: 'refresh_token',
+    description: '리프레시 토큰',
+  })
+  @IsString()
+  refresh_token: string;
+
+  @ApiProperty({
+    example: '2021-11-20T12:17:30.250',
+    description: '리프레시 토큰 만료 시간',
+  })
+  @IsString()
+  refresh_token_expires_at: string;
+
+  @ApiProperty({
+    example: 'id_token',
+    description: '아이디 토큰',
+  })
+  @IsString()
+  id_token: string;
 }
 
 export class KakaoUserDataDto {
