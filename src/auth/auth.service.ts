@@ -1,5 +1,7 @@
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import {
+  AppleRequestDto,
+  AppleUserDataDto,
   KakaoRequestDto,
   KakaoUserDataDto,
   LoginUserDto,
@@ -101,6 +103,35 @@ export class AuthService {
       user_id: response.id,
       user_nickname: response.kakao_account.profile.nickname,
     };
+  }
+
+  public async appleLogin(data: AppleRequestDto): Promise<LoginResponseType> {
+    return await this.dataSource.transaction(
+      async (transctionEntityManager) => {
+        const user = await this.userService.findByUserId(data.user_identifier);
+        if (user) {
+          const accessToken = await this.getJwtAccessToken(
+            user.user_id,
+            UserRegisterType.APPLE,
+          );
+          return { access_token: accessToken, new_user: false };
+        } else {
+          const appleUserData: AppleUserDataDto = new AppleUserDataDto();
+          appleUserData.user_id = data.user_identifier;
+          appleUserData.user_nickname = data.given_name;
+          await this.verifyDuplicateUser(data.user_identifier);
+          await this.userRepository.setNewUserByApple(
+            transctionEntityManager,
+            appleUserData,
+          );
+          const access_token = await this.getJwtAccessToken(
+            data.user_identifier,
+            UserRegisterType.APPLE,
+          );
+          return { access_token: access_token, new_user: true };
+        }
+      },
+    );
   }
 
   public async getJwtAccessToken(

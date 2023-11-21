@@ -1,6 +1,6 @@
 import { Body, Controller, Post, Res } from '@nestjs/common';
 import { AuthService } from './auth.service';
-import { KakaoRequestDto, LoginUserDto } from './dto/auth.dto';
+import { AppleRequestDto, KakaoRequestDto, LoginUserDto } from './dto/auth.dto';
 import { LoginResponseType } from 'src/global/types/response.type';
 
 @Controller('auth')
@@ -18,5 +18,13 @@ export class AuthController {
     @Res({ passthrough: true }) res: Response,
   ): Promise<LoginResponseType> {
     return this.authService.kakaoLogin(data);
+  }
+
+  @Post('login/apple')
+  async appleLogin(
+    @Body() data: AppleRequestDto,
+    @Res({ passthrough: true }) res: Response,
+  ): Promise<LoginResponseType> {
+    return this.authService.appleLogin(data);
   }
 }

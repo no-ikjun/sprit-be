@@ -61,3 +61,11 @@ export class AppleRequestDto {
   @IsString()
   identity_token: string;
 }
+
+export class AppleUserDataDto {
+  @IsString()
+  user_id: string;
+
+  @IsString()
+  user_nickname: string;
+}

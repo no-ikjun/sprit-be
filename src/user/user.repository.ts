@@ -3,7 +3,7 @@ import { User } from 'src/global/entities/user.entity';
 import { DataSource, EntityManager } from 'typeorm';
 import { CreateUserDto } from './dto/user.dto';
 import { generateRamdomId, getRandomString, getToday } from 'src/global/utils';
-import { KakaoUserDataDto } from 'src/auth/dto/auth.dto';
+import { AppleUserDataDto, KakaoUserDataDto } from 'src/auth/dto/auth.dto';
 import { UserRegisterType } from 'src/global/types/user.enum';
 import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
@@ -74,6 +74,26 @@ export class UserRepository {
     kakaoUser.register_type = UserRegisterType.KAKAO;
     kakaoUser.registered_at = new Date();
     await transactionentityManager.save(User, kakaoUser);
+    return user_uuid;
+  }
+
+  async setNewUserByApple(
+    transactionentityManager: EntityManager,
+    appleUserDto: AppleUserDataDto,
+  ): Promise<string> {
+    const appleUser = new User();
+    const user_uuid = generateRamdomId(
+      'UA' + getRandomString(6),
+      getToday(),
+      getRandomString(8),
+    );
+    appleUser.user_uuid = user_uuid;
+    appleUser.user_nickname = appleUserDto.user_nickname;
+    appleUser.user_id = appleUserDto.user_id;
+    appleUser.user_password = '';
+    appleUser.register_type = UserRegisterType.APPLE;
+    appleUser.registered_at = new Date();
+    await transactionentityManager.save(User, appleUser);
     return user_uuid;
   }
 
