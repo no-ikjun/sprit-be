@@ -16,7 +16,7 @@ export class UserController {
   @Get('/info')
   @UseGuards(JwtAccessGuard)
   async getUserInfo(@Req() req): Promise<UserInfoDto> {
-    const accessToken = req.user.access_token;
+    const accessToken = req.headers.authorization.split(' ')[1];
     return await this.userService.getUserInfo(accessToken);
   }
 }

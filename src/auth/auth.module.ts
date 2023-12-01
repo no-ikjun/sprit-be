@@ -6,6 +6,7 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
 import { JwtModule } from '@nestjs/jwt';
 import { HttpModule } from '@nestjs/axios';
 import { UserService } from 'src/user/user.service';
+import { JwtAccessStrategy } from './guard/jwtAccess.strategy';
 
 @Module({
   imports: [
@@ -21,7 +22,7 @@ import { UserService } from 'src/user/user.service';
     }),
     HttpModule,
   ],
-  providers: [AuthService, UserRepository, UserService],
+  providers: [AuthService, UserRepository, UserService, JwtAccessStrategy],
   controllers: [AuthController],
 })
 export class AuthModule {}
