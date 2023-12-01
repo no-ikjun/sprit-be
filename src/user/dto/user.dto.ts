@@ -10,3 +10,14 @@ export class CreateUserDto {
   @IsString()
   user_nickname: string;
 }
+
+export class UserInfoDto {
+  @IsString()
+  user_uuid: string;
+
+  @IsString()
+  user_nickname: string;
+
+  @IsString()
+  register_type: string;
+}

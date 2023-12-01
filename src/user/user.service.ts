@@ -5,12 +5,14 @@ import { UserRepository } from './user.repository';
 import { User } from 'src/global/entities/user.entity';
 import { UserRegisterType } from 'src/global/types/user.enum';
 import { LoginResponseType } from 'src/global/types/response.type';
+import { JwtService } from '@nestjs/jwt';
 
 @Injectable()
 export class UserService {
   constructor(
     private readonly dataSource: DataSource,
     private readonly userRepository: UserRepository,
+    private readonly jwtService: JwtService,
   ) {}
 
   async signUp(data: CreateUserDto): Promise<LoginResponseType> {
@@ -47,6 +49,18 @@ export class UserService {
       user = await this.userRepository.findOneByUserUuid(
         transctionEntityManager,
         userUuid,
+      );
+    });
+    return user;
+  }
+
+  async getUserInfo(accessToken: string): Promise<User> {
+    let user = new User();
+    const user_id = this.jwtService.decode(accessToken).user_id;
+    await this.dataSource.transaction(async (transctionEntityManager) => {
+      user = await this.userRepository.findOneByUserId(
+        transctionEntityManager,
+        user_id,
       );
     });
     return user;
