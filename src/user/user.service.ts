@@ -1,5 +1,5 @@
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
-import { CreateUserDto } from './dto/user.dto';
+import { CreateUserDto, UserInfoDto } from './dto/user.dto';
 import { DataSource } from 'typeorm';
 import { UserRepository } from './user.repository';
 import { User } from 'src/global/entities/user.entity';
@@ -54,7 +54,7 @@ export class UserService {
     return user;
   }
 
-  async getUserInfo(accessToken: string): Promise<User> {
+  async getUserInfo(accessToken: string): Promise<UserInfoDto> {
     let user = new User();
     const user_id = this.jwtService.decode(accessToken).user_id;
     await this.dataSource.transaction(async (transctionEntityManager) => {
@@ -63,6 +63,10 @@ export class UserService {
         user_id,
       );
     });
-    return user;
+    return {
+      user_uuid: user.user_uuid,
+      user_nickname: user.user_nickname,
+      register_type: user.register_type,
+    };
   }
 }
