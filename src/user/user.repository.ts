@@ -87,7 +87,6 @@ export class UserRepository {
       getToday(),
       getRandomString(8),
     );
-    console.log(appleUserDto.user_nickname);
     appleUser.user_uuid = user_uuid;
     appleUser.user_nickname = appleUserDto.user_nickname;
     appleUser.user_id = appleUserDto.user_id;

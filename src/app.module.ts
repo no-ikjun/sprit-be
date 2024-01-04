@@ -7,6 +7,8 @@ import { DatabaseModule } from './global/config/database/database.module';
 import { ConfigModule } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { DatabaseService } from './global/config/database/database.service';
+import { BookModule } from './book/book.module';
+import { HttpModule } from '@nestjs/axios';
 
 @Module({
   imports: [
@@ -21,6 +23,8 @@ import { DatabaseService } from './global/config/database/database.service';
     AuthModule,
     UserModule,
     DatabaseModule,
+    BookModule,
+    HttpModule,
   ],
   controllers: [AppController],
   providers: [AppService],
