@@ -5,7 +5,10 @@ import { BookInfoDto, NewBookDto } from './dto/book.dto';
 import { generateRamdomId, getRandomString, getToday } from 'src/global/utils';
 import { HttpService } from '@nestjs/axios';
 import { firstValueFrom } from 'rxjs';
-import { BookRegisterResponseType } from 'src/global/types/response.type';
+import {
+  BookRegisterResponseType,
+  BookSearchResponseType,
+} from 'src/global/types/response.type';
 
 @Injectable()
 export class BookService {
@@ -95,7 +98,10 @@ export class BookService {
     });
   }
 
-  async searchBook(query: string, page: string): Promise<BookInfoDto[]> {
+  async searchBook(
+    query: string,
+    page: string,
+  ): Promise<BookSearchResponseType> {
     const headersRequest = {
       Authorization: `KakaoAK ${process.env.KAKAO_REST_API_KEY}`,
     };
@@ -105,6 +111,9 @@ export class BookService {
     );
     const response = await firstValueFrom(response$);
     const books = response.data.documents;
-    return books.map((book: any) => new BookInfoDto(book));
+    return {
+      is_end: response.data.meta.is_end,
+      books: books.map((book: any) => new BookInfoDto(book)),
+    };
   }
 }

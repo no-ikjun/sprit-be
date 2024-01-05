@@ -1,8 +1,11 @@
 import { Controller, Get, Post, Query, UseGuards } from '@nestjs/common';
 import { BookService } from './book.service';
 import { JwtAccessGuard } from 'src/auth/guard/jwtAccess.guard';
-import { BookInfoDto } from './dto/book.dto';
-import { BookRegisterResponseType } from 'src/global/types/response.type';
+import {
+  BookRegisterResponseType,
+  BookSearchResponseType,
+} from 'src/global/types/response.type';
+import { Book } from 'src/global/entities/book.entity';
 
 @Controller('book')
 export class BookController {
@@ -16,7 +19,19 @@ export class BookController {
 
   @Get('/search')
   @UseGuards(JwtAccessGuard)
-  async searchBook(@Query() query): Promise<BookInfoDto[]> {
+  async searchBook(@Query() query): Promise<BookSearchResponseType> {
     return await this.bookService.searchBook(query.query, query.page ?? '1');
+  }
+
+  @Get('/find/uuid')
+  @UseGuards(JwtAccessGuard)
+  async getBookInfo(@Query() query): Promise<Book> {
+    return await this.bookService.findByBookUuid(query.book_uuid);
+  }
+
+  @Get('/find/isbn')
+  @UseGuards(JwtAccessGuard)
+  async getBookInfoByISBN(@Query() query): Promise<Book> {
+    return await this.bookService.findByISBN(query.isbn);
   }
 }

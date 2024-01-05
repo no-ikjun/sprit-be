@@ -1,3 +1,4 @@
+import { BookInfoDto } from 'src/book/dto/book.dto';
 import { Book } from '../entities/book.entity';
 
 export type LoginResponseType = {
@@ -8,4 +9,9 @@ export type LoginResponseType = {
 export type BookRegisterResponseType = {
   new_book: boolean;
   book_data: Book;
+};
+
+export type BookSearchResponseType = {
+  is_end: boolean;
+  books: BookInfoDto[];
 };
