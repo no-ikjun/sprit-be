@@ -15,3 +15,7 @@ export type BookSearchResponseType = {
   is_end: boolean;
   books: BookInfoDto[];
 };
+
+export type BannerRegisterResponseType = {
+  message: string;
+};

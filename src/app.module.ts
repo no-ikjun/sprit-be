@@ -9,6 +9,7 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { DatabaseService } from './global/config/database/database.service';
 import { BookModule } from './book/book.module';
 import { HttpModule } from '@nestjs/axios';
+import { BannerModule } from './banner/banner.module';
 
 @Module({
   imports: [
@@ -25,6 +26,7 @@ import { HttpModule } from '@nestjs/axios';
     DatabaseModule,
     BookModule,
     HttpModule,
+    BannerModule,
   ],
   controllers: [AppController],
   providers: [AppService],
