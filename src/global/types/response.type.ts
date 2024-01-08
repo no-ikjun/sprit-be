@@ -16,8 +16,13 @@ export type BookSearchResponseType = {
   books: BookInfoDto[];
 };
 
+export type BookInfoResponseType = {
+  book: Book;
+  score: number;
+};
+
 export type PopularBookResponseType = {
-  books: Book[];
+  books: BookInfoResponseType[];
   more_available: boolean;
 };
 

@@ -6,36 +6,45 @@ import { generateRamdomId, getRandomString, getToday } from 'src/global/utils';
 import { HttpService } from '@nestjs/axios';
 import { firstValueFrom } from 'rxjs';
 import {
+  BookInfoResponseType,
   BookRegisterResponseType,
   BookSearchResponseType,
   PopularBookResponseType,
 } from 'src/global/types/response.type';
+import { ReviewService } from 'src/review/review.service';
 
 @Injectable()
 export class BookService {
   constructor(
     private readonly dataSource: DataSource,
     private readonly httpService: HttpService,
+    private readonly reviewService: ReviewService,
   ) {}
 
-  async findByISBN(isbn: string): Promise<Book> {
+  async findByISBN(isbn: string): Promise<BookInfoResponseType> {
     let book: Book;
+    let score: number;
     await this.dataSource.transaction(async (transctionEntityManager) => {
       book = await transctionEntityManager.findOne(Book, {
         where: { isbn: isbn },
       });
+      score = await this.reviewService.getAverageScoreByBookUuid(
+        book.book_uuid,
+      );
     });
-    return book;
+    return { book: book, score: score };
   }
 
-  async findByBookUuid(book_uuid: string): Promise<Book> {
+  async findByBookUuid(book_uuid: string): Promise<BookInfoResponseType> {
     let book: Book;
+    let score: number;
     await this.dataSource.transaction(async (transctionEntityManager) => {
       book = await transctionEntityManager.findOne(Book, {
         where: { book_uuid: book_uuid },
       });
+      score = await this.reviewService.getAverageScoreByBookUuid(book_uuid);
     });
-    return book;
+    return { book: book, score: score };
   }
 
   async setNewBookByISBN(isbn: string): Promise<BookRegisterResponseType> {
@@ -56,7 +65,7 @@ export class BookService {
     const book = books[0];
     const existingBook = await this.findByISBN(book.isbn);
     if (existingBook) {
-      return { new_book: false, book_data: existingBook };
+      return { new_book: false, book_data: existingBook.book };
     }
     const bookData = new Book();
     bookData.book_uuid = book_uuid;
@@ -123,6 +132,7 @@ export class BookService {
   async getPopularBookList(page: number): Promise<PopularBookResponseType> {
     const pageSize = 10;
     let bookList: Book[];
+    let bookListWithScore: BookInfoResponseType[];
     let moreAvailable = false;
     await this.dataSource.transaction(async (transctionEntityManager) => {
       bookList = await transctionEntityManager.find(Book, {
@@ -132,7 +142,16 @@ export class BookService {
       });
       const totalCount = await transctionEntityManager.count(Book);
       moreAvailable = totalCount > page * pageSize;
+      for (const book of bookList) {
+        const score = await this.reviewService.getAverageScoreByBookUuid(
+          book.book_uuid,
+        );
+        bookListWithScore.push({ book: book, score: score });
+      }
     });
-    return { books: bookList, more_available: moreAvailable };
+    return {
+      books: bookListWithScore,
+      more_available: moreAvailable,
+    };
   }
 }

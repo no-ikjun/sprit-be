@@ -80,4 +80,18 @@ export class ReviewService {
       },
     );
   }
+
+  async getAverageScoreByBookUuid(book_uuid: string): Promise<number> {
+    // dataSource 인스턴스 사용
+    const averageScoreResult = await this.dataSource
+      .createQueryBuilder()
+      .select('AVG(score)', 'average')
+      .from(Review, 'review')
+      .where('review.book_uuid = :book_uuid', { book_uuid })
+      .getRawOne();
+
+    return averageScoreResult.average !== null
+      ? parseFloat(averageScoreResult.average)
+      : 0;
+  }
 }
