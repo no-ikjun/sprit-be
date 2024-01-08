@@ -10,6 +10,7 @@ import { DatabaseService } from './global/config/database/database.service';
 import { BookModule } from './book/book.module';
 import { HttpModule } from '@nestjs/axios';
 import { BannerModule } from './banner/banner.module';
+import { ReviewModule } from './review/review.module';
 
 @Module({
   imports: [
@@ -27,6 +28,7 @@ import { BannerModule } from './banner/banner.module';
     BookModule,
     HttpModule,
     BannerModule,
+    ReviewModule,
   ],
   controllers: [AppController],
   providers: [AppService],
