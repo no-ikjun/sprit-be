@@ -4,6 +4,7 @@ import { JwtAccessGuard } from 'src/auth/guard/jwtAccess.guard';
 import {
   BookRegisterResponseType,
   BookSearchResponseType,
+  PopularBookResponseType,
 } from 'src/global/types/response.type';
 import { Book } from 'src/global/entities/book.entity';
 
@@ -33,5 +34,11 @@ export class BookController {
   @UseGuards(JwtAccessGuard)
   async getBookInfoByISBN(@Query() query): Promise<Book> {
     return await this.bookService.findByISBN(query.isbn);
+  }
+
+  @Get('/popular')
+  @UseGuards(JwtAccessGuard)
+  async getPopularBook(@Query() query): Promise<PopularBookResponseType> {
+    return await this.bookService.getPopularBookList(query.page ?? 1);
   }
 }

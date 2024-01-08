@@ -34,4 +34,7 @@ export class Book {
 
   @Column()
   updated_at: Date;
+
+  @Column()
+  score: number;
 }

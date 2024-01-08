@@ -8,6 +8,7 @@ import { firstValueFrom } from 'rxjs';
 import {
   BookRegisterResponseType,
   BookSearchResponseType,
+  PopularBookResponseType,
 } from 'src/global/types/response.type';
 
 @Injectable()
@@ -69,6 +70,7 @@ export class BookService {
     bookData.content = book.contents;
     bookData.published_at = new Date(book.datetime);
     bookData.updated_at = new Date();
+    bookData.score = 0;
     await this.dataSource.transaction(async (transctionEntityManager) => {
       await transctionEntityManager.save(Book, bookData);
     });
@@ -94,6 +96,7 @@ export class BookService {
         content: bookData.content,
         published_at: new Date(bookData.datetime),
         updated_at: new Date(),
+        score: 0,
       });
     });
   }
@@ -115,5 +118,21 @@ export class BookService {
       is_end: response.data.meta.is_end,
       books: books.map((book: any) => new BookInfoDto(book)),
     };
+  }
+
+  async getPopularBookList(page: number): Promise<PopularBookResponseType> {
+    const pageSize = 10;
+    let bookList: Book[];
+    let moreAvailable = false;
+    await this.dataSource.transaction(async (transctionEntityManager) => {
+      bookList = await transctionEntityManager.find(Book, {
+        order: { score: 'DESC' },
+        skip: (page - 1) * pageSize,
+        take: pageSize,
+      });
+      const totalCount = await transctionEntityManager.count(Book);
+      moreAvailable = totalCount > page * pageSize;
+    });
+    return { books: bookList, more_available: moreAvailable };
   }
 }

@@ -16,6 +16,11 @@ export type BookSearchResponseType = {
   books: BookInfoDto[];
 };
 
+export type PopularBookResponseType = {
+  books: Book[];
+  more_available: boolean;
+};
+
 export type BannerRegisterResponseType = {
   message: string;
 };
