@@ -12,7 +12,9 @@ export class BannerService {
   async getBannerList(): Promise<Banner[]> {
     let bannerList: Banner[];
     await this.dataSource.transaction(async (transctionEntityManager) => {
-      bannerList = await transctionEntityManager.find(Banner);
+      bannerList = await transctionEntityManager.find(Banner, {
+        order: { created_at: 'DESC' },
+      });
     });
     return bannerList;
   }
