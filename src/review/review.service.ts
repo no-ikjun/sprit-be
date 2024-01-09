@@ -58,20 +58,17 @@ export class ReviewService {
       access_token,
     );
 
-    // Begin the transaction
     return await this.dataSource.transaction(
       async (transactionEntityManager) => {
         try {
-          // Create a new instance of the Review entity
           const review = transactionEntityManager.create(Review, {
             review_uuid: review_uuid,
             score: reviewData.score,
             created_at: new Date(),
             user_uuid: userInfo.user_uuid,
+            content: reviewData.content ?? '',
             book: { book_uuid: reviewData.book_uuid },
           });
-
-          // Save the new Review entity instance
           return await transactionEntityManager.save(review);
         } catch (error) {
           console.error('Error when saving review:', error);
@@ -82,16 +79,26 @@ export class ReviewService {
   }
 
   async getAverageScoreByBookUuid(book_uuid: string): Promise<number> {
-    // dataSource 인스턴스 사용
     const averageScoreResult = await this.dataSource
       .createQueryBuilder()
       .select('AVG(score)', 'average')
       .from(Review, 'review')
       .where('review.book_uuid = :book_uuid', { book_uuid })
       .getRawOne();
-
-    return averageScoreResult.average !== null
+    return averageScoreResult && averageScoreResult.average !== null
       ? parseFloat(averageScoreResult.average)
+      : 0;
+  }
+
+  async getReviewCountByBookUuid(book_uuid: string): Promise<number> {
+    const reviewCountResult = await this.dataSource
+      .createQueryBuilder()
+      .select('COUNT(*)', 'count')
+      .from(Review, 'review')
+      .where('review.book_uuid = :book_uuid', { book_uuid })
+      .getRawOne();
+    return reviewCountResult && reviewCountResult.count !== null
+      ? parseInt(reviewCountResult.count)
       : 0;
   }
 }

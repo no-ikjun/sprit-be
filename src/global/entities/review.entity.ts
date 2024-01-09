@@ -15,6 +15,9 @@ export class Review {
   @Column({ type: 'varchar', length: 255 })
   user_uuid: string;
 
+  @Column({ type: 'text' })
+  content: string;
+
   @ManyToOne(() => Book)
   @JoinColumn({ name: 'book_uuid' })
   book: Book;
