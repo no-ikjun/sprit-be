@@ -11,6 +11,7 @@ import { BookModule } from './book/book.module';
 import { HttpModule } from '@nestjs/axios';
 import { BannerModule } from './banner/banner.module';
 import { ReviewModule } from './review/review.module';
+import { QuestModule } from './quest/quest.module';
 
 @Module({
   imports: [
@@ -29,6 +30,7 @@ import { ReviewModule } from './review/review.module';
     HttpModule,
     BannerModule,
     ReviewModule,
+    QuestModule,
   ],
   controllers: [AppController],
   providers: [AppService],
