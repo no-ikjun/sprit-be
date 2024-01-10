@@ -17,8 +17,20 @@ export type BookSearchResponseType = {
 };
 
 export type BookInfoResponseType = {
-  book: Book;
+  book_uuid: string;
+  isbn: string;
+  title: string;
+  authors: string;
+  publisher: string;
+  translators: string;
+  search_url: string;
+  thumbnail: string;
+  content: string;
+  published_at: Date;
+  updated_at: Date;
   score: number;
+  star: number;
+  star_count: number;
 };
 
 export type PopularBookResponseType = {

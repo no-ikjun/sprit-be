@@ -6,4 +6,7 @@ export class CreateReviewDto {
 
   @IsString()
   book_uuid: string;
+
+  @IsString()
+  content: string;
 }
