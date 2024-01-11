@@ -1,5 +1,7 @@
 import { BookInfoDto } from 'src/book/dto/book.dto';
 import { Book } from '../entities/book.entity';
+import { QuestApply } from '../entities/quest_apply.entity';
+import { Quest } from '../entities/quest.entity';
 
 export type LoginResponseType = {
   access_token: string;
@@ -40,4 +42,9 @@ export type PopularBookResponseType = {
 
 export type BannerRegisterResponseType = {
   message: string;
+};
+
+export type AppliedQuestResponseType = {
+  apply: QuestApply;
+  quest: Quest;
 };
