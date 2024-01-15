@@ -143,12 +143,12 @@ export class NotificationRepository {
 
   async updateMarketingAgreeByFcmToken(
     transactionEntityManager: EntityManager,
-    fcm_token: string,
+    fcm_token_uuid: string,
     marketing_agree: boolean,
   ): Promise<void> {
     await transactionEntityManager.update(
       FcmToken,
-      { fcm_token: fcm_token },
+      { fcm_token_uuid: fcm_token_uuid },
       { marketing_agree: marketing_agree, agreed_at: new Date() },
     );
   }
