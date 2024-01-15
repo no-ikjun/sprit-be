@@ -1,7 +1,18 @@
-import { Controller, Post, Query, Req, UseGuards } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Patch,
+  Post,
+  Query,
+  Req,
+  UseGuards,
+} from '@nestjs/common';
 import { NotificationService } from './notification.service';
 import { JwtAccessGuard } from 'src/auth/guard/jwtAccess.guard';
 import { SetFcmTokenResponseType } from 'src/global/types/response.type';
+import { TimeAgree } from 'src/global/entities/time_agree.entity';
+import { RemindAgree } from 'src/global/entities/remind_agree.entity';
+import { QuestAgree } from 'src/global/entities/quest_agree.entity';
 
 @Controller('notification')
 export class NotificationController {
@@ -17,6 +28,65 @@ export class NotificationController {
     return await this.notificationService.setFcmToken(
       access_token,
       query.fcm_token,
+    );
+  }
+
+  @Get('agree/marketing')
+  @UseGuards(JwtAccessGuard)
+  async getMarketingAgree(@Query() query): Promise<boolean> {
+    return await this.notificationService.getMarketingAgree(query.fcm_token);
+  }
+  @Patch('agree/marketing')
+  @UseGuards(JwtAccessGuard)
+  async updateMarketingAgree(@Query() query): Promise<void> {
+    return await this.notificationService.updateMarketingAgree(
+      query.fcm_token,
+      JSON.parse(query.marketing_agree),
+    );
+  }
+
+  @Get('agree/time')
+  @UseGuards(JwtAccessGuard)
+  async getTimeAgree(@Query() query): Promise<TimeAgree> {
+    return await this.notificationService.getTimeAgree(query.fcm_token);
+  }
+  @Get('agree/remind')
+  @UseGuards(JwtAccessGuard)
+  async getRemindAgree(@Query() query): Promise<RemindAgree> {
+    return await this.notificationService.getRemindAgree(query.fcm_token);
+  }
+  @Get('agree/quest')
+  @UseGuards(JwtAccessGuard)
+  async getQuestAgree(@Query() query): Promise<QuestAgree> {
+    return await this.notificationService.getQuestAgree(query.fcm_token);
+  }
+
+  @Patch('agree/time')
+  @UseGuards(JwtAccessGuard)
+  async updateTimeAgree(@Query() query): Promise<void> {
+    return await this.notificationService.updateTimeAgree(
+      query.fcm_token,
+      JSON.parse(query.agree_01),
+      JSON.parse(query.time_01),
+    );
+  }
+  @Patch('agree/remind')
+  @UseGuards(JwtAccessGuard)
+  async updateRemindAgree(@Query() query): Promise<void> {
+    return await this.notificationService.updateRemindAgree(
+      query.fcm_token,
+      JSON.parse(query.agree_01),
+      JSON.parse(query.time_01),
+    );
+  }
+  @Patch('agree/quest')
+  @UseGuards(JwtAccessGuard)
+  async updateQuestAgree(@Query() query): Promise<void> {
+    return await this.notificationService.updateQuestAgree(
+      query.fcm_token,
+      JSON.parse(query.agree_01),
+      JSON.parse(query.agree_02),
+      JSON.parse(query.agree_03),
     );
   }
 }

@@ -16,4 +16,13 @@ export class FcmToken {
 
   @Column()
   created_at: Date;
+
+  @Column()
+  updated_at: Date;
+
+  @Column()
+  marketing_agree: boolean;
+
+  @Column()
+  agreed_at: Date;
 }

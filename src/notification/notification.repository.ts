@@ -39,6 +39,22 @@ export class NotificationRepository {
       agree_uuid: agree_uuid,
       created_at: new Date(),
     });
+    await transactionEntityManager.save(TimeAgree, {
+      agree_uuid: agree_uuid,
+      agree_01: true,
+      time_01: 20,
+    });
+    await transactionEntityManager.save(RemindAgree, {
+      agree_uuid: agree_uuid,
+      agree_01: true,
+      time_01: 7,
+    });
+    await transactionEntityManager.save(QuestAgree, {
+      agree_uuid: agree_uuid,
+      agree_01: true,
+      agree_02: true,
+      agree_03: true,
+    });
     return {
       fcm_token: fcm_token,
       agree_uuid: agree_uuid,
@@ -63,7 +79,7 @@ export class NotificationRepository {
     await transactionEntityManager.update(
       FcmToken,
       { fcm_token_uuid: fcm_token_uuid },
-      { user_uuid: user_uuid },
+      { user_uuid: user_uuid, updated_at: new Date() },
     );
     const fcm_token = await transactionEntityManager.findOne(FcmToken, {
       where: { fcm_token_uuid: fcm_token_uuid },
@@ -113,6 +129,28 @@ export class NotificationRepository {
       where: { fcm_token: fcm_token },
     });
     return fcm_token_entity.agree_uuid;
+  }
+
+  async getMarketingAgreeByFcmToken(
+    transactionEntityManager: EntityManager,
+    fcm_token: string,
+  ): Promise<boolean> {
+    const fcm_token_entity = await transactionEntityManager.findOne(FcmToken, {
+      where: { fcm_token: fcm_token },
+    });
+    return fcm_token_entity.marketing_agree;
+  }
+
+  async updateMarketingAgreeByFcmToken(
+    transactionEntityManager: EntityManager,
+    fcm_token: string,
+    marketing_agree: boolean,
+  ): Promise<void> {
+    await transactionEntityManager.update(
+      FcmToken,
+      { fcm_token: fcm_token },
+      { marketing_agree: marketing_agree, agreed_at: new Date() },
+    );
   }
 
   async getTimeAgreeByAgreeUuid(
