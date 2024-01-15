@@ -3,9 +3,13 @@ import { ConfigService } from '@nestjs/config';
 import { TypeOrmModuleOptions, TypeOrmOptionsFactory } from '@nestjs/typeorm';
 import { Banner } from 'src/global/entities/banner.entity';
 import { Book } from 'src/global/entities/book.entity';
+import { FcmToken } from 'src/global/entities/fcm_token';
 import { Quest } from 'src/global/entities/quest.entity';
+import { QuestAgree } from 'src/global/entities/quest_agree.entity';
 import { QuestApply } from 'src/global/entities/quest_apply.entity';
+import { RemindAgree } from 'src/global/entities/remind_agree.entity';
 import { Review } from 'src/global/entities/review.entity';
+import { TimeAgree } from 'src/global/entities/time_agree.entity';
 import { User } from 'src/global/entities/user.entity';
 
 @Injectable()
@@ -20,7 +24,18 @@ export class DatabaseService implements TypeOrmOptionsFactory {
       port: this.configService.get<number>('DATABASE_PORT'),
       host: this.configService.get<string>('DATABASE_HOST'),
       database: this.configService.get<string>('DATABASE_NAME'),
-      entities: [User, Book, Banner, Review, Quest, QuestApply],
+      entities: [
+        User,
+        Book,
+        Banner,
+        Review,
+        Quest,
+        QuestApply,
+        FcmToken,
+        TimeAgree,
+        RemindAgree,
+        QuestAgree,
+      ],
       synchronize: false,
     };
   }

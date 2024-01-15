@@ -12,6 +12,7 @@ import { HttpModule } from '@nestjs/axios';
 import { BannerModule } from './banner/banner.module';
 import { ReviewModule } from './review/review.module';
 import { QuestModule } from './quest/quest.module';
+import { NotificationModule } from './notification/notification.module';
 
 @Module({
   imports: [
@@ -31,6 +32,7 @@ import { QuestModule } from './quest/quest.module';
     BannerModule,
     ReviewModule,
     QuestModule,
+    NotificationModule,
   ],
   controllers: [AppController],
   providers: [AppService],

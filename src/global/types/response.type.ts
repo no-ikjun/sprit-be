@@ -48,3 +48,8 @@ export type AppliedQuestResponseType = {
   apply: QuestApply;
   quest: Quest;
 };
+
+export type SetFcmTokenResponseType = {
+  fcm_token: string;
+  agree_uuid: string;
+};
