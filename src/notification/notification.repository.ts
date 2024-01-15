@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
-import { FcmToken } from 'src/global/entities/fcm_token';
+import { FcmToken } from 'src/global/entities/fcm_token.entity';
 import { QuestAgree } from 'src/global/entities/quest_agree.entity';
 import { RemindAgree } from 'src/global/entities/remind_agree.entity';
 import { TimeAgree } from 'src/global/entities/time_agree.entity';
