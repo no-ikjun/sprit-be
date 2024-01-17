@@ -14,7 +14,6 @@ import { ReviewModule } from './review/review.module';
 import { QuestModule } from './quest/quest.module';
 import { NotificationModule } from './notification/notification.module';
 import { BookLibraryModule } from './book_library/book_library.module';
-import { BookLibrartController } from './book_librart/book_librart.controller';
 
 @Module({
   imports: [
@@ -37,7 +36,7 @@ import { BookLibrartController } from './book_librart/book_librart.controller';
     NotificationModule,
     BookLibraryModule,
   ],
-  controllers: [AppController, BookLibrartController],
+  controllers: [AppController],
   providers: [AppService],
 })
 export class AppModule {}

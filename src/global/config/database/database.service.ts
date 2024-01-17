@@ -3,6 +3,7 @@ import { ConfigService } from '@nestjs/config';
 import { TypeOrmModuleOptions, TypeOrmOptionsFactory } from '@nestjs/typeorm';
 import { Banner } from 'src/global/entities/banner.entity';
 import { Book } from 'src/global/entities/book.entity';
+import { BookLibrary } from 'src/global/entities/book_library.entity';
 import { FcmToken } from 'src/global/entities/fcm_token.entity';
 import { Quest } from 'src/global/entities/quest.entity';
 import { QuestAgree } from 'src/global/entities/quest_agree.entity';
@@ -35,6 +36,7 @@ export class DatabaseService implements TypeOrmOptionsFactory {
         TimeAgree,
         RemindAgree,
         QuestAgree,
+        BookLibrary,
       ],
       synchronize: false,
     };
