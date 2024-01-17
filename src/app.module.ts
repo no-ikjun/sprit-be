@@ -13,6 +13,8 @@ import { BannerModule } from './banner/banner.module';
 import { ReviewModule } from './review/review.module';
 import { QuestModule } from './quest/quest.module';
 import { NotificationModule } from './notification/notification.module';
+import { BookLibraryModule } from './book_library/book_library.module';
+import { BookLibrartController } from './book_librart/book_librart.controller';
 
 @Module({
   imports: [
@@ -33,8 +35,9 @@ import { NotificationModule } from './notification/notification.module';
     ReviewModule,
     QuestModule,
     NotificationModule,
+    BookLibraryModule,
   ],
-  controllers: [AppController],
+  controllers: [AppController, BookLibrartController],
   providers: [AppService],
 })
 export class AppModule {}
