@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { Book } from 'src/global/entities/book.entity';
 import { BookLibrary } from 'src/global/entities/book_library.entity';
+import { generateRamdomId, getRandomString, getToday } from 'src/global/utils';
 import { DataSource, EntityManager } from 'typeorm';
 
 @Injectable()
@@ -24,5 +25,26 @@ export class BookLibraryRepository {
       book_list.push(book);
     }
     return book_list;
+  }
+
+  async setBookLibrary(
+    transactionEntityManager: EntityManager,
+    user_uuid: string,
+    book_uuid: string,
+    state: string,
+  ): Promise<void> {
+    const library_register_uuid = generateRamdomId(
+      'LB' + getRandomString(6),
+      getToday(),
+      getRandomString(8),
+    );
+    await transactionEntityManager.save(BookLibrary, {
+      library_register_uuid: library_register_uuid,
+      user_uuid: user_uuid,
+      book_uuid: book_uuid,
+      state: state,
+      created_at: new Date(),
+      updated_at: new Date(),
+    });
   }
 }

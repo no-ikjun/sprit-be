@@ -1,4 +1,4 @@
-import { Controller, Get, Req, UseGuards } from '@nestjs/common';
+import { Controller, Get, Post, Req, UseGuards } from '@nestjs/common';
 import { BookLibraryService } from './book_library.service';
 import { JwtAccessGuard } from 'src/auth/guard/jwtAccess.guard';
 import { Book } from 'src/global/entities/book.entity';
@@ -6,6 +6,13 @@ import { Book } from 'src/global/entities/book.entity';
 @Controller('book-library')
 export class BookLibraryController {
   constructor(private readonly bookLibraryService: BookLibraryService) {}
+
+  @Post('register')
+  @UseGuards(JwtAccessGuard)
+  async setBookLibrary(@Req() req): Promise<void> {
+    const access_token = req.headers.authorization.split(' ')[1];
+    await this.bookLibraryService.setBookLibrary(access_token, req.body);
+  }
 
   @Get('before')
   @UseGuards(JwtAccessGuard)

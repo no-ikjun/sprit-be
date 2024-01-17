@@ -3,6 +3,7 @@ import { DataSource } from 'typeorm';
 import { BookLibraryRepository } from './book_library.repository';
 import { UserService } from 'src/user/user.service';
 import { Book } from 'src/global/entities/book.entity';
+import { RegisterLibraryDto } from './dto/book_library.dto';
 
 @Injectable()
 export class BookLibraryService {
@@ -26,5 +27,20 @@ export class BookLibraryService {
         );
       },
     );
+  }
+
+  async setBookLibrary(
+    access_token: string,
+    book_info: RegisterLibraryDto,
+  ): Promise<void> {
+    const userInfo = await this.userService.getUserInfo(access_token);
+    await this.dataSource.transaction(async (transactionEntityManager) => {
+      await this.bookLibraryRepository.setBookLibrary(
+        transactionEntityManager,
+        userInfo.user_uuid,
+        book_info.book_uuid,
+        book_info.state,
+      );
+    });
   }
 }
