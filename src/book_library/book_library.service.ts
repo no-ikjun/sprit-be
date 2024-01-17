@@ -32,15 +32,17 @@ export class BookLibraryService {
   async setBookLibrary(
     access_token: string,
     book_info: RegisterLibraryDto,
-  ): Promise<void> {
+  ): Promise<boolean> {
     const userInfo = await this.userService.getUserInfo(access_token);
-    await this.dataSource.transaction(async (transactionEntityManager) => {
-      await this.bookLibraryRepository.setBookLibrary(
-        transactionEntityManager,
-        userInfo.user_uuid,
-        book_info.book_uuid,
-        book_info.state,
-      );
-    });
+    return await this.dataSource.transaction(
+      async (transactionEntityManager) => {
+        return await this.bookLibraryRepository.setBookLibrary(
+          transactionEntityManager,
+          userInfo.user_uuid,
+          book_info.book_uuid,
+          book_info.state,
+        );
+      },
+    );
   }
 }

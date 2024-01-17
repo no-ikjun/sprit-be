@@ -32,7 +32,13 @@ export class BookLibraryRepository {
     user_uuid: string,
     book_uuid: string,
     state: string,
-  ): Promise<void> {
+  ): Promise<boolean> {
+    const already_book = await transactionEntityManager.findOne(BookLibrary, {
+      where: { user_uuid: user_uuid, book_uuid: book_uuid },
+    });
+    if (already_book) {
+      return false;
+    }
     const library_register_uuid = generateRamdomId(
       'LB' + getRandomString(6),
       getToday(),
@@ -46,5 +52,6 @@ export class BookLibraryRepository {
       created_at: new Date(),
       updated_at: new Date(),
     });
+    return true;
   }
 }

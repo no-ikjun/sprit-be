@@ -9,9 +9,9 @@ export class BookLibraryController {
 
   @Post('register')
   @UseGuards(JwtAccessGuard)
-  async setBookLibrary(@Req() req, @Body() body): Promise<void> {
+  async setBookLibrary(@Req() req, @Body() body): Promise<boolean> {
     const access_token = req.headers.authorization.split(' ')[1];
-    await this.bookLibraryService.setBookLibrary(access_token, body);
+    return await this.bookLibraryService.setBookLibrary(access_token, body);
   }
 
   @Get('before')
