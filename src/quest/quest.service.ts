@@ -53,6 +53,7 @@ export class QuestService {
             short_description: quest.short_description,
             long_description: quest.long_description,
             icon_url: quest.icon_url,
+            thumbnail_url: quest.thumbnail_url,
             start_date: new Date(quest.start_date),
             end_date: new Date(quest.end_date),
             limit: quest.limit,

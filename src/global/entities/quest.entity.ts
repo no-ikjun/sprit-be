@@ -18,6 +18,9 @@ export class Quest {
   icon_url: string;
 
   @Column()
+  thumbnail_url: string;
+
+  @Column()
   start_date: Date;
 
   @Column()

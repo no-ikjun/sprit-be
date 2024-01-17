@@ -14,6 +14,9 @@ export class CreateQuestDto {
   icon_url: string;
 
   @IsString()
+  thumbnail_url: string;
+
+  @IsString()
   start_date: string;
 
   @IsString()
