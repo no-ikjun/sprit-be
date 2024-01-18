@@ -15,6 +15,7 @@ export class BookLibraryRepository {
   ): Promise<Book[]> {
     const library_info = await transactionEntityManager.find(BookLibrary, {
       where: { user_uuid: user_uuid, state: state },
+      order: { created_at: 'DESC' },
     });
     const book_uuid_list = library_info.map((book) => book.book_uuid);
     const book_list = [];
