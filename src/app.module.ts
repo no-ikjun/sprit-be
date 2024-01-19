@@ -14,6 +14,7 @@ import { ReviewModule } from './review/review.module';
 import { QuestModule } from './quest/quest.module';
 import { NotificationModule } from './notification/notification.module';
 import { BookLibraryModule } from './book_library/book_library.module';
+import { RecordModule } from './record/record.module';
 
 @Module({
   imports: [
@@ -35,6 +36,7 @@ import { BookLibraryModule } from './book_library/book_library.module';
     QuestModule,
     NotificationModule,
     BookLibraryModule,
+    RecordModule,
   ],
   controllers: [AppController],
   providers: [AppService],
