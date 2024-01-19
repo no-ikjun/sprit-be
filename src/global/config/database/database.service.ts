@@ -8,6 +8,7 @@ import { FcmToken } from 'src/global/entities/fcm_token.entity';
 import { Quest } from 'src/global/entities/quest.entity';
 import { QuestAgree } from 'src/global/entities/quest_agree.entity';
 import { QuestApply } from 'src/global/entities/quest_apply.entity';
+import { Record } from 'src/global/entities/record.entity';
 import { RemindAgree } from 'src/global/entities/remind_agree.entity';
 import { Review } from 'src/global/entities/review.entity';
 import { TimeAgree } from 'src/global/entities/time_agree.entity';
@@ -37,6 +38,7 @@ export class DatabaseService implements TypeOrmOptionsFactory {
         RemindAgree,
         QuestAgree,
         BookLibrary,
+        Record,
       ],
       synchronize: false,
     };
