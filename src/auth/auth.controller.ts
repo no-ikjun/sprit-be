@@ -15,7 +15,7 @@ export class AuthController {
   @Post('login/kakao')
   async kakaoLogin(
     @Body() data: KakaoRequestDto,
-    @Res({ passthrough: true }) res: Response,
+    @Res({ passthrough: true }) res,
   ): Promise<LoginResponseType> {
     return this.authService.kakaoLogin(data);
   }
@@ -23,7 +23,7 @@ export class AuthController {
   @Post('login/apple')
   async appleLogin(
     @Body() data: AppleRequestDto,
-    @Res({ passthrough: true }) res: Response,
+    @Res({ passthrough: true }) res,
   ): Promise<LoginResponseType> {
     return this.authService.appleLogin(data);
   }
