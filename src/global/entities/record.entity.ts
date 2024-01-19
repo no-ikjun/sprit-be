@@ -24,5 +24,5 @@ export class Record {
   end: Date;
 
   @Column()
-  created_at: string;
+  created_at: Date;
 }

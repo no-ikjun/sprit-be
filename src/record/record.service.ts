@@ -1,4 +1,63 @@
 import { Injectable } from '@nestjs/common';
+import { DataSource } from 'typeorm';
+import { RecordRepository } from './record.repository';
+import { UserService } from 'src/user/user.service';
+import { NewRecordDto } from './dto/record.dto';
+import { Record } from 'src/global/entities/record.entity';
 
 @Injectable()
-export class RecordService {}
+export class RecordService {
+  constructor(
+    private readonly dataSource: DataSource,
+    private readonly recordRepository: RecordRepository,
+    private readonly userService: UserService,
+  ) {}
+
+  async setRecord(data: NewRecordDto, access_token: string): Promise<void> {
+    await this.dataSource.transaction(async (transactionEntityManager) => {
+      const user_info = await this.userService.getUserInfo(access_token);
+      await this.recordRepository.setRecord(
+        transactionEntityManager,
+        data.book_uuid,
+        user_info.user_uuid,
+        data.goal_type,
+        data.goal_scale,
+      );
+    });
+  }
+
+  async getRecordByUserUuid(access_token: string): Promise<Record[]> {
+    const user_info = await this.userService.getUserInfo(access_token);
+    return await this.dataSource.transaction(
+      async (transactionEntityManager) => {
+        return await this.recordRepository.getRecordByUserUuid(
+          transactionEntityManager,
+          user_info.user_uuid,
+        );
+      },
+    );
+  }
+
+  async getNotEndedRecordByUserUuid(
+    access_token: string,
+  ): Promise<Record | undefined> {
+    const user_info = await this.userService.getUserInfo(access_token);
+    return await this.dataSource.transaction(
+      async (transactionEntityManager) => {
+        return await this.recordRepository.getNotEndedRecordByUserUuid(
+          transactionEntityManager,
+          user_info.user_uuid,
+        );
+      },
+    );
+  }
+
+  async endRecord(record_uuid: string): Promise<void> {
+    await this.dataSource.transaction(async (transactionEntityManager) => {
+      await this.recordRepository.endRecord(
+        transactionEntityManager,
+        record_uuid,
+      );
+    });
+  }
+}
