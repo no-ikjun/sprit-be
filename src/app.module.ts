@@ -19,6 +19,7 @@ import { RecordModule } from './record/record.module';
 @Module({
   imports: [
     ConfigModule.forRoot({
+      cache: true,
       isGlobal: true,
     }),
     TypeOrmModule.forRootAsync({
