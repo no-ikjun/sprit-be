@@ -24,7 +24,7 @@ export class RecordController {
     await this.recordService.setRecord(body, access_token);
   }
 
-  @Patch('end')
+  @Patch('stop')
   @UseGuards(JwtAccessGuard)
   async endRecord(@Query() query): Promise<void> {
     await this.recordService.endRecord(query.record_uuid, query.page_end);
@@ -35,6 +35,13 @@ export class RecordController {
   async getRecordByUserUuid(@Req() req): Promise<Record[]> {
     const access_token = req.headers.authorization.split(' ')[1];
     return await this.recordService.getRecordByUserUuid(access_token);
+  }
+
+  @Get('ended')
+  @UseGuards(JwtAccessGuard)
+  async getEndedRecordByUserUuid(@Req() req): Promise<Record[]> {
+    const access_token = req.headers.authorization.split(' ')[1];
+    return await this.recordService.getEndedRecordByUserUuid(access_token);
   }
 
   @Get('notended')

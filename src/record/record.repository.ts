@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { Record } from 'src/global/entities/record.entity';
 import { generateRamdomId, getRandomString, getToday } from 'src/global/utils';
-import { DataSource, EntityManager, IsNull } from 'typeorm';
+import { DataSource, EntityManager, IsNull, Not } from 'typeorm';
 
 @Injectable()
 export class RecordRepository {
@@ -48,6 +48,16 @@ export class RecordRepository {
   ): Promise<Record> {
     return await transactionEntityManager.findOne(Record, {
       where: { user_uuid: user_uuid, end: IsNull() },
+    });
+  }
+
+  async getEndedRecordByUserUuid(
+    transactionEntityManager: EntityManager,
+    user_uuid: string,
+  ): Promise<Record[]> {
+    return await transactionEntityManager.find(Record, {
+      where: { user_uuid: user_uuid, end: Not(IsNull()) },
+      order: { created_at: 'DESC' },
     });
   }
 

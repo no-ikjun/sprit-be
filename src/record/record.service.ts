@@ -51,6 +51,18 @@ export class RecordService {
     );
   }
 
+  async getEndedRecordByUserUuid(access_token: string): Promise<Record[]> {
+    const user_info = await this.userService.getUserInfo(access_token);
+    return await this.dataSource.transaction(
+      async (transactionEntityManager) => {
+        return await this.recordRepository.getEndedRecordByUserUuid(
+          transactionEntityManager,
+          user_info.user_uuid,
+        );
+      },
+    );
+  }
+
   async endRecord(record_uuid: string, page_end: number): Promise<void> {
     await this.dataSource.transaction(async (transactionEntityManager) => {
       await this.recordRepository.endRecord(
