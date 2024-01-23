@@ -37,6 +37,12 @@ export class RecordController {
     await this.recordService.deleteRecord(query.record_uuid);
   }
 
+  @Get()
+  @UseGuards(JwtAccessGuard)
+  async getRecordByRecordUuid(@Query() query): Promise<Record> {
+    return await this.recordService.getRecordByRecordUuid(query.record_uuid);
+  }
+
   @Get('all')
   @UseGuards(JwtAccessGuard)
   async getRecordByUserUuid(@Req() req): Promise<Record[]> {

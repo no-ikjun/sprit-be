@@ -29,6 +29,17 @@ export class RecordService {
     );
   }
 
+  async getRecordByRecordUuid(record_uuid: string): Promise<Record> {
+    return await this.dataSource.transaction(
+      async (transactionEntityManager) => {
+        return await this.recordRepository.getRecordByRecordUuid(
+          transactionEntityManager,
+          record_uuid,
+        );
+      },
+    );
+  }
+
   async getRecordByUserUuid(access_token: string): Promise<Record[]> {
     const user_info = await this.userService.getUserInfo(access_token);
     return await this.dataSource.transaction(

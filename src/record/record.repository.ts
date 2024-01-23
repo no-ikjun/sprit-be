@@ -33,6 +33,15 @@ export class RecordRepository {
     return record_uuid;
   }
 
+  async getRecordByRecordUuid(
+    transactionEntityManager: EntityManager,
+    record_uuid: string,
+  ): Promise<Record> {
+    return await transactionEntityManager.findOne(Record, {
+      where: { record_uuid: record_uuid },
+    });
+  }
+
   async getRecordByUserUuid(
     transactionEntityManager: EntityManager,
     user_uuid: string,
