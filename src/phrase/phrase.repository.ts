@@ -69,4 +69,11 @@ export class PhraseRepository {
       where: { user_uuid: user_uuid, remind: true },
     });
   }
+
+  async deletePhrase(
+    transactionEntityManager: EntityManager,
+    phrase_uuid: string,
+  ): Promise<void> {
+    await transactionEntityManager.delete(Phrase, { phrase_uuid: phrase_uuid });
+  }
 }

@@ -77,4 +77,15 @@ export class PhraseService {
       },
     );
   }
+
+  async deletePhrase(phrase_uuid: string): Promise<void> {
+    return await this.dataSource.transaction(
+      async (transactionEntityManager) => {
+        await this.phraseRepository.deletePhrase(
+          transactionEntityManager,
+          phrase_uuid,
+        );
+      },
+    );
+  }
 }

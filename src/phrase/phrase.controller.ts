@@ -1,6 +1,7 @@
 import {
   Body,
   Controller,
+  Delete,
   Get,
   Patch,
   Post,
@@ -44,5 +45,11 @@ export class PhraseController {
       query.phrase_uuid,
       JSON.parse(query.remind),
     );
+  }
+
+  @Delete()
+  @UseGuards(JwtAccessGuard)
+  async deletePhrase(@Query() query): Promise<void> {
+    await this.phraseService.deletePhrase(query.phrase_uuid);
   }
 }
