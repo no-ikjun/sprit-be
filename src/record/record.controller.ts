@@ -39,7 +39,7 @@ export class RecordController {
 
   @Get('notended')
   @UseGuards(JwtAccessGuard)
-  async getNotEndedRecordByUserUuid(@Req() req): Promise<Record | undefined> {
+  async getNotEndedRecordByUserUuid(@Req() req): Promise<Record> {
     const access_token = req.headers.authorization.split(' ')[1];
     return await this.recordService.getNotEndedRecordByUserUuid(access_token);
   }

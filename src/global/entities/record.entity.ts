@@ -17,11 +17,17 @@ export class Record {
   @Column()
   goal_scale: number;
 
+  @Column({ default: 0 })
+  page_start: number;
+
+  @Column({ default: 0 })
+  page_end: number;
+
   @Column()
   start: Date;
 
-  @Column()
-  end: Date;
+  @Column({ nullable: true })
+  end?: Date;
 
   @Column()
   created_at: Date;

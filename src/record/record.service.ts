@@ -22,6 +22,7 @@ export class RecordService {
         user_info.user_uuid,
         data.goal_type,
         data.goal_scale,
+        data.page_start ?? 0,
       );
     });
   }
@@ -38,9 +39,7 @@ export class RecordService {
     );
   }
 
-  async getNotEndedRecordByUserUuid(
-    access_token: string,
-  ): Promise<Record | undefined> {
+  async getNotEndedRecordByUserUuid(access_token: string): Promise<Record> {
     const user_info = await this.userService.getUserInfo(access_token);
     return await this.dataSource.transaction(
       async (transactionEntityManager) => {

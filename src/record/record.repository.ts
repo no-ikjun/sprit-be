@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { Record } from 'src/global/entities/record.entity';
 import { generateRamdomId, getRandomString, getToday } from 'src/global/utils';
-import { DataSource, EntityManager } from 'typeorm';
+import { DataSource, EntityManager, IsNull } from 'typeorm';
 
 @Injectable()
 export class RecordRepository {
@@ -13,6 +13,7 @@ export class RecordRepository {
     user_uuid: string,
     goal_type: string,
     goal_scale: number,
+    page_start: number,
   ): Promise<void> {
     const record_uuid = generateRamdomId(
       'RE' + getRandomString(6),
@@ -25,6 +26,7 @@ export class RecordRepository {
       user_uuid: user_uuid,
       goal_type: goal_type,
       goal_scale: goal_scale,
+      page_start: page_start,
       start: new Date(),
       created_at: new Date(),
     });
@@ -45,7 +47,7 @@ export class RecordRepository {
     user_uuid: string,
   ): Promise<Record> {
     return await transactionEntityManager.findOne(Record, {
-      where: { user_uuid: user_uuid, end: null },
+      where: { user_uuid: user_uuid, end: IsNull() },
     });
   }
 

@@ -9,4 +9,7 @@ export class NewRecordDto {
 
   @IsNumber()
   goal_scale: number;
+
+  @IsNumber()
+  page_start: number;
 }
