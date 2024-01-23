@@ -89,4 +89,15 @@ export class RecordRepository {
   ): Promise<void> {
     await transactionEntityManager.delete(Record, { record_uuid: record_uuid });
   }
+
+  async updateGoalAchieved(
+    transactionEntityManager: EntityManager,
+    record_uuid: string,
+  ): Promise<void> {
+    await transactionEntityManager.update(
+      Record,
+      { record_uuid: record_uuid },
+      { goal_achieved: true },
+    );
+  }
 }

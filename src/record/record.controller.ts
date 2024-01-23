@@ -63,4 +63,10 @@ export class RecordController {
     const access_token = req.headers.authorization.split(' ')[1];
     return await this.recordService.getNotEndedRecordByUserUuid(access_token);
   }
+
+  @Patch('goal')
+  @UseGuards(JwtAccessGuard)
+  async setGoalAchieved(@Query() query): Promise<void> {
+    await this.recordService.updateGoalAchieved(query.record_uuid);
+  }
 }

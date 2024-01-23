@@ -29,6 +29,9 @@ export class Record {
   @Column({ nullable: true })
   end?: Date;
 
+  @Column({ nullable: false, default: false })
+  goal_achieved: boolean;
+
   @Column()
   created_at: Date;
 }
