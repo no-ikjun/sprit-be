@@ -13,11 +13,11 @@ export class PhraseService {
     private readonly userService: UserService,
   ) {}
 
-  async setPhrase(data: NewPhraseDto, access_token: string): Promise<void> {
+  async setPhrase(data: NewPhraseDto, access_token: string): Promise<string> {
     return await this.dataSource.transaction(
       async (transactionEntityManager) => {
         const user_info = await this.userService.getUserInfo(access_token);
-        await this.phraseRepository.setPhrase(
+        return await this.phraseRepository.setPhrase(
           transactionEntityManager,
           data.book_uuid,
           user_info.user_uuid,

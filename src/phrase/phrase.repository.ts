@@ -13,19 +13,21 @@ export class PhraseRepository {
     user_uuid: string,
     phrase: string,
     remind: boolean,
-  ): Promise<void> {
+  ): Promise<string> {
+    const phrase_uuid = generateRamdomId(
+      'PH' + getRandomString(6),
+      getToday(),
+      getRandomString(8),
+    );
     await transactionEntityManager.save('phrase', {
-      phrase_uuid: generateRamdomId(
-        'PH' + getRandomString(6),
-        getToday(),
-        getRandomString(8),
-      ),
+      phrase_uuid: phrase_uuid,
       book_uuid: book_uuid,
       user_uuid: user_uuid,
       phrase: phrase,
       remind: remind,
       created_at: new Date(),
     });
+    return phrase_uuid;
   }
 
   async getPhrasesByUserUuid(

@@ -11,6 +11,7 @@ import {
 import { PhraseService } from './phrase.service';
 import { JwtAccessGuard } from 'src/auth/guard/jwtAccess.guard';
 import { NewPhraseDto } from './dto/phrase.dto';
+import { Phrase } from 'src/global/entities/phrase.entity';
 
 @Controller('phrase')
 export class PhraseController {
@@ -18,27 +19,27 @@ export class PhraseController {
 
   @Post()
   @UseGuards(JwtAccessGuard)
-  async setPhrase(@Req() req, @Body() body: NewPhraseDto) {
+  async setPhrase(@Req() req, @Body() body: NewPhraseDto): Promise<string> {
     const access_token = req.headers.authorization.split(' ')[1];
     return await this.phraseService.setPhrase(body, access_token);
   }
 
   @Get('all')
   @UseGuards(JwtAccessGuard)
-  async getPhrasesByUserUuid(@Req() req) {
+  async getPhrasesByUserUuid(@Req() req): Promise<Phrase[]> {
     const access_token = req.headers.authorization.split(' ')[1];
     return await this.phraseService.getPhrasesByUserUuid(access_token);
   }
 
   @Get('find')
   @UseGuards(JwtAccessGuard)
-  async getPhraseByPhraseUuid(@Query() query) {
+  async getPhraseByPhraseUuid(@Query() query): Promise<Phrase> {
     return await this.phraseService.getPhraseByPhraseUuid(query.phrase_uuid);
   }
 
   @Patch('remind')
   @UseGuards(JwtAccessGuard)
-  async updatePhraseRemind(@Query() query) {
+  async updatePhraseRemind(@Query() query): Promise<void> {
     await this.phraseService.updatePhraseRemind(
       query.phrase_uuid,
       JSON.parse(query.remind),
