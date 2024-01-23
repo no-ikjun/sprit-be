@@ -27,7 +27,7 @@ export class RecordController {
   @Patch('end')
   @UseGuards(JwtAccessGuard)
   async endRecord(@Query() query): Promise<void> {
-    await this.recordService.endRecord(query.record_uuid);
+    await this.recordService.endRecord(query.record_uuid, query.page_end);
   }
 
   @Get('all')
