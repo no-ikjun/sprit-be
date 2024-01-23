@@ -13,18 +13,20 @@ export class RecordService {
     private readonly userService: UserService,
   ) {}
 
-  async setRecord(data: NewRecordDto, access_token: string): Promise<void> {
-    await this.dataSource.transaction(async (transactionEntityManager) => {
-      const user_info = await this.userService.getUserInfo(access_token);
-      await this.recordRepository.setRecord(
-        transactionEntityManager,
-        data.book_uuid,
-        user_info.user_uuid,
-        data.goal_type,
-        data.goal_scale,
-        data.page_start ?? 0,
-      );
-    });
+  async setRecord(data: NewRecordDto, access_token: string): Promise<string> {
+    return await this.dataSource.transaction(
+      async (transactionEntityManager) => {
+        const user_info = await this.userService.getUserInfo(access_token);
+        return await this.recordRepository.setRecord(
+          transactionEntityManager,
+          data.book_uuid,
+          user_info.user_uuid,
+          data.goal_type,
+          data.goal_scale,
+          data.page_start ?? 0,
+        );
+      },
+    );
   }
 
   async getRecordByUserUuid(access_token: string): Promise<Record[]> {

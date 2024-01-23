@@ -14,7 +14,7 @@ export class RecordRepository {
     goal_type: string,
     goal_scale: number,
     page_start: number,
-  ): Promise<void> {
+  ): Promise<string> {
     const record_uuid = generateRamdomId(
       'RE' + getRandomString(6),
       getToday(),
@@ -30,6 +30,7 @@ export class RecordRepository {
       start: new Date(),
       created_at: new Date(),
     });
+    return record_uuid;
   }
 
   async getRecordByUserUuid(

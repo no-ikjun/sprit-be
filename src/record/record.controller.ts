@@ -20,9 +20,9 @@ export class RecordController {
 
   @Post()
   @UseGuards(JwtAccessGuard)
-  async setRecord(@Req() req, @Body() body: NewRecordDto): Promise<void> {
+  async setRecord(@Req() req, @Body() body: NewRecordDto): Promise<string> {
     const access_token = req.headers.authorization.split(' ')[1];
-    await this.recordService.setRecord(body, access_token);
+    return await this.recordService.setRecord(body, access_token);
   }
 
   @Patch('stop')
