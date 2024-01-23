@@ -15,6 +15,7 @@ import { QuestModule } from './quest/quest.module';
 import { NotificationModule } from './notification/notification.module';
 import { BookLibraryModule } from './book_library/book_library.module';
 import { RecordModule } from './record/record.module';
+import { PhraseModule } from './phrase/phrase.module';
 
 @Module({
   imports: [
@@ -38,6 +39,7 @@ import { RecordModule } from './record/record.module';
     NotificationModule,
     BookLibraryModule,
     RecordModule,
+    PhraseModule,
   ],
   controllers: [AppController],
   providers: [AppService],
