@@ -1,6 +1,7 @@
 import {
   Body,
   Controller,
+  Delete,
   Get,
   Patch,
   Post,
@@ -28,6 +29,12 @@ export class RecordController {
   @UseGuards(JwtAccessGuard)
   async endRecord(@Query() query): Promise<void> {
     await this.recordService.endRecord(query.record_uuid, query.page_end);
+  }
+
+  @Delete()
+  @UseGuards(JwtAccessGuard)
+  async deleteRecord(@Query() query): Promise<void> {
+    await this.recordService.deleteRecord(query.record_uuid);
   }
 
   @Get('all')

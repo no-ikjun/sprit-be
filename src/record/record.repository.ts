@@ -72,4 +72,11 @@ export class RecordRepository {
       { end: new Date(), page_end: page_end },
     );
   }
+
+  async deleteRecord(
+    transactionEntityManager: EntityManager,
+    record_uuid: string,
+  ): Promise<void> {
+    await transactionEntityManager.delete(Record, { record_uuid: record_uuid });
+  }
 }

@@ -72,4 +72,13 @@ export class RecordService {
       );
     });
   }
+
+  async deleteRecord(record_uuid: string): Promise<void> {
+    await this.dataSource.transaction(async (transactionEntityManager) => {
+      await this.recordRepository.deleteRecord(
+        transactionEntityManager,
+        record_uuid,
+      );
+    });
+  }
 }
