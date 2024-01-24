@@ -69,4 +69,11 @@ export class RecordController {
   async setGoalAchieved(@Query() query): Promise<void> {
     await this.recordService.updateGoalAchieved(query.record_uuid);
   }
+
+  @Get('last-page')
+  @UseGuards(JwtAccessGuard)
+  async getLastPage(@Req() req, @Query() query): Promise<number> {
+    const access_token = req.headers.authorization.split(' ')[1];
+    return await this.recordService.getLastPage(query.book_uuid, access_token);
+  }
 }

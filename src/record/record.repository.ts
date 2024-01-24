@@ -100,4 +100,20 @@ export class RecordRepository {
       { goal_achieved: true },
     );
   }
+
+  async getLastPage(
+    transactionEntityManager: EntityManager,
+    user_uuid: string,
+    book_uuid: string,
+  ): Promise<number> {
+    const records = await transactionEntityManager.find(Record, {
+      where: { user_uuid: user_uuid, book_uuid: book_uuid },
+      order: { created_at: 'DESC' },
+    });
+    let last_page = 0;
+    if (records.length > 0) {
+      last_page = records[0].page_end;
+    }
+    return last_page;
+  }
 }
