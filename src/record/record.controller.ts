@@ -64,10 +64,13 @@ export class RecordController {
     return await this.recordService.getNotEndedRecordByUserUuid(access_token);
   }
 
-  @Patch('goal')
+  @Patch('goal-achieved')
   @UseGuards(JwtAccessGuard)
   async setGoalAchieved(@Query() query): Promise<void> {
-    await this.recordService.updateGoalAchieved(query.record_uuid);
+    await this.recordService.updateGoalAchieved(
+      query.record_uuid,
+      JSON.parse(query.goal_achieved),
+    );
   }
 
   @Get('last-page')

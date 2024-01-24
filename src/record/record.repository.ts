@@ -93,11 +93,12 @@ export class RecordRepository {
   async updateGoalAchieved(
     transactionEntityManager: EntityManager,
     record_uuid: string,
+    goal_achieved: boolean,
   ): Promise<void> {
     await transactionEntityManager.update(
       Record,
       { record_uuid: record_uuid },
-      { goal_achieved: true },
+      { goal_achieved: goal_achieved },
     );
   }
 

@@ -95,11 +95,15 @@ export class RecordService {
     });
   }
 
-  async updateGoalAchieved(record_uuid: string): Promise<void> {
+  async updateGoalAchieved(
+    record_uuid: string,
+    goal_achieved: boolean,
+  ): Promise<void> {
     await this.dataSource.transaction(async (transactionEntityManager) => {
       await this.recordRepository.updateGoalAchieved(
         transactionEntityManager,
         record_uuid,
+        goal_achieved,
       );
     });
   }
