@@ -1,4 +1,5 @@
 import { Injectable } from '@nestjs/common';
+import { BookLibrary } from 'src/global/entities/book_library.entity';
 import { Record } from 'src/global/entities/record.entity';
 import { generateRamdomId, getRandomString, getToday } from 'src/global/utils';
 import { DataSource, EntityManager, IsNull, Not } from 'typeorm';
@@ -107,6 +108,13 @@ export class RecordRepository {
     user_uuid: string,
     book_uuid: string,
   ): Promise<number> {
+    const read_history = await transactionEntityManager.findOne(BookLibrary, {
+      where: { user_uuid: user_uuid, book_uuid: book_uuid, state: 'AFTER' },
+      order: { created_at: 'DESC' },
+    });
+    if (read_history) {
+      return 0;
+    }
     const records = await transactionEntityManager.find(Record, {
       where: { user_uuid: user_uuid, book_uuid: book_uuid },
       order: { created_at: 'DESC' },
