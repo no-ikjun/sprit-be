@@ -5,12 +5,14 @@ import {
   Get,
   Patch,
   Post,
+  Query,
   Req,
   UseGuards,
 } from '@nestjs/common';
 import { BookLibraryService } from './book_library.service';
 import { JwtAccessGuard } from 'src/auth/guard/jwtAccess.guard';
 import { Book } from 'src/global/entities/book.entity';
+import { query } from 'express';
 
 @Controller('book-library')
 export class BookLibraryController {
@@ -53,11 +55,11 @@ export class BookLibraryController {
 
   @Delete('delete')
   @UseGuards(JwtAccessGuard)
-  async deleteBookLibrary(@Req() req, @Body() body): Promise<void> {
+  async deleteBookLibrary(@Req() req, @Query() query): Promise<void> {
     const access_token = req.headers.authorization.split(' ')[1];
     await this.bookLibraryService.deleteBookLibrary(
       access_token,
-      body.book_uuid,
+      query.book_uuid,
     );
   }
 
