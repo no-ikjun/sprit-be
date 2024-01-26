@@ -107,12 +107,13 @@ export class RecordRepository {
     transactionEntityManager: EntityManager,
     user_uuid: string,
     book_uuid: string,
+    is_before_record: boolean,
   ): Promise<number> {
     const read_history = await transactionEntityManager.findOne(BookLibrary, {
       where: { user_uuid: user_uuid, book_uuid: book_uuid, state: 'AFTER' },
       order: { created_at: 'DESC' },
     });
-    if (read_history) {
+    if (read_history !== null) {
       return 0;
     }
     const records = await transactionEntityManager.find(Record, {
@@ -120,8 +121,12 @@ export class RecordRepository {
       order: { created_at: 'DESC' },
     });
     let last_page = 0;
-    if (records.length > 0) {
-      last_page = records[0].page_end;
+    if (is_before_record && records.length > 0) {
+      last_page = records[0].page_start;
+    } else {
+      if (records.length > 1) {
+        last_page = records[1].page_end;
+      }
     }
     return last_page;
   }

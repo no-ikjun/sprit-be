@@ -108,7 +108,11 @@ export class RecordService {
     });
   }
 
-  async getLastPage(book_uuid: string, access_token: string): Promise<number> {
+  async getLastPage(
+    book_uuid: string,
+    access_token: string,
+    is_before_record: boolean,
+  ): Promise<number> {
     const user_info = await this.userService.getUserInfo(access_token);
     return await this.dataSource.transaction(
       async (transactionEntityManager) => {
@@ -116,6 +120,7 @@ export class RecordService {
           transactionEntityManager,
           user_info.user_uuid,
           book_uuid,
+          is_before_record,
         );
       },
     );
