@@ -12,7 +12,6 @@ import {
 import { BookLibraryService } from './book_library.service';
 import { JwtAccessGuard } from 'src/auth/guard/jwtAccess.guard';
 import { Book } from 'src/global/entities/book.entity';
-import { query } from 'express';
 
 @Controller('book-library')
 export class BookLibraryController {
