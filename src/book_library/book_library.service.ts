@@ -45,4 +45,38 @@ export class BookLibraryService {
       },
     );
   }
+
+  async deleteBookLibrary(
+    access_token: string,
+    book_uuid: string,
+  ): Promise<void> {
+    const userInfo = await this.userService.getUserInfo(access_token);
+    return await this.dataSource.transaction(
+      async (transactionEntityManager) => {
+        return await this.bookLibraryRepository.deleteBookLibrary(
+          transactionEntityManager,
+          userInfo.user_uuid,
+          book_uuid,
+        );
+      },
+    );
+  }
+
+  async updateBookLibraryState(
+    access_token: string,
+    book_uuid: string,
+    state: string,
+  ): Promise<void> {
+    const userInfo = await this.userService.getUserInfo(access_token);
+    return await this.dataSource.transaction(
+      async (transactionEntityManager) => {
+        return await this.bookLibraryRepository.updateBookLibrary(
+          transactionEntityManager,
+          userInfo.user_uuid,
+          book_uuid,
+          state,
+        );
+      },
+    );
+  }
 }

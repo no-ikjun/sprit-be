@@ -55,4 +55,28 @@ export class BookLibraryRepository {
     });
     return true;
   }
+
+  async deleteBookLibrary(
+    transactionEntityManager: EntityManager,
+    user_uuid: string,
+    book_uuid: string,
+  ): Promise<void> {
+    await transactionEntityManager.delete(BookLibrary, {
+      user_uuid: user_uuid,
+      book_uuid: book_uuid,
+    });
+  }
+
+  async updateBookLibrary(
+    transactionEntityManager: EntityManager,
+    user_uuid: string,
+    book_uuid: string,
+    state: string,
+  ): Promise<void> {
+    await transactionEntityManager.update(
+      BookLibrary,
+      { user_uuid: user_uuid, book_uuid: book_uuid },
+      { state: state },
+    );
+  }
 }
