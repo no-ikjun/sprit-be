@@ -1,5 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { BookReport } from 'src/global/entities/book_report.entity';
+import { generateRamdomId, getRandomString, getToday } from 'src/global/utils';
 import { DataSource, EntityManager } from 'typeorm';
 
 @Injectable()
@@ -12,7 +13,13 @@ export class BookReportRepository {
     user_uuid: string,
     report: string,
   ): Promise<void> {
+    const book_report_uuid = generateRamdomId(
+      'BR' + getRandomString(6),
+      getToday(),
+      getRandomString(8),
+    );
     await transactionEntityManager.save(BookReport, {
+      book_report_uuid: book_report_uuid,
       book_uuid: book_uuid,
       user_uuid: user_uuid,
       report: report,
