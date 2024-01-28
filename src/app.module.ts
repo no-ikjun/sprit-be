@@ -16,6 +16,7 @@ import { NotificationModule } from './notification/notification.module';
 import { BookLibraryModule } from './book_library/book_library.module';
 import { RecordModule } from './record/record.module';
 import { PhraseModule } from './phrase/phrase.module';
+import { BookReportModule } from './book_report/book_report.module';
 
 @Module({
   imports: [
@@ -40,6 +41,7 @@ import { PhraseModule } from './phrase/phrase.module';
     BookLibraryModule,
     RecordModule,
     PhraseModule,
+    BookReportModule,
   ],
   controllers: [AppController],
   providers: [AppService],

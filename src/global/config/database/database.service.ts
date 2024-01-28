@@ -4,6 +4,7 @@ import { TypeOrmModuleOptions, TypeOrmOptionsFactory } from '@nestjs/typeorm';
 import { Banner } from 'src/global/entities/banner.entity';
 import { Book } from 'src/global/entities/book.entity';
 import { BookLibrary } from 'src/global/entities/book_library.entity';
+import { BookReport } from 'src/global/entities/book_report.entity';
 import { FcmToken } from 'src/global/entities/fcm_token.entity';
 import { Phrase } from 'src/global/entities/phrase.entity';
 import { Quest } from 'src/global/entities/quest.entity';
@@ -41,6 +42,7 @@ export class DatabaseService implements TypeOrmOptionsFactory {
         BookLibrary,
         Record,
         Phrase,
+        BookReport,
       ],
       synchronize: false,
     };
