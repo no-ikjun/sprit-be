@@ -20,6 +20,15 @@ export class BookReportRepository {
     });
   }
 
+  async getBookReportByBookReportUuid(
+    transactionEntityManager: EntityManager,
+    book_report_uuid: string,
+  ): Promise<BookReport> {
+    return await transactionEntityManager.findOne(BookReport, {
+      where: { book_report_uuid: book_report_uuid },
+    });
+  }
+
   async getBookReportByUserUuid(
     transactionEntityManager: EntityManager,
     user_uuid: string,

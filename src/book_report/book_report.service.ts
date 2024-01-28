@@ -30,6 +30,21 @@ export class BookReportService {
     );
   }
 
+  async getBookReportByBookReportUuid(
+    book_report_uuid: string,
+  ): Promise<BookReport> {
+    return await this.dataSource.transaction(
+      async (transactionEntityManager) => {
+        const book_report =
+          await this.bookReportRepository.getBookReportByBookReportUuid(
+            transactionEntityManager,
+            book_report_uuid,
+          );
+        return book_report;
+      },
+    );
+  }
+
   async getBookReportByUserUuid(access_token: string): Promise<string[]> {
     const user_info = await this.userService.getUserInfo(access_token);
     return await this.dataSource.transaction(

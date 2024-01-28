@@ -28,6 +28,16 @@ export class BookReportController {
     return await this.bookReportService.setBookReport(access_token, body);
   }
 
+  @Get('uuid')
+  @UseGuards(JwtAccessGuard)
+  async getBookReportByBookUuidAndUserUuid(
+    @Query() query,
+  ): Promise<BookReport> {
+    return await this.bookReportService.getBookReportByBookReportUuid(
+      query.book_report_uuid,
+    );
+  }
+
   @Get('user')
   @UseGuards(JwtAccessGuard)
   async getBookReportByUserUuid(@Req() req): Promise<string[]> {
