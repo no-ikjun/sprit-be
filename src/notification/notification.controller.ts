@@ -76,6 +76,14 @@ export class NotificationController {
       JSON.parse(query.agree_02),
     );
   }
+  @Patch('agree/time/only')
+  @UseGuards(JwtAccessGuard)
+  async updateOnlyTime(@Query() query): Promise<void> {
+    return await this.notificationService.updateOnlyTime(
+      query.fcm_token,
+      JSON.parse(query.time_01),
+    );
+  }
   @Patch('agree/remind')
   @UseGuards(JwtAccessGuard)
   async updateRemindAgree(@Query() query): Promise<void> {

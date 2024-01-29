@@ -178,6 +178,18 @@ export class NotificationRepository {
     );
   }
 
+  async updataOnlyTime(
+    transactionEntityManager: EntityManager,
+    agree_uuid: string,
+    time: number,
+  ): Promise<void> {
+    await transactionEntityManager.update(
+      TimeAgree,
+      { agree_uuid: agree_uuid },
+      { time_01: time },
+    );
+  }
+
   async getRemindAgreeByAgreeUuid(
     transactionEntityManager: EntityManager,
     agree_uuid: string,

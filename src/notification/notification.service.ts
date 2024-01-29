@@ -134,6 +134,21 @@ export class NotificationService {
       agree_02,
     );
   }
+  async updateOnlyTime(fcm_token: string, time_01: number): Promise<void> {
+    const token = await this.notificationRepository.getTokenInfoByFcmToken(
+      this.dataSource.manager,
+      fcm_token,
+    );
+    const timeAgree = await this.notificationRepository.getTimeAgreeByAgreeUuid(
+      this.dataSource.manager,
+      token.agree_uuid,
+    );
+    await this.notificationRepository.updataOnlyTime(
+      this.dataSource.manager,
+      timeAgree.agree_uuid,
+      time_01,
+    );
+  }
   async updateRemindAgree(
     fcm_token: string,
     agree_01: boolean,
