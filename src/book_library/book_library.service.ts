@@ -4,6 +4,7 @@ import { BookLibraryRepository } from './book_library.repository';
 import { UserService } from 'src/user/user.service';
 import { Book } from 'src/global/entities/book.entity';
 import { RegisterLibraryDto } from './dto/book_library.dto';
+import { BookLibrary } from 'src/global/entities/book_library.entity';
 
 @Injectable()
 export class BookLibraryService {
@@ -13,7 +14,7 @@ export class BookLibraryService {
     private readonly userService: UserService,
   ) {}
 
-  async getBeforeBookLibraryList(
+  async getBookLibraryList(
     access_token: string,
     state: string,
   ): Promise<Book[]> {
@@ -75,6 +76,22 @@ export class BookLibraryService {
           userInfo.user_uuid,
           book_uuid,
           state,
+        );
+      },
+    );
+  }
+
+  async getBookLibraryByBookUuidAndUserUuid(
+    access_token: string,
+    book_uuid: string,
+  ): Promise<BookLibrary> {
+    const userInfo = await this.userService.getUserInfo(access_token);
+    return await this.dataSource.transaction(
+      async (transactionEntityManager) => {
+        return await this.bookLibraryRepository.getBookLibraryByBookUuidAndUserUuid(
+          transactionEntityManager,
+          book_uuid,
+          userInfo.user_uuid,
         );
       },
     );

@@ -12,6 +12,8 @@ import {
 import { BookLibraryService } from './book_library.service';
 import { JwtAccessGuard } from 'src/auth/guard/jwtAccess.guard';
 import { Book } from 'src/global/entities/book.entity';
+import { RegisterLibraryDto } from './dto/book_library.dto';
+import { BookLibrary } from 'src/global/entities/book_library.entity';
 
 @Controller('book-library')
 export class BookLibraryController {
@@ -19,16 +21,29 @@ export class BookLibraryController {
 
   @Post('register')
   @UseGuards(JwtAccessGuard)
-  async setBookLibrary(@Req() req, @Body() body): Promise<boolean> {
+  async setBookLibrary(
+    @Req() req,
+    @Body() body: RegisterLibraryDto,
+  ): Promise<boolean> {
     const access_token = req.headers.authorization.split(' ')[1];
     return await this.bookLibraryService.setBookLibrary(access_token, body);
+  }
+
+  @Get('find')
+  @UseGuards(JwtAccessGuard)
+  async getBookLibrary(@Req() req, @Query() query): Promise<BookLibrary> {
+    const access_token = req.headers.authorization.split(' ')[1];
+    return await this.bookLibraryService.getBookLibraryByBookUuidAndUserUuid(
+      access_token,
+      query.book_uuid,
+    );
   }
 
   @Get('before')
   @UseGuards(JwtAccessGuard)
   async getBeforeBookLibraryList(@Req() req): Promise<Book[]> {
     const access_token = req.headers.authorization.split(' ')[1];
-    return await this.bookLibraryService.getBeforeBookLibraryList(
+    return await this.bookLibraryService.getBookLibraryList(
       access_token,
       'BEFORE',
     );
@@ -37,7 +52,7 @@ export class BookLibraryController {
   @UseGuards(JwtAccessGuard)
   async getReadingBookLibraryList(@Req() req): Promise<Book[]> {
     const access_token = req.headers.authorization.split(' ')[1];
-    return await this.bookLibraryService.getBeforeBookLibraryList(
+    return await this.bookLibraryService.getBookLibraryList(
       access_token,
       'READING',
     );
@@ -46,7 +61,7 @@ export class BookLibraryController {
   @UseGuards(JwtAccessGuard)
   async getAfterBookLibraryList(@Req() req): Promise<Book[]> {
     const access_token = req.headers.authorization.split(' ')[1];
-    return await this.bookLibraryService.getBeforeBookLibraryList(
+    return await this.bookLibraryService.getBookLibraryList(
       access_token,
       'AFTER',
     );

@@ -79,4 +79,14 @@ export class BookLibraryRepository {
       { state: state },
     );
   }
+
+  async getBookLibraryByBookUuidAndUserUuid(
+    transactionEntityManager: EntityManager,
+    book_uuid: string,
+    user_uuid: string,
+  ): Promise<BookLibrary> {
+    return await transactionEntityManager.findOne(BookLibrary, {
+      where: { book_uuid: book_uuid, user_uuid: user_uuid },
+    });
+  }
 }
