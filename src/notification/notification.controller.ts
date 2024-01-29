@@ -1,4 +1,5 @@
 import {
+  Body,
   Controller,
   Get,
   Patch,
@@ -9,10 +10,14 @@ import {
 } from '@nestjs/common';
 import { NotificationService } from './notification.service';
 import { JwtAccessGuard } from 'src/auth/guard/jwtAccess.guard';
-import { SetFcmTokenResponseType } from 'src/global/types/response.type';
+import {
+  MessageResponseType,
+  SetFcmTokenResponseType,
+} from 'src/global/types/response.type';
 import { TimeAgree } from 'src/global/entities/time_agree.entity';
 import { RemindAgree } from 'src/global/entities/remind_agree.entity';
 import { QuestAgree } from 'src/global/entities/quest_agree.entity';
+import { NotificationDto } from './dto/notification.dto';
 
 @Controller('notification')
 export class NotificationController {
@@ -88,5 +93,35 @@ export class NotificationController {
       JSON.parse(query.agree_02),
       JSON.parse(query.agree_03),
     );
+  }
+
+  @Post('send/user')
+  @UseGuards(JwtAccessGuard)
+  async sendMessageByUserUuid(
+    @Query('user_uuid') user_uuid: string,
+    @Body() data: NotificationDto,
+  ): Promise<MessageResponseType> {
+    await this.notificationService.sendMessageByUserUuid(
+      user_uuid,
+      data.title,
+      data.body,
+      data.data,
+    );
+    return { message: 'success' };
+  }
+
+  @Post('send/token')
+  @UseGuards(JwtAccessGuard)
+  async sendMessageByFcmToken(
+    @Query('fcm_token') fcm_token: string,
+    @Body() data: NotificationDto,
+  ): Promise<MessageResponseType> {
+    await this.notificationService.sendMessageByFcmToken(
+      fcm_token,
+      data.title,
+      data.body,
+      data.data,
+    );
+    return { message: 'success' };
   }
 }

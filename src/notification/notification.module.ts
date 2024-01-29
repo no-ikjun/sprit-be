@@ -7,6 +7,7 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
 import { HttpModule } from '@nestjs/axios';
 import { UserService } from 'src/user/user.service';
 import { UserRepository } from 'src/user/user.repository';
+import { GlobalFcmService } from 'src/firebase/fcm.service';
 
 @Module({
   imports: [
@@ -28,6 +29,7 @@ import { UserRepository } from 'src/user/user.repository';
     NotificationRepository,
     UserService,
     UserRepository,
+    GlobalFcmService,
   ],
 })
 export class NotificationModule {}

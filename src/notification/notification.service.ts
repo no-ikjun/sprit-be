@@ -8,6 +8,7 @@ import { UserService } from 'src/user/user.service';
 import { TimeAgree } from 'src/global/entities/time_agree.entity';
 import { RemindAgree } from 'src/global/entities/remind_agree.entity';
 import { QuestAgree } from 'src/global/entities/quest_agree.entity';
+import { GlobalFcmService } from 'src/firebase/fcm.service';
 
 @Injectable()
 export class NotificationService {
@@ -16,6 +17,7 @@ export class NotificationService {
     private readonly jwtService: JwtService,
     private readonly notificationRepository: NotificationRepository,
     private readonly userService: UserService,
+    private readonly globalFcmService: GlobalFcmService,
   ) {}
 
   async setFcmToken(
@@ -172,6 +174,44 @@ export class NotificationService {
       agree_01,
       agree_02,
       agree_03,
+    );
+  }
+
+  async sendMessageByUserUuid(
+    user_uuid: string,
+    title: string,
+    body: string,
+    data: { [key: string]: string },
+  ): Promise<void> {
+    const fcm_token = await this.notificationRepository.getFcmTokenByUserUuid(
+      this.dataSource.manager,
+      user_uuid,
+    );
+    fcm_token.forEach((fcm_token) => {
+      this.globalFcmService.postMessage(
+        title,
+        body,
+        'https://rushhour.s3.ap-northeast-2.amazonaws.com/logo-launcher.png',
+        fcm_token.fcm_token,
+        'default',
+        data,
+      );
+    });
+  }
+
+  async sendMessageByFcmToken(
+    fcm_token: string,
+    title: string,
+    body: string,
+    data: { [key: string]: string },
+  ): Promise<void> {
+    this.globalFcmService.postMessage(
+      title,
+      body,
+      'https://rushhour.s3.ap-northeast-2.amazonaws.com/logo-launcher.png',
+      fcm_token,
+      'default',
+      data,
     );
   }
 }

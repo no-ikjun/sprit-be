@@ -53,3 +53,7 @@ export type SetFcmTokenResponseType = {
   fcm_token: string;
   agree_uuid: string;
 };
+
+export type MessageResponseType = {
+  message: string;
+};
