@@ -116,6 +116,7 @@ export class NotificationService {
     fcm_token: string,
     agree_01: boolean,
     time_01: number,
+    agree_02: boolean,
   ): Promise<void> {
     const token = await this.notificationRepository.getTokenInfoByFcmToken(
       this.dataSource.manager,
@@ -130,6 +131,7 @@ export class NotificationService {
       timeAgree.agree_uuid,
       agree_01,
       time_01,
+      agree_02,
     );
   }
   async updateRemindAgree(

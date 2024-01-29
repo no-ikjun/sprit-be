@@ -73,6 +73,7 @@ export class NotificationController {
       query.fcm_token,
       JSON.parse(query.agree_01),
       JSON.parse(query.time_01),
+      JSON.parse(query.agree_02),
     );
   }
   @Patch('agree/remind')

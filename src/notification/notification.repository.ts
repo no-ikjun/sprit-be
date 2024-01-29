@@ -43,6 +43,7 @@ export class NotificationRepository {
       agree_uuid: agree_uuid,
       agree_01: true,
       time_01: 20,
+      agree_02: true,
     });
     await transactionEntityManager.save(RemindAgree, {
       agree_uuid: agree_uuid,
@@ -89,7 +90,7 @@ export class NotificationRepository {
       {
         agree_uuid: fcm_token.agree_uuid,
       },
-      { agree_01: true, time_01: 20 },
+      { agree_01: true, time_01: 20, agree_02: true },
     );
     await transactionEntityManager.update(
       RemindAgree,
@@ -166,13 +167,14 @@ export class NotificationRepository {
   async updateTimeAgree(
     transactionEntityManager: EntityManager,
     agree_uuid: string,
-    agree: boolean,
+    agree_01: boolean,
     time: number,
+    agree_02: boolean,
   ): Promise<void> {
     await transactionEntityManager.update(
       TimeAgree,
       { agree_uuid: agree_uuid },
-      { agree_01: agree, time_01: time },
+      { agree_01: agree_01, time_01: time, agree_02: agree_02 },
     );
   }
 

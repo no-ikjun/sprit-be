@@ -10,4 +10,7 @@ export class TimeAgree {
 
   @Column()
   time_01: number;
+
+  @Column()
+  agree_02: boolean;
 }

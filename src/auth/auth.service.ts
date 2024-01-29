@@ -118,7 +118,7 @@ export class AuthService {
         } else {
           const appleUserData: AppleUserDataDto = new AppleUserDataDto();
           appleUserData.user_id = data.user_identifier;
-          appleUserData.user_nickname = data.given_name;
+          appleUserData.user_nickname = data.given_name ?? 'SPRIT 사용자';
           await this.verifyDuplicateUser(data.user_identifier);
           await this.userRepository.setNewUserByApple(
             transctionEntityManager,
