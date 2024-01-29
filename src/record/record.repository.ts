@@ -121,12 +121,10 @@ export class RecordRepository {
       order: { created_at: 'DESC' },
     });
     let last_page = 0;
-    if (is_before_record && records.length > 0) {
+    if (records.length > 0 && is_before_record) {
+      last_page = records[0].page_end;
+    } else if (records.length > 0 && !is_before_record) {
       last_page = records[0].page_start;
-    } else {
-      if (records.length > 1) {
-        last_page = records[1].page_end;
-      }
     }
     return last_page;
   }
