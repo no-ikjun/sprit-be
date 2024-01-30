@@ -1,12 +1,22 @@
 import { Injectable } from '@nestjs/common';
+import { BookService } from 'src/book/book.service';
 import { Book } from 'src/global/entities/book.entity';
 import { BookLibrary } from 'src/global/entities/book_library.entity';
+import {
+  BookMarkResponseType,
+  BookMarkType,
+} from 'src/global/types/response.type';
 import { generateRamdomId, getRandomString, getToday } from 'src/global/utils';
+import { RecordRepository } from 'src/record/record.repository';
 import { DataSource, EntityManager } from 'typeorm';
 
 @Injectable()
 export class BookLibraryRepository {
-  constructor(private readonly dataSource: DataSource) {}
+  constructor(
+    private readonly dataSource: DataSource,
+    private readonly recordRepository: RecordRepository,
+    private readonly bookService: BookService,
+  ) {}
 
   async getBookLibraryListByUserUuid(
     transactionEntityManager: EntityManager,
@@ -88,5 +98,45 @@ export class BookLibraryRepository {
     return await transactionEntityManager.findOne(BookLibrary, {
       where: { book_uuid: book_uuid, user_uuid: user_uuid },
     });
+  }
+
+  async getBookMark(
+    transactionEntityManager: EntityManager,
+    user_uuid: string,
+    page: number,
+  ): Promise<BookMarkResponseType> {
+    const pageSize = 3;
+    const bookMarkList: BookMarkType[] = [];
+    let moreAvailable = false;
+    const bookLibraryList = await transactionEntityManager.find(BookLibrary, {
+      order: { updated_at: 'DESC' },
+      where: { user_uuid: user_uuid, state: 'READING' },
+      skip: (page - 1) * pageSize,
+      take: pageSize,
+    });
+    const totalCount = await transactionEntityManager.count(BookLibrary, {
+      where: { user_uuid: user_uuid, state: 'READING' },
+    });
+    moreAvailable = totalCount > page * pageSize;
+    for (const bookLibrary of bookLibraryList) {
+      const bookInfo = await this.bookService.findByBookUuid(
+        bookLibrary.book_uuid,
+      );
+      const lastPage = await this.recordRepository.getLastPage(
+        transactionEntityManager,
+        user_uuid,
+        bookLibrary.book_uuid,
+        false,
+      );
+      bookMarkList.push({
+        book_uuid: bookInfo.book_uuid,
+        thumbnail: bookInfo.thumbnail,
+        last_page: lastPage,
+      });
+    }
+    return {
+      book_marks: bookMarkList,
+      more_available: moreAvailable,
+    };
   }
 }

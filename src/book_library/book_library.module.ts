@@ -6,6 +6,10 @@ import { JwtModule } from '@nestjs/jwt';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { UserService } from 'src/user/user.service';
 import { UserRepository } from 'src/user/user.repository';
+import { RecordRepository } from 'src/record/record.repository';
+import { BookService } from 'src/book/book.service';
+import { HttpModule } from '@nestjs/axios';
+import { ReviewService } from 'src/review/review.service';
 
 @Module({
   imports: [
@@ -19,6 +23,7 @@ import { UserRepository } from 'src/user/user.repository';
         },
       }),
     }),
+    HttpModule,
   ],
   controllers: [BookLibraryController],
   providers: [
@@ -26,6 +31,9 @@ import { UserRepository } from 'src/user/user.repository';
     BookLibraryRepository,
     UserService,
     UserRepository,
+    RecordRepository,
+    BookService,
+    ReviewService,
   ],
 })
 export class BookLibraryModule {}

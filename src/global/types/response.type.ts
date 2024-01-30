@@ -57,3 +57,14 @@ export type SetFcmTokenResponseType = {
 export type MessageResponseType = {
   message: string;
 };
+
+export type BookMarkType = {
+  book_uuid: string;
+  thumbnail: string;
+  last_page: number;
+};
+
+export type BookMarkResponseType = {
+  book_marks: BookMarkType[];
+  more_available: boolean;
+};
