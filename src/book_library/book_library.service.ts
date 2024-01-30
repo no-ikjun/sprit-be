@@ -5,6 +5,7 @@ import { UserService } from 'src/user/user.service';
 import { Book } from 'src/global/entities/book.entity';
 import { RegisterLibraryDto } from './dto/book_library.dto';
 import { BookLibrary } from 'src/global/entities/book_library.entity';
+import { BookMarkResponseType } from 'src/global/types/response.type';
 
 @Injectable()
 export class BookLibraryService {
@@ -92,6 +93,22 @@ export class BookLibraryService {
           transactionEntityManager,
           book_uuid,
           userInfo.user_uuid,
+        );
+      },
+    );
+  }
+
+  async getBookMark(
+    access_token: string,
+    page: number,
+  ): Promise<BookMarkResponseType> {
+    const userInfo = await this.userService.getUserInfo(access_token);
+    return await this.dataSource.transaction(
+      async (transactionEntityManager) => {
+        return await this.bookLibraryRepository.getBookMark(
+          transactionEntityManager,
+          userInfo.user_uuid,
+          page,
         );
       },
     );

@@ -14,6 +14,7 @@ import { JwtAccessGuard } from 'src/auth/guard/jwtAccess.guard';
 import { Book } from 'src/global/entities/book.entity';
 import { RegisterLibraryDto } from './dto/book_library.dto';
 import { BookLibrary } from 'src/global/entities/book_library.entity';
+import { BookMarkResponseType } from 'src/global/types/response.type';
 
 @Controller('book-library')
 export class BookLibraryController {
@@ -85,6 +86,16 @@ export class BookLibraryController {
       access_token,
       body.book_uuid,
       body.state,
+    );
+  }
+
+  @Get('bookmark')
+  @UseGuards(JwtAccessGuard)
+  async getBookMark(@Req() req, @Query() query): Promise<BookMarkResponseType> {
+    const access_token = req.headers.authorization.split(' ')[1];
+    return await this.bookLibraryService.getBookMark(
+      access_token,
+      JSON.parse(query.page),
     );
   }
 }
