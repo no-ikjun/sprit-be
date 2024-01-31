@@ -45,29 +45,25 @@ export class BookReportService {
     );
   }
 
-  async getBookReportByUserUuid(access_token: string): Promise<string[]> {
+  async getBookReportByUserUuid(access_token: string): Promise<BookReport[]> {
     const user_info = await this.userService.getUserInfo(access_token);
     return await this.dataSource.transaction(
       async (transactionEntityManager) => {
-        const book_report_list =
-          await this.bookReportRepository.getBookReportByUserUuid(
-            transactionEntityManager,
-            user_info.user_uuid,
-          );
-        return book_report_list.map((book_report) => book_report.book_uuid);
+        return await this.bookReportRepository.getBookReportByUserUuid(
+          transactionEntityManager,
+          user_info.user_uuid,
+        );
       },
     );
   }
 
-  async getBookReportByBookUuid(book_uuid: string): Promise<string[]> {
+  async getBookReportByBookUuid(book_uuid: string): Promise<BookReport[]> {
     return await this.dataSource.transaction(
       async (transactionEntityManager) => {
-        const book_report_list =
-          await this.bookReportRepository.getBookReportByBookUuid(
-            transactionEntityManager,
-            book_uuid,
-          );
-        return book_report_list.map((book_report) => book_report.book_uuid);
+        return await this.bookReportRepository.getBookReportByBookUuid(
+          transactionEntityManager,
+          book_uuid,
+        );
       },
     );
   }

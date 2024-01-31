@@ -40,7 +40,7 @@ export class BookReportController {
 
   @Get('user')
   @UseGuards(JwtAccessGuard)
-  async getBookReportByUserUuid(@Req() req): Promise<string[]> {
+  async getBookReportByUserUuid(@Req() req): Promise<BookReport[]> {
     const access_token = req.headers.authorization.split(' ')[1];
     return await this.bookReportService.getBookReportByUserUuid(access_token);
   }
