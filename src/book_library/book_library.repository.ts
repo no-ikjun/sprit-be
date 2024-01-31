@@ -126,7 +126,7 @@ export class BookLibraryRepository {
         transactionEntityManager,
         user_uuid,
         bookLibrary.book_uuid,
-        false,
+        true,
       );
       bookMarkList.push({
         book_uuid: bookInfo.book_uuid,
