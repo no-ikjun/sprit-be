@@ -68,3 +68,9 @@ export type BookMarkResponseType = {
   book_marks: BookMarkType[];
   more_available: boolean;
 };
+
+export type BookLibraryResponseType = {
+  book_uuid: string;
+  count: number;
+  state: string;
+};

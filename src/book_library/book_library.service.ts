@@ -5,7 +5,10 @@ import { UserService } from 'src/user/user.service';
 import { Book } from 'src/global/entities/book.entity';
 import { RegisterLibraryDto } from './dto/book_library.dto';
 import { BookLibrary } from 'src/global/entities/book_library.entity';
-import { BookMarkResponseType } from 'src/global/types/response.type';
+import {
+  BookLibraryResponseType,
+  BookMarkResponseType,
+} from 'src/global/types/response.type';
 
 @Injectable()
 export class BookLibraryService {
@@ -26,6 +29,22 @@ export class BookLibraryService {
           transactionEntityManager,
           userInfo.user_uuid,
           state,
+        );
+      },
+    );
+  }
+
+  async getBookLibraryListWithStateList(
+    access_token: string,
+    state_list: string[],
+  ): Promise<BookLibraryResponseType[]> {
+    const userInfo = await this.userService.getUserInfo(access_token);
+    return await this.dataSource.transaction(
+      async (transactionEntityManager) => {
+        return await this.bookLibraryRepository.getBookLibraryListWithStateList(
+          transactionEntityManager,
+          userInfo.user_uuid,
+          state_list,
         );
       },
     );

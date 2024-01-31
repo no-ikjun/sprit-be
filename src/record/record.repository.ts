@@ -129,4 +129,14 @@ export class RecordRepository {
     }
     return last_page;
   }
+
+  async getRecordCountByBookUuidandUserUuid(
+    transactionEntityManager: EntityManager,
+    book_uuid: string,
+    user_uuid: string,
+  ): Promise<number> {
+    return await transactionEntityManager.count(Record, {
+      where: { book_uuid: book_uuid, user_uuid: user_uuid },
+    });
+  }
 }

@@ -3,12 +3,13 @@ import { BookService } from 'src/book/book.service';
 import { Book } from 'src/global/entities/book.entity';
 import { BookLibrary } from 'src/global/entities/book_library.entity';
 import {
+  BookLibraryResponseType,
   BookMarkResponseType,
   BookMarkType,
 } from 'src/global/types/response.type';
 import { generateRamdomId, getRandomString, getToday } from 'src/global/utils';
 import { RecordRepository } from 'src/record/record.repository';
-import { DataSource, EntityManager } from 'typeorm';
+import { DataSource, EntityManager, In } from 'typeorm';
 
 @Injectable()
 export class BookLibraryRepository {
@@ -17,6 +18,31 @@ export class BookLibraryRepository {
     private readonly recordRepository: RecordRepository,
     private readonly bookService: BookService,
   ) {}
+
+  async getBookLibraryListWithStateList(
+    transactionEntityManager: EntityManager,
+    user_uuid: string,
+    state_list: string[],
+  ): Promise<BookLibraryResponseType[]> {
+    const result: BookLibraryResponseType[] = [];
+    const bookLibraryList = await transactionEntityManager.find(BookLibrary, {
+      where: { user_uuid: user_uuid, state: In(state_list) },
+    });
+    for (const bookLibrary of bookLibraryList) {
+      const count =
+        await this.recordRepository.getRecordCountByBookUuidandUserUuid(
+          transactionEntityManager,
+          bookLibrary.book_uuid,
+          user_uuid,
+        );
+      result.push({
+        book_uuid: bookLibrary.book_uuid,
+        state: bookLibrary.state,
+        count: count,
+      });
+    }
+    return result;
+  }
 
   async getBookLibraryListByUserUuid(
     transactionEntityManager: EntityManager,
