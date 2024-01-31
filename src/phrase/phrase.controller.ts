@@ -13,6 +13,7 @@ import { PhraseService } from './phrase.service';
 import { JwtAccessGuard } from 'src/auth/guard/jwtAccess.guard';
 import { NewPhraseDto } from './dto/phrase.dto';
 import { Phrase } from 'src/global/entities/phrase.entity';
+import { LibraryPhraseResponseType } from 'src/global/types/response.type';
 
 @Controller('phrase')
 export class PhraseController {
@@ -51,5 +52,18 @@ export class PhraseController {
   @UseGuards(JwtAccessGuard)
   async deletePhrase(@Query() query): Promise<void> {
     await this.phraseService.deletePhrase(query.phrase_uuid);
+  }
+
+  @Get('library')
+  @UseGuards(JwtAccessGuard)
+  async getPhrasesByBookUuid(
+    @Req() req,
+    @Query() query,
+  ): Promise<LibraryPhraseResponseType> {
+    const access_token = req.headers.authorization.split(' ')[1];
+    return await this.phraseService.getPhrasesForLibrary(
+      access_token,
+      JSON.parse(query.page) ?? 1,
+    );
   }
 }

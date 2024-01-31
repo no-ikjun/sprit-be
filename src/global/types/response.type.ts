@@ -79,3 +79,14 @@ export type BookLibraryListResponseType = {
   book_library_list: BookLibraryResponseType[];
   more_available: boolean;
 };
+
+export type LibraryPhraseType = {
+  phrase_uuid: string;
+  book_title: string;
+  phrase: string;
+};
+
+export type LibraryPhraseResponseType = {
+  library_phrase_list: LibraryPhraseType[];
+  more_available: boolean;
+};

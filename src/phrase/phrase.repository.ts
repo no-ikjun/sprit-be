@@ -1,11 +1,19 @@
 import { Injectable } from '@nestjs/common';
+import { BookService } from 'src/book/book.service';
 import { Phrase } from 'src/global/entities/phrase.entity';
+import {
+  LibraryPhraseResponseType,
+  LibraryPhraseType,
+} from 'src/global/types/response.type';
 import { generateRamdomId, getRandomString, getToday } from 'src/global/utils';
 import { DataSource, EntityManager } from 'typeorm';
 
 @Injectable()
 export class PhraseRepository {
-  constructor(private readonly dataSource: DataSource) {}
+  constructor(
+    private readonly dataSource: DataSource,
+    private readonly bookService: BookService,
+  ) {}
 
   async setPhrase(
     transactionEntityManager: EntityManager,
@@ -75,5 +83,37 @@ export class PhraseRepository {
     phrase_uuid: string,
   ): Promise<void> {
     await transactionEntityManager.delete(Phrase, { phrase_uuid: phrase_uuid });
+  }
+
+  async getPhrasesForLibrary(
+    transactionEntityManager: EntityManager,
+    user_uuid: string,
+    page: number,
+  ): Promise<LibraryPhraseResponseType> {
+    const pageSize = 3;
+    const phraseList: LibraryPhraseType[] = [];
+    let moreAvailable = false;
+    const phraseListFromDB = await transactionEntityManager.find(Phrase, {
+      order: { created_at: 'DESC' },
+      where: { user_uuid: user_uuid },
+      skip: (page - 1) * pageSize,
+      take: pageSize,
+    });
+    const totalCount = await transactionEntityManager.count(Phrase, {
+      where: { user_uuid: user_uuid },
+    });
+    for (const phrase of phraseListFromDB) {
+      const book_info = await this.bookService.findByBookUuid(phrase.book_uuid);
+      phraseList.push({
+        phrase_uuid: phrase.phrase_uuid,
+        book_title: book_info.title,
+        phrase: phrase.phrase,
+      });
+    }
+    moreAvailable = totalCount > page * pageSize;
+    return {
+      library_phrase_list: phraseList,
+      more_available: moreAvailable,
+    };
   }
 }

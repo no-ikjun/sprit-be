@@ -4,6 +4,7 @@ import { PhraseRepository } from './phrase.repository';
 import { UserService } from 'src/user/user.service';
 import { NewPhraseDto } from './dto/phrase.dto';
 import { Phrase } from 'src/global/entities/phrase.entity';
+import { LibraryPhraseResponseType } from 'src/global/types/response.type';
 
 @Injectable()
 export class PhraseService {
@@ -84,6 +85,22 @@ export class PhraseService {
         await this.phraseRepository.deletePhrase(
           transactionEntityManager,
           phrase_uuid,
+        );
+      },
+    );
+  }
+
+  async getPhrasesForLibrary(
+    access_token: string,
+    page: number,
+  ): Promise<LibraryPhraseResponseType> {
+    const user_info = await this.userService.getUserInfo(access_token);
+    return await this.dataSource.transaction(
+      async (transactionEntityManager) => {
+        return await this.phraseRepository.getPhrasesForLibrary(
+          transactionEntityManager,
+          user_info.user_uuid,
+          page,
         );
       },
     );
