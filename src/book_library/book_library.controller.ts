@@ -112,6 +112,7 @@ export class BookLibraryController {
     return await this.bookLibraryService.getBookLibraryListWithStateList(
       access_token,
       JSON.parse(body.state_list) as string[],
+      (JSON.parse(body.page) as number) ?? 1,
     );
   }
 }

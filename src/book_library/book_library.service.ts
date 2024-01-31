@@ -37,6 +37,7 @@ export class BookLibraryService {
   async getBookLibraryListWithStateList(
     access_token: string,
     state_list: string[],
+    page: number,
   ): Promise<BookLibraryResponseType[]> {
     const userInfo = await this.userService.getUserInfo(access_token);
     return await this.dataSource.transaction(
@@ -45,6 +46,7 @@ export class BookLibraryService {
           transactionEntityManager,
           userInfo.user_uuid,
           state_list,
+          page,
         );
       },
     );

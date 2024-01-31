@@ -23,10 +23,14 @@ export class BookLibraryRepository {
     transactionEntityManager: EntityManager,
     user_uuid: string,
     state_list: string[],
+    page: number,
   ): Promise<BookLibraryResponseType[]> {
     const result: BookLibraryResponseType[] = [];
     const bookLibraryList = await transactionEntityManager.find(BookLibrary, {
       where: { user_uuid: user_uuid, state: In(state_list) },
+      order: { updated_at: 'DESC' },
+      skip: (page - 1) * 3,
+      take: 3,
     });
     for (const bookLibrary of bookLibraryList) {
       const count =
