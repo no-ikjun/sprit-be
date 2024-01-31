@@ -42,6 +42,7 @@ export class BookReportRepository {
   ): Promise<BookReport[]> {
     return await transactionEntityManager.find(BookReport, {
       where: { user_uuid: user_uuid },
+      order: { created_at: 'DESC' },
     });
   }
 
