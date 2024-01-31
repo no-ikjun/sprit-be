@@ -123,7 +123,7 @@ export class BookLibraryRepository {
     await transactionEntityManager.update(
       BookLibrary,
       { user_uuid: user_uuid, book_uuid: book_uuid },
-      { state: state },
+      { state: state, updated_at: new Date() },
     );
   }
 
