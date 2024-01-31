@@ -15,7 +15,7 @@ import { Book } from 'src/global/entities/book.entity';
 import { RegisterLibraryDto } from './dto/book_library.dto';
 import { BookLibrary } from 'src/global/entities/book_library.entity';
 import {
-  BookLibraryResponseType,
+  BookLibraryListResponseType,
   BookMarkResponseType,
 } from 'src/global/types/response.type';
 
@@ -107,11 +107,11 @@ export class BookLibraryController {
   async getBookLibraryStateList(
     @Req() req,
     @Body() body,
-  ): Promise<BookLibraryResponseType[]> {
+  ): Promise<BookLibraryListResponseType> {
     const access_token = req.headers.authorization.split(' ')[1];
     return await this.bookLibraryService.getBookLibraryListWithStateList(
       access_token,
-      JSON.parse(body.state_list) as string[],
+      body.state_list as string[],
       (JSON.parse(body.page) as number) ?? 1,
     );
   }

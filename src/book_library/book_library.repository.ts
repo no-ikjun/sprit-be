@@ -3,6 +3,7 @@ import { BookService } from 'src/book/book.service';
 import { Book } from 'src/global/entities/book.entity';
 import { BookLibrary } from 'src/global/entities/book_library.entity';
 import {
+  BookLibraryListResponseType,
   BookLibraryResponseType,
   BookMarkResponseType,
   BookMarkType,
@@ -24,14 +25,20 @@ export class BookLibraryRepository {
     user_uuid: string,
     state_list: string[],
     page: number,
-  ): Promise<BookLibraryResponseType[]> {
-    const result: BookLibraryResponseType[] = [];
+  ): Promise<BookLibraryListResponseType> {
+    const libraryList: BookLibraryResponseType[] = [];
+    let moreAvailable = false;
+    const pageSize = 3;
     const bookLibraryList = await transactionEntityManager.find(BookLibrary, {
       where: { user_uuid: user_uuid, state: In(state_list) },
       order: { updated_at: 'DESC' },
-      skip: (page - 1) * 3,
-      take: 3,
+      skip: (page - 1) * pageSize,
+      take: pageSize,
     });
+    const totalCount = await transactionEntityManager.count(BookLibrary, {
+      where: { user_uuid: user_uuid, state: In(state_list) },
+    });
+    moreAvailable = totalCount > page * pageSize;
     for (const bookLibrary of bookLibraryList) {
       const count =
         await this.recordRepository.getRecordCountByBookUuidandUserUuid(
@@ -39,13 +46,13 @@ export class BookLibraryRepository {
           bookLibrary.book_uuid,
           user_uuid,
         );
-      result.push({
+      libraryList.push({
         book_uuid: bookLibrary.book_uuid,
         state: bookLibrary.state,
         count: count,
       });
     }
-    return result;
+    return { book_library_list: libraryList, more_available: moreAvailable };
   }
 
   async getBookLibraryListByUserUuid(

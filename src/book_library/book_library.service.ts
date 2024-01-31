@@ -6,7 +6,7 @@ import { Book } from 'src/global/entities/book.entity';
 import { RegisterLibraryDto } from './dto/book_library.dto';
 import { BookLibrary } from 'src/global/entities/book_library.entity';
 import {
-  BookLibraryResponseType,
+  BookLibraryListResponseType,
   BookMarkResponseType,
 } from 'src/global/types/response.type';
 
@@ -38,7 +38,7 @@ export class BookLibraryService {
     access_token: string,
     state_list: string[],
     page: number,
-  ): Promise<BookLibraryResponseType[]> {
+  ): Promise<BookLibraryListResponseType> {
     const userInfo = await this.userService.getUserInfo(access_token);
     return await this.dataSource.transaction(
       async (transactionEntityManager) => {

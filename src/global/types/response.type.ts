@@ -74,3 +74,8 @@ export type BookLibraryResponseType = {
   count: number;
   state: string;
 };
+
+export type BookLibraryListResponseType = {
+  book_library_list: BookLibraryResponseType[];
+  more_available: boolean;
+};
