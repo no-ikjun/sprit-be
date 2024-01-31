@@ -28,7 +28,11 @@ export class RecordController {
   @Patch('stop')
   @UseGuards(JwtAccessGuard)
   async endRecord(@Query() query): Promise<void> {
-    await this.recordService.endRecord(query.record_uuid, query.page_end);
+    await this.recordService.endRecord(
+      query.record_uuid,
+      query.page_end,
+      query.total_time,
+    );
   }
 
   @Delete()

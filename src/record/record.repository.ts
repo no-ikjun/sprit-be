@@ -76,11 +76,12 @@ export class RecordRepository {
     transactionEntityManager: EntityManager,
     record_uuid: string,
     page_end?: number,
+    total_time?: number,
   ): Promise<void> {
     await transactionEntityManager.update(
       Record,
       { record_uuid: record_uuid },
-      { end: new Date(), page_end: page_end },
+      { end: new Date(), page_end: page_end, total_time: total_time },
     );
   }
 

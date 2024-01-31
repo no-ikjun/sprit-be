@@ -23,6 +23,9 @@ export class Record {
   @Column({ default: 0 })
   page_end: number;
 
+  @Column({ default: 0 })
+  total_time: number;
+
   @Column()
   start: Date;
 

@@ -76,12 +76,17 @@ export class RecordService {
     );
   }
 
-  async endRecord(record_uuid: string, page_end: number): Promise<void> {
+  async endRecord(
+    record_uuid: string,
+    page_end: number,
+    total_time: number,
+  ): Promise<void> {
     await this.dataSource.transaction(async (transactionEntityManager) => {
       await this.recordRepository.endRecord(
         transactionEntityManager,
         record_uuid,
         page_end ?? 0,
+        total_time ?? 0,
       );
     });
   }
