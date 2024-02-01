@@ -249,6 +249,7 @@ export class BookService {
   }
 
   async getPopularBookList(page: number): Promise<PopularBookResponseType> {
+    if (page > 10) return { books: [], more_available: false };
     const pageSize = 10;
     let bookList: Book[];
     const bookListWithScore: BookInfoResponseType[] = [];
