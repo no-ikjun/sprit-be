@@ -29,10 +29,7 @@ export class BannerService {
       getRandomString(8),
     );
     banner_data.banner_uuid = banner_uuid;
-    banner_data.background_color = banner.background_color;
-    banner_data.title = banner.title;
-    banner_data.content = banner.content;
-    banner_data.icon_url = banner.icon_url;
+    banner_data.banner_url = banner.banner_url;
     banner_data.created_at = new Date();
     banner_data.click_url = banner.click_url;
     await this.dataSource.transaction(async (transctionEntityManager) => {

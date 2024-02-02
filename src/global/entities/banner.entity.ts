@@ -6,16 +6,7 @@ export class Banner {
   banner_uuid: string;
 
   @Column()
-  background_color: string;
-
-  @Column()
-  title: string;
-
-  @Column()
-  content: string;
-
-  @Column()
-  icon_url: string;
+  banner_url: string;
 
   @Column()
   created_at: Date;
