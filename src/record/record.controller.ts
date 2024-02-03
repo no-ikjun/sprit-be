@@ -102,6 +102,18 @@ export class RecordController {
     );
   }
 
+  @Get('daily-record')
+  @UseGuards(JwtAccessGuard)
+  async getDailyRecord(@Req() req, @Query() query): Promise<number> {
+    const access_token = req.headers.authorization.split(' ')[1];
+    return await this.recordService.getDailyRecordTotalTime(
+      access_token,
+      JSON.parse(query.year),
+      JSON.parse(query.month),
+      JSON.parse(query.date),
+    );
+  }
+
   @Get('weekly-record')
   @UseGuards(JwtAccessGuard)
   async getWeeklyRecord(

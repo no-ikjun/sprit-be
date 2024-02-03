@@ -151,6 +151,26 @@ export class RecordService {
     );
   }
 
+  async getDailyRecordTotalTime(
+    access_token: string,
+    year: number,
+    month: number,
+    date: number,
+  ): Promise<number> {
+    const user_info = await this.userService.getUserInfo(access_token);
+    return await this.dataSource.transaction(
+      async (transactionEntityManager) => {
+        return await this.recordRepository.getDailyRecordTotalTime(
+          transactionEntityManager,
+          user_info.user_uuid,
+          year,
+          month,
+          date,
+        );
+      },
+    );
+  }
+
   async getWeeklyRecordHistory(
     access_token: string,
     back_week: number,

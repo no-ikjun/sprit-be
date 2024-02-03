@@ -144,6 +144,30 @@ export class RecordRepository {
     });
   }
 
+  async getDailyRecordTotalTime(
+    transactionEntityManager: EntityManager,
+    user_uuid: string,
+    year: number,
+    month: number,
+    date: number,
+  ): Promise<number> {
+    const startOfDay = new Date(Date.UTC(year, month - 1, date));
+    startOfDay.setHours(0, 0, 0, 0);
+    const endOfDay = new Date(Date.UTC(year, month - 1, date));
+    endOfDay.setHours(23, 59, 59, 999);
+    const records = await transactionEntityManager.find(Record, {
+      where: {
+        user_uuid: user_uuid,
+        end: Between(startOfDay, endOfDay),
+      },
+    });
+    let total_time = 0;
+    for (let i = 0; i < records.length; i++) {
+      total_time += records[i].total_time;
+    }
+    return total_time;
+  }
+
   async getRecordCountByUserUuid(
     transactionEntityManager: EntityManager,
     user_uuid: string,
@@ -162,7 +186,7 @@ export class RecordRepository {
       const count = await transactionEntityManager.count(Record, {
         where: {
           user_uuid: user_uuid,
-          created_at: Between(startOfDay, endOfDay),
+          end: Between(startOfDay, endOfDay),
         },
       });
       result.push(count);
