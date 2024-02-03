@@ -90,3 +90,14 @@ export type LibraryPhraseResponseType = {
   library_phrase_list: LibraryPhraseType[];
   more_available: boolean;
 };
+
+export type BookRecordHistoryType = {
+  book_uuid: string;
+  is_achieved: boolean;
+  total_time: number;
+};
+
+export type MonthlyRecordResponseType = {
+  present_month: number;
+  past_month: number;
+};

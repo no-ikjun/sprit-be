@@ -4,6 +4,10 @@ import { RecordRepository } from './record.repository';
 import { UserService } from 'src/user/user.service';
 import { NewRecordDto } from './dto/record.dto';
 import { Record } from 'src/global/entities/record.entity';
+import {
+  BookRecordHistoryType,
+  MonthlyRecordResponseType,
+} from 'src/global/types/response.type';
 
 @Injectable()
 export class RecordService {
@@ -126,6 +130,60 @@ export class RecordService {
           user_info.user_uuid,
           book_uuid,
           is_before_record,
+        );
+      },
+    );
+  }
+
+  async getRecordCountByUserUuid(
+    access_token: string,
+    count: number,
+  ): Promise<number[]> {
+    const user_info = await this.userService.getUserInfo(access_token);
+    return await this.dataSource.transaction(
+      async (transactionEntityManager) => {
+        return await this.recordRepository.getRecordCountByUserUuid(
+          transactionEntityManager,
+          user_info.user_uuid,
+          count,
+        );
+      },
+    );
+  }
+
+  async getWeeklyRecordHistory(
+    access_token: string,
+    back_week: number,
+    count: number,
+  ): Promise<BookRecordHistoryType[][]> {
+    const user_info = await this.userService.getUserInfo(access_token);
+    return await this.dataSource.transaction(
+      async (transactionEntityManager) => {
+        return await this.recordRepository.getWeeklyRecordHistory(
+          transactionEntityManager,
+          user_info.user_uuid,
+          back_week,
+          count,
+        );
+      },
+    );
+  }
+
+  async getMonthlyRecordCount(
+    access_token: string,
+    year: number,
+    month: number,
+    kind: string,
+  ): Promise<MonthlyRecordResponseType> {
+    const user_info = await this.userService.getUserInfo(access_token);
+    return await this.dataSource.transaction(
+      async (transactionEntityManager) => {
+        return await this.recordRepository.getReadingRecordCountsByMonth(
+          transactionEntityManager,
+          user_info.user_uuid,
+          year,
+          month,
+          kind,
         );
       },
     );

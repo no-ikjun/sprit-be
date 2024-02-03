@@ -13,6 +13,10 @@ import { RecordService } from './record.service';
 import { JwtAccessGuard } from 'src/auth/guard/jwtAccess.guard';
 import { NewRecordDto } from './dto/record.dto';
 import { Record } from 'src/global/entities/record.entity';
+import {
+  BookRecordHistoryType,
+  MonthlyRecordResponseType,
+} from 'src/global/types/response.type';
 
 @Controller('record')
 export class RecordController {
@@ -85,6 +89,45 @@ export class RecordController {
       query.book_uuid,
       access_token,
       JSON.parse(query.is_before_record),
+    );
+  }
+
+  @Get('record-count')
+  @UseGuards(JwtAccessGuard)
+  async getRecordCount(@Req() req, @Query() query): Promise<number[]> {
+    const access_token = req.headers.authorization.split(' ')[1];
+    return await this.recordService.getRecordCountByUserUuid(
+      access_token,
+      JSON.parse(query.count),
+    );
+  }
+
+  @Get('weekly-record')
+  @UseGuards(JwtAccessGuard)
+  async getWeeklyRecord(
+    @Req() req,
+    @Query() query,
+  ): Promise<BookRecordHistoryType[][]> {
+    const access_token = req.headers.authorization.split(' ')[1];
+    return await this.recordService.getWeeklyRecordHistory(
+      access_token,
+      JSON.parse(query.back_week) ?? 0,
+      JSON.parse(query.count) ?? 7,
+    );
+  }
+
+  @Get('monthly-count')
+  @UseGuards(JwtAccessGuard)
+  async getMonthlyRecordCount(
+    @Req() req,
+    @Query() query,
+  ): Promise<MonthlyRecordResponseType> {
+    const access_token = req.headers.authorization.split(' ')[1];
+    return await this.recordService.getMonthlyRecordCount(
+      access_token,
+      JSON.parse(query.year),
+      JSON.parse(query.month),
+      query.kind,
     );
   }
 }
