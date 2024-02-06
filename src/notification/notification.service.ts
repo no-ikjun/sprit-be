@@ -208,7 +208,7 @@ export class NotificationService {
       this.globalFcmService.postMessage(
         title,
         body,
-        'https://rushhour.s3.ap-northeast-2.amazonaws.com/logo-launcher.png',
+        'https://d3ob3cint7tr3s.cloudfront.net/profile.png',
         fcm_token.fcm_token,
         'default',
         data,
@@ -225,10 +225,95 @@ export class NotificationService {
     this.globalFcmService.postMessage(
       title,
       body,
-      'https://rushhour.s3.ap-northeast-2.amazonaws.com/logo-launcher.png',
+      'https://d3ob3cint7tr3s.cloudfront.net/profile.png',
       fcm_token,
       'default',
       data,
     );
+  }
+
+  async sendMarketingMessage(
+    title: string,
+    body: string,
+    data: { [key: string]: string },
+  ): Promise<void> {
+    const fcm_token = await this.notificationRepository.getMarketingFcmToken(
+      this.dataSource.manager,
+    );
+    fcm_token.forEach((fcm_token) => {
+      this.globalFcmService.postMessage(
+        title,
+        body,
+        'https://d3ob3cint7tr3s.cloudfront.net/profile.png',
+        fcm_token.fcm_token,
+        'default',
+        data,
+      );
+    });
+  }
+
+  async sendTimeMessage(
+    title: string,
+    body: string,
+    data: { [key: string]: string },
+    type: string,
+  ): Promise<void> {
+    const fcm_token = await this.notificationRepository.getTimeAgreeFcmToken(
+      this.dataSource.manager,
+      type,
+    );
+    console.log(fcm_token);
+    fcm_token.forEach((fcm_token) => {
+      this.globalFcmService.postMessage(
+        title,
+        body,
+        'https://d3ob3cint7tr3s.cloudfront.net/profile.png',
+        fcm_token.fcm_token,
+        'default',
+        data,
+      );
+    });
+  }
+
+  async sendRemindMessage(
+    title: string,
+    body: string,
+    data: { [key: string]: string },
+  ): Promise<void> {
+    const fcm_token = await this.notificationRepository.getRemindAgreeFcmToken(
+      this.dataSource.manager,
+    );
+    fcm_token.forEach((fcm_token) => {
+      this.globalFcmService.postMessage(
+        title,
+        body,
+        'https://d3ob3cint7tr3s.cloudfront.net/profile.png',
+        fcm_token.fcm_token,
+        'default',
+        data,
+      );
+    });
+  }
+
+  async sendQuestMessage(
+    title: string,
+    body: string,
+    data: { [key: string]: string },
+    type: string,
+  ): Promise<void> {
+    const fcm_token = await this.notificationRepository.getQuestAgreeFcmToken(
+      this.dataSource.manager,
+      type,
+    );
+    fcm_token.forEach((fcm_token) => {
+      this.globalFcmService.postMessage(
+        title,
+        body,
+        'https://d3ob3cint7tr3s.cloudfront.net/profile.png',
+        fcm_token.fcm_token,
+        'default',
+        data,
+      );
+    });
   }
 }

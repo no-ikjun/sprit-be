@@ -17,9 +17,11 @@ import { BookLibraryModule } from './book_library/book_library.module';
 import { RecordModule } from './record/record.module';
 import { PhraseModule } from './phrase/phrase.module';
 import { BookReportModule } from './book_report/book_report.module';
+import { ScheduleModule } from './schedule/schedule.module';
 
 @Module({
   imports: [
+    ScheduleModule,
     ConfigModule.forRoot({
       cache: true,
       isGlobal: true,
@@ -42,6 +44,7 @@ import { BookReportModule } from './book_report/book_report.module';
     RecordModule,
     PhraseModule,
     BookReportModule,
+    ScheduleModule,
   ],
   controllers: [AppController],
   providers: [AppService],

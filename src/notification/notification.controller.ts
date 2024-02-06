@@ -133,4 +133,17 @@ export class NotificationController {
     );
     return { message: 'success' };
   }
+
+  @Post('send/all/marketing')
+  @UseGuards(JwtAccessGuard)
+  async sendMessageAllMarketing(
+    @Body() data: NotificationDto,
+  ): Promise<MessageResponseType> {
+    await this.notificationService.sendMarketingMessage(
+      data.title,
+      data.body,
+      data.data,
+    );
+    return { message: 'success' };
+  }
 }

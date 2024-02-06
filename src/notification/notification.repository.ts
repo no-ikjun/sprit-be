@@ -246,4 +246,82 @@ export class NotificationRepository {
     });
     return fcm_token;
   }
+
+  async getMarketingFcmToken(
+    transactionEntityManager: EntityManager,
+  ): Promise<FcmToken[]> {
+    const fcm_tokens = await transactionEntityManager.find(FcmToken, {
+      where: { marketing_agree: true },
+    });
+    return fcm_tokens;
+  }
+
+  async getTimeAgreeFcmToken(
+    transactionEntityManager: EntityManager,
+    type: string,
+  ): Promise<FcmToken[]> {
+    let time_agree;
+    if (type === 'agree_02') {
+      time_agree = await transactionEntityManager.find(TimeAgree, {
+        where: { agree_02: true },
+      });
+    } else if (type === 'agree_01') {
+      time_agree = await transactionEntityManager.find(TimeAgree, {
+        where: { agree_01: true },
+      });
+    }
+    const promises = time_agree.map(async (agree: TimeAgree) => {
+      return transactionEntityManager.findOne(FcmToken, {
+        where: { agree_uuid: agree.agree_uuid },
+      });
+    });
+    const result = (await Promise.all(promises)).filter(
+      (fcmToken) => fcmToken !== null && fcmToken !== undefined,
+    );
+    return result;
+  }
+
+  async getRemindAgreeFcmToken(
+    transactionEntityManager: EntityManager,
+  ): Promise<FcmToken[]> {
+    const result: FcmToken[] = [];
+    const remind_agree = await transactionEntityManager.find(RemindAgree, {
+      where: { agree_01: true },
+    });
+    remind_agree.map(async (agree: RemindAgree) => {
+      const fcm_token = await transactionEntityManager.findOne(FcmToken, {
+        where: { agree_uuid: agree.agree_uuid },
+      });
+      result.push(fcm_token);
+    });
+    return result;
+  }
+
+  async getQuestAgreeFcmToken(
+    transactionEntityManager: EntityManager,
+    type: string,
+  ): Promise<FcmToken[]> {
+    let quest_agree;
+    const result: FcmToken[] = [];
+    if (type === 'agree_01') {
+      quest_agree = await transactionEntityManager.find(QuestAgree, {
+        where: { agree_01: true },
+      });
+    } else if (type === 'agree_02') {
+      quest_agree = await transactionEntityManager.find(QuestAgree, {
+        where: { agree_02: true },
+      });
+    } else if (type === 'agree_03') {
+      quest_agree = await transactionEntityManager.find(QuestAgree, {
+        where: { agree_03: true },
+      });
+    }
+    quest_agree.map(async (agree: QuestAgree) => {
+      const fcm_token = await transactionEntityManager.findOne(FcmToken, {
+        where: { agree_uuid: agree.agree_uuid },
+      });
+      result.push(fcm_token);
+    });
+    return result;
+  }
 }
