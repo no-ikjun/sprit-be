@@ -62,6 +62,26 @@ export class NotificationRepository {
     };
   }
 
+  async deleteFcmToken(
+    transactionEntityManager: EntityManager,
+    fcm_token: string,
+  ): Promise<void> {
+    const agree_uuid = await this.getAgreeUuidByFcmToken(
+      transactionEntityManager,
+      fcm_token,
+    );
+    await transactionEntityManager.delete(FcmToken, { fcm_token: fcm_token });
+    await transactionEntityManager.delete(TimeAgree, {
+      agree_uuid: agree_uuid,
+    });
+    await transactionEntityManager.delete(RemindAgree, {
+      agree_uuid: agree_uuid,
+    });
+    await transactionEntityManager.delete(QuestAgree, {
+      agree_uuid: agree_uuid,
+    });
+  }
+
   async getTokenInfoByFcmToken(
     transactionEntityManager: EntityManager,
     fcm_token: string,

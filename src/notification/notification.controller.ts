@@ -1,6 +1,7 @@
 import {
   Body,
   Controller,
+  Delete,
   Get,
   Patch,
   Post,
@@ -34,6 +35,12 @@ export class NotificationController {
       access_token,
       query.fcm_token,
     );
+  }
+
+  @Delete('delete')
+  @UseGuards(JwtAccessGuard)
+  async deleteFcmToken(@Query() query): Promise<void> {
+    return await this.notificationService.deleteFcmToken(query.fcm_token);
   }
 
   @Get('agree/marketing')

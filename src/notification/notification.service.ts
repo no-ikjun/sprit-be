@@ -51,6 +51,13 @@ export class NotificationService {
     );
   }
 
+  async deleteFcmToken(fcm_token: string): Promise<void> {
+    await this.notificationRepository.deleteFcmToken(
+      this.dataSource.manager,
+      fcm_token,
+    );
+  }
+
   async getMarketingAgree(fcm_token: string): Promise<boolean> {
     const token = await this.notificationRepository.getTokenInfoByFcmToken(
       this.dataSource.manager,
