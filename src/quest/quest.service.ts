@@ -21,7 +21,7 @@ export class QuestService {
     await this.dataSource.transaction(async (transctionEntityManager) => {
       quests = await transctionEntityManager.find(Quest, {
         where: { is_ended: false },
-        order: { start_date: 'DESC' },
+        order: { start_date: 'ASC' },
       });
     });
     return quests;
