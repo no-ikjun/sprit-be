@@ -15,6 +15,9 @@ export class Quest {
   long_description: string;
 
   @Column()
+  mission: string;
+
+  @Column()
   icon_url: string;
 
   @Column()

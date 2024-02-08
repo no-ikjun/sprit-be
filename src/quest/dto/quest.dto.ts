@@ -11,6 +11,9 @@ export class CreateQuestDto {
   long_description: string;
 
   @IsString()
+  mission: string;
+
+  @IsString()
   icon_url: string;
 
   @IsString()
