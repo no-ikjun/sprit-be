@@ -24,26 +24,32 @@ export class QuestController {
     return await this.questService.setNewQuest(body);
   }
 
-  @Get('/active')
+  @Get('find')
+  @UseGuards(JwtAccessGuard)
+  async getQuestByUuid(@Query() query): Promise<Quest> {
+    return await this.questService.findQuestByUuid(query.quest_uuid);
+  }
+
+  @Get('active')
   @UseGuards(JwtAccessGuard)
   async getActiveQuests(): Promise<Quest[]> {
     return await this.questService.getActiveQuests();
   }
 
-  @Get('/ended')
+  @Get('ended')
   @UseGuards(JwtAccessGuard)
   async getEndedQuests(): Promise<Quest[]> {
     return await this.questService.getEndedQuests();
   }
 
-  @Post('/apply')
+  @Post('apply')
   @UseGuards(JwtAccessGuard)
   async applyQuest(@Query() query, @Req() req): Promise<QuestApply> {
     const access_token = req.headers.authorization.split(' ')[1];
     return await this.questService.applyQuest(query.quest_uuid, access_token);
   }
 
-  @Get('/my/active')
+  @Get('my/active')
   @UseGuards(JwtAccessGuard)
   async getMyQuest(@Req() req): Promise<AppliedQuestResponseType[]> {
     const access_token = req.headers.authorization.split(' ')[1];

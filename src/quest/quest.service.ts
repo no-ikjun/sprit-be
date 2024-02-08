@@ -70,6 +70,16 @@ export class QuestService {
     );
   }
 
+  async findQuestByUuid(quest_uuid: string): Promise<Quest> {
+    let quest: Quest;
+    await this.dataSource.transaction(async (transctionEntityManager) => {
+      quest = await transctionEntityManager.findOne(Quest, {
+        where: { quest_uuid: quest_uuid },
+      });
+    });
+    return quest;
+  }
+
   async applyQuest(
     quest_uuid: string,
     access_token: string,
