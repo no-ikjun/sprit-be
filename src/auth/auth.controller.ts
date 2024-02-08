@@ -7,7 +7,7 @@ import { LoginResponseType } from 'src/global/types/response.type';
 export class AuthController {
   constructor(private readonly authService: AuthService) {}
 
-  @Post('/login')
+  @Post('login')
   async login(@Body() data: LoginUserDto): Promise<LoginResponseType> {
     return await this.authService.login(data);
   }

@@ -17,19 +17,26 @@ import { JwtAccessGuard } from 'src/auth/guard/jwtAccess.guard';
 export class UserController {
   constructor(private readonly userService: UserService) {}
 
-  @Post('/signup')
+  @Post('signup')
   async signup(@Body() data: CreateUserDto): Promise<LoginResponseType> {
     return await this.userService.signUp(data);
   }
 
-  @Get('/info')
+  @Get('info')
   @UseGuards(JwtAccessGuard)
   async getUserInfo(@Req() req): Promise<UserInfoDto> {
     const accessToken = req.headers.authorization.split(' ')[1];
     return await this.userService.getUserInfo(accessToken);
   }
 
-  @Patch('/nickname')
+  @Get('find')
+  @UseGuards(JwtAccessGuard)
+  async findUser(@Req() req): Promise<UserInfoDto> {
+    const accessToken = req.headers.authorization.split(' ')[1];
+    return await this.userService.findByUserUuid(accessToken);
+  }
+
+  @Patch('nickname')
   @UseGuards(JwtAccessGuard)
   async changeNickname(@Query() query, @Req() req): Promise<void> {
     const accessToken = req.headers.authorization.split(' ')[1];
@@ -39,7 +46,7 @@ export class UserController {
     );
   }
 
-  @Patch('/password')
+  @Patch('password')
   @UseGuards(JwtAccessGuard)
   async changePassword(@Query() query, @Req() req): Promise<void> {
     const accessToken = req.headers.authorization.split(' ')[1];

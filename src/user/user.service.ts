@@ -43,12 +43,13 @@ export class UserService {
     return user;
   }
 
-  async findByUserUuid(userUuid: string): Promise<User> {
+  async findByUserUuid(access_token: string): Promise<User> {
+    const userInfo = await this.getUserInfo(access_token);
     let user: User;
     await this.dataSource.transaction(async (transctionEntityManager) => {
       user = await this.userRepository.findOneByUserUuid(
         transctionEntityManager,
-        userUuid,
+        userInfo.user_uuid,
       );
     });
     return user;
