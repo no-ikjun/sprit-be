@@ -14,7 +14,7 @@ import { NewBookReportDto, UpdateBookReportDto } from './dto/book_report.dto';
 import { BookReport } from 'src/global/entities/book_report.entity';
 import { JwtAccessGuard } from 'src/auth/guard/jwtAccess.guard';
 
-@Controller('book-report')
+@Controller('v1/book-report')
 export class BookReportController {
   constructor(private readonly bookReportService: BookReportService) {}
 

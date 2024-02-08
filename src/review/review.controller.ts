@@ -12,7 +12,7 @@ import { JwtAccessGuard } from 'src/auth/guard/jwtAccess.guard';
 import { Review } from 'src/global/entities/review.entity';
 import { CreateReviewDto } from './dto/review.dto';
 
-@Controller('review')
+@Controller('v1/review')
 export class ReviewController {
   constructor(private readonly reviewService: ReviewService) {}
 

@@ -19,7 +19,7 @@ import {
   BookMarkResponseType,
 } from 'src/global/types/response.type';
 
-@Controller('book-library')
+@Controller('v1/book-library')
 export class BookLibraryController {
   constructor(private readonly bookLibraryService: BookLibraryService) {}
 

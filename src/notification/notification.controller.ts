@@ -20,7 +20,7 @@ import { RemindAgree } from 'src/global/entities/remind_agree.entity';
 import { QuestAgree } from 'src/global/entities/quest_agree.entity';
 import { NotificationDto } from './dto/notification.dto';
 
-@Controller('notification')
+@Controller('v1/notification')
 export class NotificationController {
   constructor(private readonly notificationService: NotificationService) {}
 

@@ -3,7 +3,7 @@ import { AuthService } from './auth.service';
 import { AppleRequestDto, KakaoRequestDto, LoginUserDto } from './dto/auth.dto';
 import { LoginResponseType } from 'src/global/types/response.type';
 
-@Controller('auth')
+@Controller('v1/auth')
 export class AuthController {
   constructor(private readonly authService: AuthService) {}
 

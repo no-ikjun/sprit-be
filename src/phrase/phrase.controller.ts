@@ -15,7 +15,7 @@ import { NewPhraseDto } from './dto/phrase.dto';
 import { Phrase } from 'src/global/entities/phrase.entity';
 import { LibraryPhraseResponseType } from 'src/global/types/response.type';
 
-@Controller('phrase')
+@Controller('v1/phrase')
 export class PhraseController {
   constructor(private readonly phraseService: PhraseService) {}
 

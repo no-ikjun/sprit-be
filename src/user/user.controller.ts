@@ -4,7 +4,7 @@ import { LoginResponseType } from 'src/global/types/response.type';
 import { CreateUserDto, UserInfoDto } from './dto/user.dto';
 import { JwtAccessGuard } from 'src/auth/guard/jwtAccess.guard';
 
-@Controller('user')
+@Controller('v1/user')
 export class UserController {
   constructor(private readonly userService: UserService) {}
 

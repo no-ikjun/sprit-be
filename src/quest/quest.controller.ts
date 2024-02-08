@@ -14,7 +14,7 @@ import { Quest } from 'src/global/entities/quest.entity';
 import { QuestApply } from 'src/global/entities/quest_apply.entity';
 import { AppliedQuestResponseType } from 'src/global/types/response.type';
 
-@Controller('quest')
+@Controller('v1/quest')
 export class QuestController {
   constructor(private readonly questService: QuestService) {}
 

@@ -5,7 +5,7 @@ import { Banner } from 'src/global/entities/banner.entity';
 import { BannerRegisterResponseType } from 'src/global/types/response.type';
 import { NewBannerDto } from './dto/banner.dto';
 
-@Controller('banner')
+@Controller('v1/banner')
 export class BannerController {
   constructor(private readonly bannerService: BannerService) {}
 

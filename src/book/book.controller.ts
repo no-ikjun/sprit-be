@@ -8,7 +8,7 @@ import {
   PopularBookResponseType,
 } from 'src/global/types/response.type';
 
-@Controller('book')
+@Controller('v1/book')
 export class BookController {
   constructor(private readonly bookService: BookService) {}
 

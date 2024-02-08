@@ -18,7 +18,7 @@ import {
   MonthlyRecordResponseType,
 } from 'src/global/types/response.type';
 
-@Controller('record')
+@Controller('v1/record')
 export class RecordController {
   constructor(private readonly recordService: RecordService) {}
 
