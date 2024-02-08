@@ -289,7 +289,7 @@ export class RecordRepository {
           })
           .getRawOne();
 
-        presentMonthCount = parseInt(presentMonthBooks.count, 10); // 문자열을 숫자로 변환
+        presentMonthCount = parseInt(presentMonthBooks.count, 10);
 
         const pastMonthBooks = await transactionEntityManager
           .createQueryBuilder(Record, 'record')
