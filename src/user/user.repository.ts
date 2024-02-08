@@ -118,4 +118,29 @@ export class UserRepository {
     user.user_password = await bcrypt.hash(user.user_password, 10);
     return user;
   }
+
+  async updateUserNickname(
+    transactionEntityManager: EntityManager,
+    user_uuid: string,
+    user_nickname: string,
+  ): Promise<void> {
+    await transactionEntityManager.update(
+      User,
+      { user_uuid: user_uuid },
+      { user_nickname: user_nickname },
+    );
+  }
+
+  async updateUserPassword(
+    transactionEntityManager: EntityManager,
+    user_uuid: string,
+    user_password: string,
+  ): Promise<void> {
+    const encryptedPassword = await bcrypt.hash(user_password, 10);
+    await transactionEntityManager.update(
+      User,
+      { user_uuid: user_uuid },
+      { user_password: encryptedPassword },
+    );
+  }
 }

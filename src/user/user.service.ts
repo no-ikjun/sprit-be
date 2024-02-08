@@ -69,4 +69,32 @@ export class UserService {
       register_type: user.register_type,
     };
   }
+
+  async updateUserNickname(
+    accessToken: string,
+    userNickname: string,
+  ): Promise<void> {
+    const user_info = await this.getUserInfo(accessToken);
+    await this.dataSource.transaction(async (transctionEntityManager) => {
+      await this.userRepository.updateUserNickname(
+        transctionEntityManager,
+        user_info.user_uuid,
+        userNickname,
+      );
+    });
+  }
+
+  async updateUserPassword(
+    accessToken: string,
+    userPassword: string,
+  ): Promise<void> {
+    const user_info = await this.getUserInfo(accessToken);
+    await this.dataSource.transaction(async (transctionEntityManager) => {
+      await this.userRepository.updateUserPassword(
+        transctionEntityManager,
+        user_info.user_uuid,
+        userPassword,
+      );
+    });
+  }
 }

@@ -1,4 +1,13 @@
-import { Body, Controller, Get, Post, Req, UseGuards } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Get,
+  Patch,
+  Post,
+  Query,
+  Req,
+  UseGuards,
+} from '@nestjs/common';
 import { UserService } from './user.service';
 import { LoginResponseType } from 'src/global/types/response.type';
 import { CreateUserDto, UserInfoDto } from './dto/user.dto';
@@ -18,5 +27,25 @@ export class UserController {
   async getUserInfo(@Req() req): Promise<UserInfoDto> {
     const accessToken = req.headers.authorization.split(' ')[1];
     return await this.userService.getUserInfo(accessToken);
+  }
+
+  @Patch('/nickname')
+  @UseGuards(JwtAccessGuard)
+  async changeNickname(@Query() query, @Req() req): Promise<void> {
+    const accessToken = req.headers.authorization.split(' ')[1];
+    return await this.userService.updateUserNickname(
+      accessToken,
+      query.nickname,
+    );
+  }
+
+  @Patch('/password')
+  @UseGuards(JwtAccessGuard)
+  async changePassword(@Query() query, @Req() req): Promise<void> {
+    const accessToken = req.headers.authorization.split(' ')[1];
+    return await this.userService.updateUserPassword(
+      accessToken,
+      query.password,
+    );
   }
 }
