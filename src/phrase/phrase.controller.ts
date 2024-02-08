@@ -26,6 +26,12 @@ export class PhraseController {
     return await this.phraseService.setPhrase(body, access_token);
   }
 
+  @Patch()
+  @UseGuards(JwtAccessGuard)
+  async updatePhrase(@Query() query): Promise<void> {
+    await this.phraseService.updatePhrase(query.phrase_uuid, query.phrase);
+  }
+
   @Get('all')
   @UseGuards(JwtAccessGuard)
   async getPhrasesByUserUuid(@Req() req): Promise<Phrase[]> {

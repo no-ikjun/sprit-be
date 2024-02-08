@@ -67,6 +67,18 @@ export class PhraseService {
     );
   }
 
+  async updatePhrase(phrase_uuid: string, phrase: string): Promise<void> {
+    return await this.dataSource.transaction(
+      async (transactionEntityManager) => {
+        await this.phraseRepository.updatePhrase(
+          transactionEntityManager,
+          phrase_uuid,
+          phrase,
+        );
+      },
+    );
+  }
+
   async getRemindPhrase(access_token: string): Promise<Phrase[]> {
     const user_info = await this.userService.getUserInfo(access_token);
     return await this.dataSource.transaction(

@@ -69,6 +69,18 @@ export class PhraseRepository {
     );
   }
 
+  async updatePhrase(
+    transactionEntityManager: EntityManager,
+    phrase_uuid: string,
+    phrase: string,
+  ): Promise<void> {
+    await transactionEntityManager.update(
+      Phrase,
+      { phrase_uuid: phrase_uuid },
+      { phrase: phrase },
+    );
+  }
+
   async getRemindPhrase(
     transactionEntityManager: EntityManager,
     user_uuid: string,
