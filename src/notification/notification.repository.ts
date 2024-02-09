@@ -279,6 +279,7 @@ export class NotificationRepository {
   async getTimeAgreeFcmToken(
     transactionEntityManager: EntityManager,
     type: string,
+    time: number,
   ): Promise<FcmToken[]> {
     let time_agree;
     if (type === 'agree_02') {
@@ -287,7 +288,7 @@ export class NotificationRepository {
       });
     } else if (type === 'agree_01') {
       time_agree = await transactionEntityManager.find(TimeAgree, {
-        where: { agree_01: true },
+        where: { agree_01: true, time_01: time },
       });
     }
     const promises = time_agree.map(async (agree: TimeAgree) => {

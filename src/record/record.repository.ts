@@ -63,6 +63,7 @@ export class RecordRepository {
   ): Promise<Record> {
     return await transactionEntityManager.findOne(Record, {
       where: { user_uuid: user_uuid, end: IsNull() },
+      order: { created_at: 'DESC' },
     });
   }
 

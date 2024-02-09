@@ -264,12 +264,13 @@ export class NotificationService {
     body: string,
     data: { [key: string]: string },
     type: string,
+    time: number,
   ): Promise<void> {
     const fcm_token = await this.notificationRepository.getTimeAgreeFcmToken(
       this.dataSource.manager,
       type,
+      time,
     );
-    console.log(fcm_token);
     fcm_token.forEach((fcm_token) => {
       this.globalFcmService.postMessage(
         title,
