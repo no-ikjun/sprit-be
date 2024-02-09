@@ -11,7 +11,7 @@ export class ScheduleService {
       '스프릿 독서 시간 알림 📚',
       '독서할 시간이 되었어요! 오늘도 꾸준히 스프릿과 함께 독서하세요 😊',
       {},
-      'agree_02',
+      'agree_01',
       time,
     );
   }
