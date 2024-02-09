@@ -15,5 +15,8 @@ export class QuestApply {
   state: string;
 
   @Column()
+  phone_number: string;
+
+  @Column()
   created_at: Date;
 }

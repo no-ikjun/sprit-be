@@ -3,4 +3,5 @@ export enum QuestApplyType {
   ONGOING = 'ONGOING',
   SUCCESS = 'SUCCESS',
   FAIL = 'FAIL',
+  CHECKING = 'CHECKING',
 }

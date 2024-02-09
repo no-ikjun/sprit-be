@@ -46,7 +46,11 @@ export class QuestController {
   @UseGuards(JwtAccessGuard)
   async applyQuest(@Query() query, @Req() req): Promise<QuestApply> {
     const access_token = req.headers.authorization.split(' ')[1];
-    return await this.questService.applyQuest(query.quest_uuid, access_token);
+    return await this.questService.applyQuest(
+      access_token,
+      query.quest_uuid,
+      query.phone_number,
+    );
   }
 
   @Get('my/active')

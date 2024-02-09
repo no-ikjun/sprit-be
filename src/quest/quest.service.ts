@@ -81,8 +81,9 @@ export class QuestService {
   }
 
   async applyQuest(
-    quest_uuid: string,
     access_token: string,
+    quest_uuid: string,
+    phone_number: string,
   ): Promise<QuestApply> {
     const apply_uuid = generateRamdomId(
       'QU' + getRandomString(6),
@@ -100,6 +101,7 @@ export class QuestService {
             quest_uuid: quest_uuid,
             user_uuid: userInfo.user_uuid,
             state: QuestApplyType.APPLY,
+            phone_number: phone_number,
             created_at: new Date(),
           });
           await transctionEntityManager.save(newApply);
