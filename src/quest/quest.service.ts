@@ -120,6 +120,20 @@ export class QuestService {
     );
   }
 
+  async findQuestApplyByQuestUuid(
+    access_token: string,
+    quest_uuid: string,
+  ): Promise<QuestApply> {
+    const user_info = await this.userService.getUserInfo(access_token);
+    return await this.dataSource.transaction(
+      async (transctionEntityManager) => {
+        return await transctionEntityManager.findOne(QuestApply, {
+          where: { quest_uuid: quest_uuid, user_uuid: user_info.user_uuid },
+        });
+      },
+    );
+  }
+
   async getMyActiveQuests(
     access_token: string,
   ): Promise<AppliedQuestResponseType[]> {
@@ -136,6 +150,40 @@ export class QuestService {
           user_uuid: userInfo.user_uuid,
           state: In(['APPLY', 'ONGOING']),
         },
+      });
+      quests = await Promise.all(
+        applies.map(async (apply) => {
+          temp_apply = apply;
+          temp_quest = await transctionEntityManager.findOne(Quest, {
+            where: { quest_uuid: apply.quest_uuid },
+          });
+          return {
+            apply: temp_apply,
+            quest: temp_quest,
+          };
+        }),
+      );
+    });
+    return quests;
+  }
+
+  async getMyAllQuests(
+    access_token: string,
+  ): Promise<AppliedQuestResponseType[]> {
+    const userInfo: UserInfoDto = await this.userService.getUserInfo(
+      access_token,
+    );
+    let quests: AppliedQuestResponseType[];
+    let applies: QuestApply[];
+    let temp_apply: QuestApply;
+    let temp_quest: Quest;
+    await this.dataSource.transaction(async (transctionEntityManager) => {
+      applies = await transctionEntityManager.find(QuestApply, {
+        where: {
+          user_uuid: userInfo.user_uuid,
+          state: In(['APPLY', 'ONGOING', 'SUCCESS', 'FAIL', 'CHECKING']),
+        },
+        order: { created_at: 'DESC' },
       });
       quests = await Promise.all(
         applies.map(async (apply) => {

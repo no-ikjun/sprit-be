@@ -59,4 +59,21 @@ export class QuestController {
     const access_token = req.headers.authorization.split(' ')[1];
     return await this.questService.getMyActiveQuests(access_token);
   }
+
+  @Get('my/all')
+  @UseGuards(JwtAccessGuard)
+  async getMyAllQuest(@Req() req): Promise<AppliedQuestResponseType[]> {
+    const access_token = req.headers.authorization.split(' ')[1];
+    return await this.questService.getMyAllQuests(access_token);
+  }
+
+  @Get('find/apply')
+  @UseGuards(JwtAccessGuard)
+  async findQuestApply(@Query() query, @Req() req): Promise<QuestApply> {
+    const access_token = req.headers.authorization.split(' ')[1];
+    return await this.questService.findQuestApplyByQuestUuid(
+      access_token,
+      query.quest_uuid,
+    );
+  }
 }
