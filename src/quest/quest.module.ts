@@ -6,6 +6,8 @@ import { UserRepository } from 'src/user/user.repository';
 import { JwtModule } from '@nestjs/jwt';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { HttpModule } from '@nestjs/axios';
+import { BookService } from 'src/book/book.service';
+import { ReviewService } from 'src/review/review.service';
 
 @Module({
   imports: [
@@ -22,6 +24,12 @@ import { HttpModule } from '@nestjs/axios';
     HttpModule,
   ],
   controllers: [QuestController],
-  providers: [QuestService, UserService, UserRepository],
+  providers: [
+    QuestService,
+    UserService,
+    UserRepository,
+    BookService,
+    ReviewService,
+  ],
 })
 export class QuestModule {}

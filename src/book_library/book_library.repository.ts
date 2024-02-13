@@ -100,6 +100,7 @@ export class BookLibraryRepository {
       created_at: new Date(),
       updated_at: new Date(),
     });
+    await this.bookService.addScoreToBook(book_uuid, 5);
     return true;
   }
 

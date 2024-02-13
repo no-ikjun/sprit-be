@@ -7,6 +7,8 @@ import { HttpModule } from '@nestjs/axios';
 import { RecordRepository } from './record.repository';
 import { UserService } from 'src/user/user.service';
 import { UserRepository } from 'src/user/user.repository';
+import { BookService } from 'src/book/book.service';
+import { ReviewService } from 'src/review/review.service';
 
 @Module({
   imports: [
@@ -23,6 +25,13 @@ import { UserRepository } from 'src/user/user.repository';
     HttpModule,
   ],
   controllers: [RecordController],
-  providers: [RecordService, RecordRepository, UserService, UserRepository],
+  providers: [
+    RecordService,
+    RecordRepository,
+    UserService,
+    UserRepository,
+    BookService,
+    ReviewService,
+  ],
 })
 export class RecordModule {}

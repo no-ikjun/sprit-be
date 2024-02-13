@@ -40,6 +40,7 @@ export class BookService {
         }
       });
       if (book) {
+        await this.addScoreToBook(book.book_uuid, 4);
         return {
           book_uuid: book.book_uuid,
           isbn: book.isbn,
@@ -111,6 +112,7 @@ export class BookService {
         }
       });
       if (book) {
+        await this.addScoreToBook(book.book_uuid, 4);
         return {
           book_uuid: book.book_uuid,
           isbn: book.isbn,
@@ -198,6 +200,7 @@ export class BookService {
       await this.dataSource.transaction(async (transactionEntityManager) => {
         await transactionEntityManager.save(Book, bookData);
       });
+      await this.addScoreToBook(book_uuid, 5);
       return { new_book: true, book_data: bookData };
     } catch (error) {
       console.error('Error when saving new book:', error);
@@ -291,5 +294,15 @@ export class BookService {
       books: bookListWithScore,
       more_available: moreAvailable,
     };
+  }
+
+  async addScoreToBook(book_uuid: string, score: number): Promise<void> {
+    await this.dataSource.transaction(async (transctionEntityManager) => {
+      const book = await transctionEntityManager.findOne(Book, {
+        where: { book_uuid: book_uuid },
+      });
+      book.score += score;
+      await transctionEntityManager.save(Book, book);
+    });
   }
 }

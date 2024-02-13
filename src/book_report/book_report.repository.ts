@@ -1,11 +1,15 @@
 import { Injectable } from '@nestjs/common';
+import { BookService } from 'src/book/book.service';
 import { BookReport } from 'src/global/entities/book_report.entity';
 import { generateRamdomId, getRandomString, getToday } from 'src/global/utils';
 import { DataSource, EntityManager } from 'typeorm';
 
 @Injectable()
 export class BookReportRepository {
-  constructor(private readonly dataSource: DataSource) {}
+  constructor(
+    private readonly dataSource: DataSource,
+    private readonly bookService: BookService,
+  ) {}
 
   async setBookReport(
     transactionEntityManager: EntityManager,
@@ -25,6 +29,7 @@ export class BookReportRepository {
       report: report,
       created_at: new Date(),
     });
+    await this.bookService.addScoreToBook(book_uuid, 3);
   }
 
   async getBookReportByBookReportUuid(

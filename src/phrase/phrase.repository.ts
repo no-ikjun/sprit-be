@@ -35,6 +35,7 @@ export class PhraseRepository {
       remind: remind,
       created_at: new Date(),
     });
+    await this.bookService.addScoreToBook(book_uuid, 3);
     return phrase_uuid;
   }
 

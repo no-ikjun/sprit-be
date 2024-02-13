@@ -1,4 +1,5 @@
 import { Injectable } from '@nestjs/common';
+import { BookService } from 'src/book/book.service';
 import { BookLibrary } from 'src/global/entities/book_library.entity';
 import { Record } from 'src/global/entities/record.entity';
 import {
@@ -10,7 +11,10 @@ import { Between, DataSource, EntityManager, IsNull, Not } from 'typeorm';
 
 @Injectable()
 export class RecordRepository {
-  constructor(private readonly dataSource: DataSource) {}
+  constructor(
+    private readonly dataSource: DataSource,
+    private readonly bookService: BookService,
+  ) {}
 
   async setRecord(
     transactionEntityManager: EntityManager,
@@ -35,6 +39,7 @@ export class RecordRepository {
       start: new Date(),
       created_at: new Date(),
     });
+    await this.bookService.addScoreToBook(book_uuid, 10);
     return record_uuid;
   }
 
