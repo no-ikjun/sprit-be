@@ -6,7 +6,12 @@ import {
   BookRecordHistoryType,
   MonthlyRecordResponseType,
 } from 'src/global/types/response.type';
-import { generateRamdomId, getRandomString, getToday } from 'src/global/utils';
+import {
+  generateRamdomId,
+  getRandomString,
+  getToday,
+  getWeekRange,
+} from 'src/global/utils';
 import { Between, DataSource, EntityManager, IsNull, Not } from 'typeorm';
 
 @Injectable()
@@ -315,5 +320,30 @@ export class RecordRepository {
       present_month: presentMonthCount,
       past_month: pastMonthCount,
     };
+  }
+
+  async getWeeklyData(
+    transactionEntityManager: EntityManager,
+    offset: number,
+    user_uuid: string,
+  ): Promise<number> {
+    let weeklyDataCount = 0;
+
+    const startWeek = getWeekRange(offset).startOfWeek;
+    const endWeek = getWeekRange(offset).endOfWeek;
+
+    const weeklyRecordData = await transactionEntityManager
+      .createQueryBuilder(Record, 'record')
+      .select('COUNT(DISTINCT record.book_uuid)', 'count')
+      .where('record.user_uuid = :user_uuid', { user_uuid })
+      .andWhere('record.created_at BETWEEN :start AND :end', {
+        start: startWeek,
+        end: endWeek,
+      })
+      .getRawOne();
+
+    weeklyDataCount = parseInt(weeklyRecordData.count, 10);
+
+    return weeklyDataCount;
   }
 }

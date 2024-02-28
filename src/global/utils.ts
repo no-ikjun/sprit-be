@@ -27,3 +27,17 @@ export const getLocalTime = (): Date => {
     now.getTime() + now.getTimezoneOffset() * 60 * 1000 + 9 * 60 * 60 * 1000,
   );
 };
+
+export const getWeekRange = (offset = 0) => {
+  const now = new Date();
+  const dayOfWeek = now.getDay(); // 일요일은 0, 월요일은 1, ..., 토요일은 6
+  const startOfWeek = new Date(now);
+  startOfWeek.setDate(now.getDate() - dayOfWeek + 7 * offset);
+  startOfWeek.setHours(0, 0, 0, 0); // 해당 주의 시작일 00:00:00
+
+  const endOfWeek = new Date(startOfWeek);
+  endOfWeek.setDate(startOfWeek.getDate() + 6);
+  endOfWeek.setHours(23, 59, 59, 999); // 해당 주의 마지막일 23:59:59
+
+  return { startOfWeek, endOfWeek };
+};

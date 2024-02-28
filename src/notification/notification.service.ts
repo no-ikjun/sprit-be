@@ -9,6 +9,7 @@ import { TimeAgree } from 'src/global/entities/time_agree.entity';
 import { RemindAgree } from 'src/global/entities/remind_agree.entity';
 import { QuestAgree } from 'src/global/entities/quest_agree.entity';
 import { GlobalFcmService } from 'src/firebase/fcm.service';
+import { RecordRepository } from 'src/record/record.repository';
 
 @Injectable()
 export class NotificationService {
@@ -18,6 +19,7 @@ export class NotificationService {
     private readonly notificationRepository: NotificationRepository,
     private readonly userService: UserService,
     private readonly globalFcmService: GlobalFcmService,
+    private readonly recordRepository: RecordRepository,
   ) {}
 
   async setFcmToken(
@@ -321,6 +323,77 @@ export class NotificationService {
         fcm_token.fcm_token,
         'default',
         data,
+      );
+    });
+  }
+
+  async sendWeeklyReportMessage(user_uuid: string): Promise<void> {
+    const thisWeek = await this.recordRepository.getWeeklyRecordHistory(
+      this.dataSource.manager,
+      user_uuid,
+      0,
+      7,
+    );
+    const lastWeek = await this.recordRepository.getWeeklyRecordHistory(
+      this.dataSource.manager,
+      user_uuid,
+      1,
+      7,
+    );
+
+    // 독서 시간 및 목표 달성 횟수 계산
+    const totalTimeThisWeek = thisWeek
+      .flat()
+      .reduce((acc, record) => acc + record.total_time, 0);
+    const totalTimeLastWeek = lastWeek
+      .flat()
+      .reduce((acc, record) => acc + record.total_time, 0);
+
+    const achievedThisWeek = thisWeek
+      .flat()
+      .filter((record) => record.is_achieved).length;
+    const achievedLastWeek = lastWeek
+      .flat()
+      .filter((record) => record.is_achieved).length;
+
+    // 독서 시간 증가율 또는 감소율 메시지
+    let timeChangeMessage = '변화가 없어요.';
+    if (totalTimeThisWeek > totalTimeLastWeek) {
+      timeChangeMessage = `증가했어요. ${(
+        ((totalTimeThisWeek - totalTimeLastWeek) / totalTimeLastWeek) *
+        100
+      ).toFixed(2)}% 증가했어요.`;
+    } else if (totalTimeThisWeek < totalTimeLastWeek) {
+      timeChangeMessage = `감소했어요. ${(
+        ((totalTimeLastWeek - totalTimeThisWeek) / totalTimeLastWeek) *
+        100
+      ).toFixed(2)}% 감소했어요.`;
+    }
+
+    // 목표 달성 횟수 증가 또는 감소 메시지
+    let achievedChangeMessage = '변화가 없어요.';
+    if (achievedThisWeek > achievedLastWeek) {
+      achievedChangeMessage = `증가했어요. ${
+        achievedThisWeek - achievedLastWeek
+      }회 증가했어요.`;
+    } else if (achievedThisWeek < achievedLastWeek) {
+      achievedChangeMessage = `감소했어요. ${
+        achievedLastWeek - achievedThisWeek
+      }회 감소했어요.`;
+    }
+
+    const fcmToken = await this.notificationRepository.getFcmTokenByUserUuid(
+      this.dataSource.manager,
+      user_uuid,
+    );
+
+    const message = `독서 시간이 저번 주에 비해 ${timeChangeMessage} 목표 달성 횟수는 ${achievedChangeMessage}`;
+    fcmToken.forEach((token) => {
+      this.globalFcmService.postMessage(
+        '스프릿 주간 독서 리포트',
+        message,
+        'https://d3ob3cint7tr3s.cloudfront.net/profile.png',
+        token.fcm_token,
       );
     });
   }
