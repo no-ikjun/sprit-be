@@ -1,10 +1,16 @@
 import { Injectable } from '@nestjs/common';
 import { Cron } from '@nestjs/schedule';
+import { NotificationRepository } from 'src/notification/notification.repository';
 import { NotificationService } from 'src/notification/notification.service';
+import { DataSource } from 'typeorm';
 
 @Injectable()
 export class ScheduleService {
-  constructor(private readonly notificationService: NotificationService) {}
+  constructor(
+    private readonly dataSource: DataSource,
+    private readonly notificationService: NotificationService,
+    private readonly notificationRepository: NotificationRepository,
+  ) {}
 
   timeMessage(time: number) {
     this.notificationService.sendTimeMessage(
@@ -134,5 +140,16 @@ export class ScheduleService {
   @Cron('0 0 0 * * *')
   sendTimeMessage24() {
     this.timeMessage(12);
+  }
+
+  @Cron('0 10 * * 0')
+  async handleWeeklyReport() {
+    const tokens = await this.notificationRepository.getTimeAgreeFcmToken(
+      this.dataSource.manager,
+      'agree_02',
+    );
+    tokens.forEach(async (token) => {
+      await this.notificationService.sendWeeklyReportMessage(token.user_uuid);
+    });
   }
 }

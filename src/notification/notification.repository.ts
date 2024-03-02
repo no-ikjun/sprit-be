@@ -279,7 +279,7 @@ export class NotificationRepository {
   async getTimeAgreeFcmToken(
     transactionEntityManager: EntityManager,
     type: string,
-    time: number,
+    time?: number,
   ): Promise<FcmToken[]> {
     let time_agree;
     if (type === 'agree_02') {

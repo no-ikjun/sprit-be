@@ -9,6 +9,10 @@ import { NotificationRepository } from 'src/notification/notification.repository
 import { UserService } from 'src/user/user.service';
 import { UserRepository } from 'src/user/user.repository';
 import { GlobalFcmService } from 'src/firebase/fcm.service';
+import { RecordService } from 'src/record/record.service';
+import { RecordRepository } from 'src/record/record.repository';
+import { BookService } from 'src/book/book.service';
+import { ReviewService } from 'src/review/review.service';
 
 @Module({
   imports: [
@@ -32,6 +36,10 @@ import { GlobalFcmService } from 'src/firebase/fcm.service';
     UserService,
     UserRepository,
     GlobalFcmService,
+    RecordService,
+    RecordRepository,
+    BookService,
+    ReviewService,
   ],
 })
 export class ScheduleModule {}
