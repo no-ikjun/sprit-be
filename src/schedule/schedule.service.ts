@@ -142,14 +142,18 @@ export class ScheduleService {
     this.timeMessage(12);
   }
 
-  @Cron('0 10 * * 0')
+  //@Cron('0 10 * * 0')
+  @Cron('30 16 * * 0')
   async handleWeeklyReport() {
     const tokens = await this.notificationRepository.getTimeAgreeFcmToken(
       this.dataSource.manager,
       'agree_02',
     );
     tokens.forEach(async (token) => {
-      await this.notificationService.sendWeeklyReportMessage(token.user_uuid);
+      await this.notificationService.sendWeeklyReportMessage(
+        token.user_uuid,
+        token.fcm_token,
+      );
     });
   }
 }
