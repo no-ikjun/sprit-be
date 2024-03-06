@@ -125,6 +125,7 @@ export class RecordController {
       access_token,
       JSON.parse(query.back_week) ?? 0,
       JSON.parse(query.count) ?? 7,
+      JSON.parse(query.today),
     );
   }
 

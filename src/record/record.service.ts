@@ -175,6 +175,7 @@ export class RecordService {
     access_token: string,
     back_week: number,
     count: number,
+    todayDay: number,
   ): Promise<BookRecordHistoryType[][]> {
     const user_info = await this.userService.getUserInfo(access_token);
     return await this.dataSource.transaction(
@@ -184,6 +185,7 @@ export class RecordService {
           user_info.user_uuid,
           back_week,
           count,
+          todayDay,
         );
       },
     );

@@ -210,15 +210,22 @@ export class RecordRepository {
     user_uuid: string,
     back_week: number,
     count: number,
+    todayDay: number, //일요일 0, 월요일 1, ... , 토요일 6
   ): Promise<BookRecordHistoryType[][]> {
     const result = [];
-    for (let i = 0; i < count; i++) {
+    let length = count;
+    let minusCount = 0;
+    if (back_week > 0) {
+      length = 7;
+      minusCount = 7 * (back_week - 1) + todayDay + 1;
+    }
+    for (let i = 0; i < length; i++) {
       const startOfDay = new Date();
-      startOfDay.setDate(startOfDay.getDate() - i - 7 * back_week);
+      startOfDay.setDate(startOfDay.getDate() - i - minusCount);
       startOfDay.setHours(0, 0, 0, 0);
 
       const endOfDay = new Date();
-      endOfDay.setDate(endOfDay.getDate() - i - 7 * back_week);
+      endOfDay.setDate(endOfDay.getDate() - i - minusCount);
       endOfDay.setHours(23, 59, 59, 999);
 
       const record_data = await transactionEntityManager.find(Record, {
