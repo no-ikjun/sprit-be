@@ -255,12 +255,12 @@ export class RecordRepository {
     month: number,
     kind: string,
   ): Promise<MonthlyRecordResponseType> {
-    const presentMonthStart = new Date(Date.UTC(year, month - 1, 1));
-    const presentMonthEnd = new Date(Date.UTC(year, month, 0, 23, 59, 59, 999));
-    const pastMonthStart = new Date(Date.UTC(year, month - 2, 1));
-    const pastMonthEnd = new Date(
-      Date.UTC(year, month - 1, 0, 23, 59, 59, 999),
+    const presentMonthStart = new Date(Date.UTC(year, month, 1));
+    const presentMonthEnd = new Date(
+      Date.UTC(year, month + 1, 0, 23, 59, 59, 999),
     );
+    const pastMonthStart = new Date(Date.UTC(year, month - 1, 1));
+    const pastMonthEnd = new Date(Date.UTC(year, month, 0, 23, 59, 59, 999));
 
     let presentMonthCount = 0;
     let pastMonthCount = 0;
