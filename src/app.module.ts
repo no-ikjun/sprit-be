@@ -18,6 +18,16 @@ import { RecordModule } from './record/record.module';
 import { PhraseModule } from './phrase/phrase.module';
 import { BookReportModule } from './book_report/book_report.module';
 import { ScheduleModule } from './schedule/schedule.module';
+import { NotificationService } from './notification/notification.service';
+import { NotificationRepository } from './notification/notification.repository';
+import { UserService } from './user/user.service';
+import { UserRepository } from './user/user.repository';
+import { GlobalFcmService } from './firebase/fcm.service';
+import { RecordService } from './record/record.service';
+import { RecordRepository } from './record/record.repository';
+import { BookService } from './book/book.service';
+import { ReviewService } from './review/review.service';
+import { JwtService } from '@nestjs/jwt';
 
 @Module({
   imports: [
@@ -47,6 +57,18 @@ import { ScheduleModule } from './schedule/schedule.module';
     ScheduleModule,
   ],
   controllers: [AppController],
-  providers: [AppService],
+  providers: [
+    AppService,
+    NotificationService,
+    NotificationRepository,
+    UserService,
+    UserRepository,
+    GlobalFcmService,
+    RecordService,
+    RecordRepository,
+    BookService,
+    ReviewService,
+    JwtService,
+  ],
 })
 export class AppModule {}

@@ -8,12 +8,14 @@ import { QuestApplyType } from 'src/global/types/quest.enum';
 import { UserService } from 'src/user/user.service';
 import { UserInfoDto } from 'src/user/dto/user.dto';
 import { AppliedQuestResponseType } from 'src/global/types/response.type';
+import { NotificationService } from 'src/notification/notification.service';
 
 @Injectable()
 export class QuestService {
   constructor(
     private readonly dataSource: DataSource,
     private readonly userService: UserService,
+    private readonly notificationService: NotificationService,
   ) {}
 
   async getActiveQuests(): Promise<Quest[]> {
@@ -61,6 +63,12 @@ export class QuestService {
             is_ended: false,
             created_at: new Date(),
           });
+          this.notificationService.sendQuestMessage(
+            '새로운 퀘스트가 등록되었어요 🚀',
+            `[${quest.title}]\n퀘스트를 완료하고 리워드를 받아보세요!\n*수신거부: 홈->독서 알림설정->새로운 퀘스트 정보`,
+            {},
+            'agree_01',
+          );
           return await transctionEntityManager.save(newQuest);
         } catch (err) {
           console.log(err);
