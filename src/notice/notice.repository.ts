@@ -23,7 +23,9 @@ export class NoticeRepository {
   }
 
   async getNoticeList(): Promise<Notice[]> {
-    return await this.dataSource.manager.find(Notice);
+    return await this.dataSource.manager.find(Notice, {
+      order: { created_at: 'DESC' },
+    });
   }
 
   async getNoticeByUuid(notice_uuid: string): Promise<Notice> {
