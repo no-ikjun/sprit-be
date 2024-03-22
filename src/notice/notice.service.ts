@@ -20,4 +20,8 @@ export class NoticeService {
   async deleteNotice(notice_uuid: string) {
     await this.noticeRepository.deleteNotice(notice_uuid);
   }
+
+  async getlatestNotice() {
+    return await this.noticeRepository.getlatestNotice();
+  }
 }

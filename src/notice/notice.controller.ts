@@ -33,6 +33,12 @@ export class NoticeController {
     return await this.noticeService.getNoticeByUuid(query.notice_uuid);
   }
 
+  @Get('latest')
+  @UseGuards(JwtAccessGuard)
+  async getlatestNotice() {
+    return await this.noticeService.getlatestNotice();
+  }
+
   @Delete()
   @UseGuards(JwtAccessGuard)
   async deleteNotice(@Query() query) {
