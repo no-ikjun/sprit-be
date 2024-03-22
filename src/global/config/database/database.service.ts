@@ -6,6 +6,7 @@ import { Book } from 'src/global/entities/book.entity';
 import { BookLibrary } from 'src/global/entities/book_library.entity';
 import { BookReport } from 'src/global/entities/book_report.entity';
 import { FcmToken } from 'src/global/entities/fcm_token.entity';
+import { Notice } from 'src/global/entities/notice.entity';
 import { Phrase } from 'src/global/entities/phrase.entity';
 import { Quest } from 'src/global/entities/quest.entity';
 import { QuestAgree } from 'src/global/entities/quest_agree.entity';
@@ -44,6 +45,7 @@ export class DatabaseService implements TypeOrmOptionsFactory {
         Record,
         Phrase,
         BookReport,
+        Notice,
       ],
       synchronize: false,
     };
