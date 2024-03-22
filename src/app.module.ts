@@ -28,6 +28,7 @@ import { RecordRepository } from './record/record.repository';
 import { BookService } from './book/book.service';
 import { ReviewService } from './review/review.service';
 import { JwtService } from '@nestjs/jwt';
+import { NoticeModule } from './notice/notice.module';
 
 @Module({
   imports: [
@@ -55,6 +56,7 @@ import { JwtService } from '@nestjs/jwt';
     PhraseModule,
     BookReportModule,
     ScheduleModule,
+    NoticeModule,
   ],
   controllers: [AppController],
   providers: [
