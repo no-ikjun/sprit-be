@@ -40,6 +40,7 @@ export class NoticeRepository {
 
   async getlatestNotice(): Promise<Notice> {
     return await this.dataSource.manager.findOne(Notice, {
+      where: {},
       order: { created_at: 'DESC' },
     });
   }
