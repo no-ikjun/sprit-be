@@ -54,6 +54,7 @@ export class QuestService {
             title: quest.title,
             short_description: quest.short_description,
             long_description: quest.long_description,
+            mission: quest.mission,
             icon_url: quest.icon_url,
             thumbnail_url: quest.thumbnail_url,
             start_date: new Date(quest.start_date),
@@ -63,7 +64,7 @@ export class QuestService {
             is_ended: false,
             created_at: new Date(),
           });
-          this.notificationService.sendQuestMessage(
+          await this.notificationService.sendQuestMessage(
             '새로운 퀘스트가 등록되었어요 🚀',
             `[${quest.title}]\n퀘스트를 완료하고 리워드를 받아보세요!\n*수신거부: 홈->독서 알림설정->새로운 퀘스트 정보`,
             {},
