@@ -153,4 +153,18 @@ export class NotificationController {
     );
     return { message: 'success' };
   }
+
+  @Post('send/all/new-quest')
+  @UseGuards(JwtAccessGuard)
+  async sendQuestMessage(
+    @Body() data: NotificationDto,
+  ): Promise<MessageResponseType> {
+    await this.notificationService.sendQuestMessage(
+      data.title,
+      data.body,
+      data.data,
+      'agree_01',
+    );
+    return { message: 'success' };
+  }
 }
