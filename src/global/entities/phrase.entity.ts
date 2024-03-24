@@ -15,6 +15,9 @@ export class Phrase {
   phrase: string;
 
   @Column()
+  page: number;
+
+  @Column()
   remind: boolean;
 
   @Column()

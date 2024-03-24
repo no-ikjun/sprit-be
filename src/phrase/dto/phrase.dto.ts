@@ -1,4 +1,4 @@
-import { IsBoolean, IsString } from 'class-validator';
+import { IsBoolean, IsNumber, IsString } from 'class-validator';
 
 export class NewPhraseDto {
   @IsString()
@@ -6,6 +6,9 @@ export class NewPhraseDto {
 
   @IsString()
   phrase: string;
+
+  @IsNumber()
+  page: number;
 
   @IsBoolean()
   remind: boolean;

@@ -23,6 +23,7 @@ export class PhraseService {
           data.book_uuid,
           user_info.user_uuid,
           data.phrase,
+          data.page,
           data.remind,
         );
       },

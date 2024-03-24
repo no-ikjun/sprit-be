@@ -20,6 +20,7 @@ export class PhraseRepository {
     book_uuid: string,
     user_uuid: string,
     phrase: string,
+    page: number,
     remind: boolean,
   ): Promise<string> {
     const phrase_uuid = generateRamdomId(
@@ -27,11 +28,12 @@ export class PhraseRepository {
       getToday(),
       getRandomString(8),
     );
-    await transactionEntityManager.save('phrase', {
+    await transactionEntityManager.save(Phrase, {
       phrase_uuid: phrase_uuid,
       book_uuid: book_uuid,
       user_uuid: user_uuid,
       phrase: phrase,
+      page: page,
       remind: remind,
       created_at: new Date(),
     });
@@ -120,7 +122,9 @@ export class PhraseRepository {
       phraseList.push({
         phrase_uuid: phrase.phrase_uuid,
         book_title: book_info.title,
+        book_thumbnail: book_info.thumbnail,
         phrase: phrase.phrase,
+        page: phrase.page,
       });
     }
     moreAvailable = totalCount > page * pageSize;
