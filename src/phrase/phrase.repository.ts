@@ -137,9 +137,37 @@ export class PhraseRepository {
   async getPhrasesForLibraryV2(
     transactionEntityManager: EntityManager,
     user_uuid: string,
-    page: number,
   ): Promise<LibraryPhraseResponseTypeV2> {
     const pageSize = 3;
+    const phraseList: LibraryPhraseTypeV2[] = [];
+    const moreAvailable = false;
+    const phraseListFromDB = await transactionEntityManager.find(Phrase, {
+      order: { created_at: 'DESC' },
+      where: { user_uuid: user_uuid },
+      take: pageSize,
+    });
+    for (const phrase of phraseListFromDB) {
+      const book_info = await this.bookService.findByBookUuid(phrase.book_uuid);
+      phraseList.push({
+        phrase_uuid: phrase.phrase_uuid,
+        book_title: book_info.title,
+        book_thumbnail: book_info.thumbnail,
+        phrase: phrase.phrase,
+        page: phrase.page,
+      });
+    }
+    return {
+      library_phrase_list: phraseList,
+      more_available: moreAvailable,
+    };
+  }
+
+  async getAllPhrasesInSpecificPage(
+    transactionEntityManager: EntityManager,
+    user_uuid: string,
+    page: number,
+  ): Promise<LibraryPhraseResponseTypeV2> {
+    const pageSize = 10;
     const phraseList: LibraryPhraseTypeV2[] = [];
     let moreAvailable = false;
     const phraseListFromDB = await transactionEntityManager.find(Phrase, {

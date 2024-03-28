@@ -4,7 +4,10 @@ import { PhraseRepository } from './phrase.repository';
 import { UserService } from 'src/user/user.service';
 import { NewPhraseDto } from './dto/phrase.dto';
 import { Phrase } from 'src/global/entities/phrase.entity';
-import { LibraryPhraseResponseType } from 'src/global/types/response.type';
+import {
+  LibraryPhraseResponseType,
+  LibraryPhraseResponseTypeV2,
+} from 'src/global/types/response.type';
 
 @Injectable()
 export class PhraseService {
@@ -119,6 +122,20 @@ export class PhraseService {
     );
   }
 
+  async getPhrasesForLibraryScreen(
+    access_token: string,
+  ): Promise<LibraryPhraseResponseTypeV2> {
+    const user_info = await this.userService.getUserInfo(access_token);
+    return await this.dataSource.transaction(
+      async (transactionEntityManager) => {
+        return await this.phraseRepository.getPhrasesForLibraryV2(
+          transactionEntityManager,
+          user_info.user_uuid,
+        );
+      },
+    );
+  }
+
   async getPhrasesForLibraryV2(
     access_token: string,
     page: number,
@@ -126,7 +143,7 @@ export class PhraseService {
     const user_info = await this.userService.getUserInfo(access_token);
     return await this.dataSource.transaction(
       async (transactionEntityManager) => {
-        return await this.phraseRepository.getPhrasesForLibraryV2(
+        return await this.phraseRepository.getAllPhrasesInSpecificPage(
           transactionEntityManager,
           user_info.user_uuid,
           page,

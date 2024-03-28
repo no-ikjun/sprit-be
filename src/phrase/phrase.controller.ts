@@ -73,16 +73,23 @@ export class PhraseController {
     );
   }
 
-  @Get('library-v2')
+  @Get('library/screen')
   @UseGuards(JwtAccessGuard)
-  async getPhrasesByBookUuidV2(
+  async getPhrasesByBookUuidV2(@Req() req): Promise<LibraryPhraseResponseType> {
+    const access_token = req.headers.authorization.split(' ')[1];
+    return await this.phraseService.getPhrasesForLibraryScreen(access_token);
+  }
+
+  @Get('library/all')
+  @UseGuards(JwtAccessGuard)
+  async getPhrases(
     @Req() req,
     @Query() query,
   ): Promise<LibraryPhraseResponseType> {
     const access_token = req.headers.authorization.split(' ')[1];
     return await this.phraseService.getPhrasesForLibraryV2(
       access_token,
-      query.page ?? 1,
+      JSON.parse(query.page) ?? 1,
     );
   }
 }
