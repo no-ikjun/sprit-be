@@ -118,4 +118,20 @@ export class PhraseService {
       },
     );
   }
+
+  async getPhrasesForLibraryV2(
+    access_token: string,
+    page: number,
+  ): Promise<LibraryPhraseResponseType> {
+    const user_info = await this.userService.getUserInfo(access_token);
+    return await this.dataSource.transaction(
+      async (transactionEntityManager) => {
+        return await this.phraseRepository.getPhrasesForLibraryV2(
+          transactionEntityManager,
+          user_info.user_uuid,
+          page,
+        );
+      },
+    );
+  }
 }

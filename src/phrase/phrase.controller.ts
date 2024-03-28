@@ -72,4 +72,17 @@ export class PhraseController {
       JSON.parse(query.page) ?? 1,
     );
   }
+
+  @Get('library-v2')
+  @UseGuards(JwtAccessGuard)
+  async getPhrasesByBookUuidV2(
+    @Req() req,
+    @Query() query,
+  ): Promise<LibraryPhraseResponseType> {
+    const access_token = req.headers.authorization.split(' ')[1];
+    return await this.phraseService.getPhrasesForLibraryV2(
+      access_token,
+      query.page ?? 1,
+    );
+  }
 }
