@@ -4,6 +4,7 @@ import { BookLibrary } from 'src/global/entities/book_library.entity';
 import { Record } from 'src/global/entities/record.entity';
 import {
   BookRecordHistoryType,
+  BookRecordHistoryTypeV2,
   MonthlyRecordResponseType,
 } from 'src/global/types/response.type';
 import {
@@ -212,7 +213,7 @@ export class RecordRepository {
     count: number,
     todayDay: number, //일요일 0, 월요일 1, ... , 토요일 6
   ): Promise<BookRecordHistoryType[][]> {
-    const result = [];
+    const result: BookRecordHistoryType[][] = [];
     let length = count;
     let minusCount = 0;
     if (back_week > 0) {
@@ -235,16 +236,91 @@ export class RecordRepository {
         },
         order: { created_at: 'ASC' },
       });
-      const record_data_by_date = [];
-      for (let j = 0; j < record_data.length; j++) {
-        record_data_by_date.push({
-          book_uuid: record_data[j].book_uuid,
-          goal_achieved: record_data[j].goal_achieved,
-          total_time: record_data[j].total_time,
-        });
-      }
-      result.push(record_data_by_date);
+      //독서 기록 데이터를 책 별로 묶어서 저장
+      const aggregatedByBookUuid: {
+        [book_uuid: string]: BookRecordHistoryType;
+      } = {};
+
+      record_data.forEach((record) => {
+        if (aggregatedByBookUuid[record.book_uuid]) {
+          aggregatedByBookUuid[record.book_uuid].total_time +=
+            record.total_time;
+          aggregatedByBookUuid[record.book_uuid].goal_achieved =
+            aggregatedByBookUuid[record.book_uuid].goal_achieved &&
+            record.goal_achieved;
+        } else {
+          aggregatedByBookUuid[record.book_uuid] = {
+            book_uuid: record.book_uuid,
+            goal_achieved: record.goal_achieved,
+            total_time: record.total_time,
+          };
+        }
+      });
+      const recordDataByDate: BookRecordHistoryType[] =
+        Object.values(aggregatedByBookUuid);
+      result.push(recordDataByDate);
     }
+    return result.reverse();
+  }
+
+  async getWeeklyRecordHistoryV2(
+    transactionEntityManager: EntityManager,
+    user_uuid: string,
+    back_week: number,
+    count: number,
+    todayDay: number, //일요일 0, 월요일 1, ... , 토요일 6
+  ): Promise<BookRecordHistoryTypeV2[][]> {
+    const result = [];
+    let length = count;
+    let minusCount = 0;
+    if (back_week > 0) {
+      length = 7;
+      minusCount = 7 * (back_week - 1) + todayDay + 1;
+    }
+    for (let i = 0; i < length; i++) {
+      const startOfDay = new Date();
+      startOfDay.setDate(startOfDay.getDate() - i - minusCount);
+      startOfDay.setHours(0, 0, 0, 0);
+
+      const endOfDay = new Date();
+      endOfDay.setDate(endOfDay.getDate() - i - minusCount);
+      endOfDay.setHours(23, 59, 59, 999);
+
+      const recordData = await transactionEntityManager.find(Record, {
+        where: {
+          user_uuid: user_uuid,
+          end: Between(startOfDay, endOfDay),
+        },
+        order: { created_at: 'ASC' },
+      });
+      const recordsByBookUuid = {};
+
+      for (const record of recordData) {
+        const bookInfo = await this.bookService.findByBookUuid(
+          record.book_uuid,
+        );
+        console.log(bookInfo);
+        if (!recordsByBookUuid[bookInfo.book_uuid]) {
+          // 새로운 book_uuid라면 객체 생성
+          recordsByBookUuid[bookInfo.book_uuid] = {
+            book_uuid: bookInfo.book_uuid,
+            goal_achieved: record.goal_achieved,
+            total_time: record.total_time,
+            book_title: bookInfo.title,
+            book_thumbnail: bookInfo.thumbnail,
+            authors: bookInfo.authors,
+            publisher: bookInfo.publisher,
+          };
+        } else {
+          // 기존에 있던 book_uuid라면 total_time만 업데이트
+          recordsByBookUuid[bookInfo.book_uuid].total_time += record.total_time;
+        }
+      }
+
+      const recordDataByDate = Object.values(recordsByBookUuid);
+      result.push(recordDataByDate);
+    }
+    console.log(result);
     return result.reverse();
   }
 

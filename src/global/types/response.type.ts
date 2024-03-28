@@ -95,8 +95,18 @@ export type LibraryPhraseResponseType = {
 
 export type BookRecordHistoryType = {
   book_uuid: string;
-  is_achieved: boolean;
+  goal_achieved: boolean;
   total_time: number;
+};
+
+export type BookRecordHistoryTypeV2 = {
+  book_uuid: string;
+  goal_achieved: boolean;
+  total_time: number;
+  book_title: string;
+  book_thumbnail: string;
+  authors: string[];
+  publisher: string;
 };
 
 export type MonthlyRecordResponseType = {

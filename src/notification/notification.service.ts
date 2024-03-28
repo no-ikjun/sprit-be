@@ -356,10 +356,10 @@ export class NotificationService {
 
     const achievedThisWeek = thisWeek
       .flat()
-      .filter((record) => record.is_achieved).length;
+      .filter((record) => record.goal_achieved).length;
     const achievedLastWeek = lastWeek
       .flat()
-      .filter((record) => record.is_achieved).length;
+      .filter((record) => record.goal_achieved).length;
 
     // 독서 시간 증가율 또는 감소율 메시지
     let timeChangeMessage = '변화가 없어요.';

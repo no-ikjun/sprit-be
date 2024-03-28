@@ -15,6 +15,7 @@ import { NewRecordDto } from './dto/record.dto';
 import { Record } from 'src/global/entities/record.entity';
 import {
   BookRecordHistoryType,
+  BookRecordHistoryTypeV2,
   MonthlyRecordResponseType,
 } from 'src/global/types/response.type';
 
@@ -122,6 +123,21 @@ export class RecordController {
   ): Promise<BookRecordHistoryType[][]> {
     const access_token = req.headers.authorization.split(' ')[1];
     return await this.recordService.getWeeklyRecordHistory(
+      access_token,
+      JSON.parse(query.back_week) ?? 0,
+      JSON.parse(query.count) ?? 7,
+      JSON.parse(query.today),
+    );
+  }
+
+  @Get('weekly-record-v2')
+  @UseGuards(JwtAccessGuard)
+  async getWeeklyRecordV2(
+    @Req() req,
+    @Query() query,
+  ): Promise<BookRecordHistoryTypeV2[][]> {
+    const access_token = req.headers.authorization.split(' ')[1];
+    return await this.recordService.getWeeklyRecordHistoryV2(
       access_token,
       JSON.parse(query.back_week) ?? 0,
       JSON.parse(query.count) ?? 7,

@@ -6,6 +6,7 @@ import { NewRecordDto } from './dto/record.dto';
 import { Record } from 'src/global/entities/record.entity';
 import {
   BookRecordHistoryType,
+  BookRecordHistoryTypeV2,
   MonthlyRecordResponseType,
 } from 'src/global/types/response.type';
 
@@ -181,6 +182,26 @@ export class RecordService {
     return await this.dataSource.transaction(
       async (transactionEntityManager) => {
         return await this.recordRepository.getWeeklyRecordHistory(
+          transactionEntityManager,
+          user_info.user_uuid,
+          back_week,
+          count,
+          todayDay,
+        );
+      },
+    );
+  }
+
+  async getWeeklyRecordHistoryV2(
+    access_token: string,
+    back_week: number,
+    count: number,
+    todayDay: number,
+  ): Promise<BookRecordHistoryTypeV2[][]> {
+    const user_info = await this.userService.getUserInfo(access_token);
+    return await this.dataSource.transaction(
+      async (transactionEntityManager) => {
+        return await this.recordRepository.getWeeklyRecordHistoryV2(
           transactionEntityManager,
           user_info.user_uuid,
           back_week,
