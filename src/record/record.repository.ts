@@ -229,6 +229,9 @@ export class RecordRepository {
       endOfDay.setDate(endOfDay.getDate() - i - minusCount);
       endOfDay.setHours(23, 59, 59, 999);
 
+      console.log(startOfDay);
+      console.log(endOfDay);
+      console.log('----------------');
       const record_data = await transactionEntityManager.find(Record, {
         where: {
           user_uuid: user_uuid,
@@ -260,6 +263,7 @@ export class RecordRepository {
         Object.values(aggregatedByBookUuid);
       result.push(recordDataByDate);
     }
+    console.log('--------------------------');
     return result.reverse();
   }
 

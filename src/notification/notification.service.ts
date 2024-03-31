@@ -338,12 +338,13 @@ export class NotificationService {
       7,
       0,
     );
+
     const lastWeek = await this.recordRepository.getWeeklyRecordHistory(
       this.dataSource.manager,
       user_uuid,
       1,
       7,
-      0,
+      6,
     );
 
     // 독서 시간 및 목표 달성 횟수 계산
