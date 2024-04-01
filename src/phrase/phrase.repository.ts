@@ -167,7 +167,7 @@ export class PhraseRepository {
     user_uuid: string,
     page: number,
   ): Promise<LibraryPhraseResponseTypeV2> {
-    const pageSize = 10;
+    const pageSize = 7;
     const phraseList: LibraryPhraseTypeV2[] = [];
     let moreAvailable = false;
     const phraseListFromDB = await transactionEntityManager.find(Phrase, {
