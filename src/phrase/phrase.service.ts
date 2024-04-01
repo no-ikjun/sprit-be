@@ -139,7 +139,7 @@ export class PhraseService {
   async getPhrasesForLibraryV2(
     access_token: string,
     page: number,
-  ): Promise<LibraryPhraseResponseType> {
+  ): Promise<LibraryPhraseResponseTypeV2> {
     const user_info = await this.userService.getUserInfo(access_token);
     return await this.dataSource.transaction(
       async (transactionEntityManager) => {

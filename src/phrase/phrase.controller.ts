@@ -13,7 +13,10 @@ import { PhraseService } from './phrase.service';
 import { JwtAccessGuard } from 'src/auth/guard/jwtAccess.guard';
 import { NewPhraseDto } from './dto/phrase.dto';
 import { Phrase } from 'src/global/entities/phrase.entity';
-import { LibraryPhraseResponseType } from 'src/global/types/response.type';
+import {
+  LibraryPhraseResponseType,
+  LibraryPhraseResponseTypeV2,
+} from 'src/global/types/response.type';
 
 @Controller('v1/phrase')
 export class PhraseController {
@@ -85,7 +88,7 @@ export class PhraseController {
   async getPhrases(
     @Req() req,
     @Query() query,
-  ): Promise<LibraryPhraseResponseType> {
+  ): Promise<LibraryPhraseResponseTypeV2> {
     const access_token = req.headers.authorization.split(' ')[1];
     return await this.phraseService.getPhrasesForLibraryV2(
       access_token,
