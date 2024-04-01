@@ -29,6 +29,7 @@ import { BookService } from './book/book.service';
 import { ReviewService } from './review/review.service';
 import { JwtService } from '@nestjs/jwt';
 import { NoticeModule } from './notice/notice.module';
+import { VersionModule } from './version/version.module';
 
 @Module({
   imports: [
@@ -57,6 +58,7 @@ import { NoticeModule } from './notice/notice.module';
     BookReportModule,
     ScheduleModule,
     NoticeModule,
+    VersionModule,
   ],
   controllers: [AppController],
   providers: [

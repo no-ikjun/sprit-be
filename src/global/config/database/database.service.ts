@@ -16,6 +16,7 @@ import { RemindAgree } from 'src/global/entities/remind_agree.entity';
 import { Review } from 'src/global/entities/review.entity';
 import { TimeAgree } from 'src/global/entities/time_agree.entity';
 import { User } from 'src/global/entities/user.entity';
+import { Version } from 'src/global/entities/version.entity';
 
 @Injectable()
 export class DatabaseService implements TypeOrmOptionsFactory {
@@ -46,6 +47,7 @@ export class DatabaseService implements TypeOrmOptionsFactory {
         Phrase,
         BookReport,
         Notice,
+        Version,
       ],
       synchronize: false,
     };
