@@ -12,6 +12,7 @@ import { RecordService } from 'src/record/record.service';
 import { RecordRepository } from 'src/record/record.repository';
 import { BookService } from 'src/book/book.service';
 import { ReviewService } from 'src/review/review.service';
+import { PhraseRepository } from 'src/phrase/phrase.repository';
 
 @Module({
   imports: [
@@ -38,6 +39,7 @@ import { ReviewService } from 'src/review/review.service';
     RecordRepository,
     BookService,
     ReviewService,
+    PhraseRepository,
   ],
 })
 export class NotificationModule {}

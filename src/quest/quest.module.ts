@@ -12,6 +12,7 @@ import { NotificationService } from 'src/notification/notification.service';
 import { NotificationRepository } from 'src/notification/notification.repository';
 import { GlobalFcmService } from 'src/firebase/fcm.service';
 import { RecordRepository } from 'src/record/record.repository';
+import { PhraseRepository } from 'src/phrase/phrase.repository';
 
 @Module({
   imports: [
@@ -36,6 +37,7 @@ import { RecordRepository } from 'src/record/record.repository';
     ReviewService,
     NotificationService,
     NotificationRepository,
+    PhraseRepository,
     GlobalFcmService,
     RecordRepository,
     JwtService,

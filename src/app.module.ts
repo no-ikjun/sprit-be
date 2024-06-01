@@ -30,6 +30,7 @@ import { ReviewService } from './review/review.service';
 import { JwtService } from '@nestjs/jwt';
 import { NoticeModule } from './notice/notice.module';
 import { VersionModule } from './version/version.module';
+import { PhraseRepository } from './phrase/phrase.repository';
 
 @Module({
   imports: [
@@ -73,6 +74,7 @@ import { VersionModule } from './version/version.module';
     BookService,
     ReviewService,
     JwtService,
+    PhraseRepository,
   ],
 })
 export class AppModule {}
