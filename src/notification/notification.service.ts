@@ -10,6 +10,7 @@ import { RemindAgree } from 'src/global/entities/remind_agree.entity';
 import { QuestAgree } from 'src/global/entities/quest_agree.entity';
 import { GlobalFcmService } from 'src/firebase/fcm.service';
 import { RecordRepository } from 'src/record/record.repository';
+import { PhraseRepository } from 'src/phrase/phrase.repository';
 
 @Injectable()
 export class NotificationService {
@@ -20,6 +21,7 @@ export class NotificationService {
     private readonly userService: UserService,
     private readonly globalFcmService: GlobalFcmService,
     private readonly recordRepository: RecordRepository,
+    private readonly phraseRepository: PhraseRepository,
   ) {}
 
   async setFcmToken(
@@ -285,23 +287,28 @@ export class NotificationService {
     });
   }
 
-  async sendRemindMessage(
-    title: string,
-    body: string,
-    data: { [key: string]: string },
-  ): Promise<void> {
+  async sendRemindMessage(data?: { [key: string]: string }): Promise<void> {
     const fcm_token = await this.notificationRepository.getRemindAgreeFcmToken(
       this.dataSource.manager,
     );
-    fcm_token.forEach((fcm_token) => {
-      this.globalFcmService.postMessage(
-        title,
-        body,
-        'https://d3ob3cint7tr3s.cloudfront.net/profile.png',
-        fcm_token.fcm_token,
-        'default',
-        data,
+    fcm_token.forEach(async (fcm_token) => {
+      const user_uuid = fcm_token.user_uuid;
+      const phrases = await this.phraseRepository.getRemindPhrase(
+        this.dataSource.manager,
+        user_uuid,
       );
+      if (phrases.length > 0) {
+        const randomIndex = Math.floor(Math.random() * phrases.length);
+        const randomPhrase = phrases[randomIndex].phrase;
+        this.globalFcmService.postMessage(
+          '스프릿 문구 리마인드',
+          randomPhrase,
+          'https://d3ob3cint7tr3s.cloudfront.net/profile.png',
+          fcm_token.fcm_token,
+          'default',
+          data,
+        );
+      }
     });
   }
 
