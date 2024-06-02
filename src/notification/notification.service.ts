@@ -11,6 +11,7 @@ import { QuestAgree } from 'src/global/entities/quest_agree.entity';
 import { GlobalFcmService } from 'src/firebase/fcm.service';
 import { RecordRepository } from 'src/record/record.repository';
 import { PhraseRepository } from 'src/phrase/phrase.repository';
+import { BookService } from 'src/book/book.service';
 
 @Injectable()
 export class NotificationService {
@@ -22,6 +23,7 @@ export class NotificationService {
     private readonly globalFcmService: GlobalFcmService,
     private readonly recordRepository: RecordRepository,
     private readonly phraseRepository: PhraseRepository,
+    private readonly bookService: BookService,
   ) {}
 
   async setFcmToken(
@@ -300,8 +302,15 @@ export class NotificationService {
       if (phrases.length > 0) {
         const randomIndex = Math.floor(Math.random() * phrases.length);
         const randomPhrase = phrases[randomIndex].phrase;
+        const bookInfo = await this.bookService.findByBookUuid(
+          phrases[randomIndex].book_uuid,
+        );
+        const shortTitle =
+          bookInfo.title.length > 8
+            ? bookInfo.title.slice(0, 8) + '...'
+            : bookInfo.title;
         this.globalFcmService.postMessage(
-          '스프릿 문구 리마인드',
+          `${shortTitle} 문구 리마인드`,
           randomPhrase,
           'https://d3ob3cint7tr3s.cloudfront.net/profile.png',
           fcm_token.fcm_token,
