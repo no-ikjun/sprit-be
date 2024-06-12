@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { User } from 'src/global/entities/user.entity';
-import { DataSource, EntityManager } from 'typeorm';
+import { DataSource } from 'typeorm';
 import { CreateUserDto } from './dto/user.dto';
 import { generateRamdomId, getRandomString, getToday } from 'src/global/utils';
 import { AppleUserDataDto, KakaoUserDataDto } from 'src/auth/dto/auth.dto';
@@ -17,37 +17,28 @@ export class UserRepository {
     private readonly configService: ConfigService,
   ) {}
 
-  async findOneByUserUuid(
-    transctionEntityManager: EntityManager,
-    userUuid: string,
-  ): Promise<User> {
-    const user = await transctionEntityManager.findOne(User, {
+  async findOneByUserUuid(userUuid: string): Promise<User> {
+    const user = await this.dataSource.manager.findOne(User, {
       where: { user_uuid: userUuid },
     });
     return user;
   }
 
-  async findOneByUserId(
-    transctionEntityManager: EntityManager,
-    userId: string,
-  ): Promise<User> {
-    const user = await transctionEntityManager.findOne(User, {
+  async findOneByUserId(userId: string): Promise<User> {
+    const user = await this.dataSource.manager.findOne(User, {
       where: { user_id: userId },
     });
     return user;
   }
 
-  async setNewUser(
-    transctionEntityManager: EntityManager,
-    userData: CreateUserDto,
-  ): Promise<void> {
+  async setNewUser(userData: CreateUserDto): Promise<void> {
     const user_uuid = generateRamdomId(
       'UL' + getRandomString(6),
       getToday(),
       getRandomString(8),
     );
     await this.encryptPassword(userData);
-    await transctionEntityManager.save(User, {
+    await this.dataSource.manager.save(User, {
       user_uuid: user_uuid,
       user_nickname: userData.user_nickname,
       user_id: userData.user_id,
@@ -57,10 +48,7 @@ export class UserRepository {
     });
   }
 
-  async setNewUserByKakao(
-    transactionentityManager: EntityManager,
-    kakaoUserDto: KakaoUserDataDto,
-  ): Promise<string> {
+  async setNewUserByKakao(kakaoUserDto: KakaoUserDataDto): Promise<string> {
     const kakaoUser = new User();
     const user_uuid = generateRamdomId(
       'UK' + getRandomString(6),
@@ -73,14 +61,11 @@ export class UserRepository {
     kakaoUser.user_password = '';
     kakaoUser.register_type = UserRegisterType.KAKAO;
     kakaoUser.registered_at = new Date();
-    await transactionentityManager.save(User, kakaoUser);
+    await this.dataSource.manager.save(User, kakaoUser);
     return user_uuid;
   }
 
-  async setNewUserByApple(
-    transactionentityManager: EntityManager,
-    appleUserDto: AppleUserDataDto,
-  ): Promise<string> {
+  async setNewUserByApple(appleUserDto: AppleUserDataDto): Promise<string> {
     const appleUser = new User();
     const user_uuid = generateRamdomId(
       'UA' + getRandomString(6),
@@ -93,7 +78,7 @@ export class UserRepository {
     appleUser.user_password = '';
     appleUser.register_type = UserRegisterType.APPLE;
     appleUser.registered_at = new Date();
-    await transactionentityManager.save(User, appleUser);
+    await this.dataSource.manager.save(User, appleUser);
     return user_uuid;
   }
 
@@ -120,11 +105,10 @@ export class UserRepository {
   }
 
   async updateUserNickname(
-    transactionEntityManager: EntityManager,
     user_uuid: string,
     user_nickname: string,
   ): Promise<void> {
-    await transactionEntityManager.update(
+    await this.dataSource.manager.update(
       User,
       { user_uuid: user_uuid },
       { user_nickname: user_nickname },
@@ -132,12 +116,11 @@ export class UserRepository {
   }
 
   async updateUserPassword(
-    transactionEntityManager: EntityManager,
     user_uuid: string,
     user_password: string,
   ): Promise<void> {
     const encryptedPassword = await bcrypt.hash(user_password, 10);
-    await transactionEntityManager.update(
+    await this.dataSource.manager.update(
       User,
       { user_uuid: user_uuid },
       { user_password: encryptedPassword },

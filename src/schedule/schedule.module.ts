@@ -14,6 +14,8 @@ import { RecordRepository } from 'src/record/record.repository';
 import { BookService } from 'src/book/book.service';
 import { ReviewService } from 'src/review/review.service';
 import { PhraseRepository } from 'src/phrase/phrase.repository';
+import { TypeOrmModule } from '@nestjs/typeorm';
+import { Book } from 'src/global/entities/book.entity';
 
 @Module({
   imports: [
@@ -29,6 +31,7 @@ import { PhraseRepository } from 'src/phrase/phrase.repository';
       }),
     }),
     HttpModule,
+    TypeOrmModule.forFeature([Book]),
   ],
   providers: [
     ScheduleService,

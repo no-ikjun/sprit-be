@@ -13,6 +13,8 @@ import { NotificationRepository } from 'src/notification/notification.repository
 import { GlobalFcmService } from 'src/firebase/fcm.service';
 import { RecordRepository } from 'src/record/record.repository';
 import { PhraseRepository } from 'src/phrase/phrase.repository';
+import { TypeOrmModule } from '@nestjs/typeorm';
+import { Book } from 'src/global/entities/book.entity';
 
 @Module({
   imports: [
@@ -27,6 +29,7 @@ import { PhraseRepository } from 'src/phrase/phrase.repository';
       }),
     }),
     HttpModule,
+    TypeOrmModule.forFeature([Book]),
   ],
   controllers: [QuestController],
   providers: [

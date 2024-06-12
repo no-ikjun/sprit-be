@@ -9,6 +9,8 @@ import { UserRepository } from 'src/user/user.repository';
 import { BookService } from 'src/book/book.service';
 import { HttpModule } from '@nestjs/axios';
 import { ReviewService } from 'src/review/review.service';
+import { TypeOrmModule } from '@nestjs/typeorm';
+import { Book } from 'src/global/entities/book.entity';
 
 @Module({
   imports: [
@@ -23,6 +25,7 @@ import { ReviewService } from 'src/review/review.service';
       }),
     }),
     HttpModule,
+    TypeOrmModule.forFeature([Book]),
   ],
   controllers: [BookReportController],
   providers: [

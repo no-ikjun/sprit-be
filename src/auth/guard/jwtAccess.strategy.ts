@@ -1,7 +1,7 @@
 import { PassportStrategy } from '@nestjs/passport';
 import { ConfigService } from '@nestjs/config';
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
-import { DataSource, EntityManager } from 'typeorm';
+import { DataSource } from 'typeorm';
 import { ExtractJwt, Strategy } from 'passport-jwt';
 import { UserRepository } from 'src/user/user.repository';
 import { User } from 'src/global/entities/user.entity';
@@ -24,16 +24,7 @@ export class JwtAccessStrategy extends PassportStrategy(
   }
 
   async validate(payload: any): Promise<User> {
-    const user = await this.dataSource
-      .transaction(async (entity_manager: EntityManager) => {
-        return await this.userRepository.findOneByUserId(
-          entity_manager,
-          payload.user_id,
-        );
-      })
-      .catch((error) => {
-        throw error;
-      });
+    const user = await this.userRepository.findOneByUserId(payload.user_id);
     if (user === null) {
       throw new HttpException('User Not Found', HttpStatus.BAD_REQUEST);
     }

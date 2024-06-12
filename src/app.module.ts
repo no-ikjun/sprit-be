@@ -31,6 +31,7 @@ import { JwtService } from '@nestjs/jwt';
 import { NoticeModule } from './notice/notice.module';
 import { VersionModule } from './version/version.module';
 import { PhraseRepository } from './phrase/phrase.repository';
+import { Book } from './global/entities/book.entity';
 
 @Module({
   imports: [
@@ -60,6 +61,7 @@ import { PhraseRepository } from './phrase/phrase.repository';
     ScheduleModule,
     NoticeModule,
     VersionModule,
+    TypeOrmModule.forFeature([Book]),
   ],
   controllers: [AppController],
   providers: [

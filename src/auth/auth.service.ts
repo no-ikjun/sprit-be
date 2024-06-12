@@ -31,20 +31,15 @@ export class AuthService {
   ) {}
 
   async login(data: LoginUserDto): Promise<LoginResponseType> {
-    await this.dataSource.transaction(async (transctionEntityManager) => {
-      const user = await this.userRepository.findOneByUserId(
-        transctionEntityManager,
-        data.user_id,
-      );
-      if (!user)
-        throw new HttpException('User not found', HttpStatus.BAD_REQUEST);
-      const isPasswordValid = await bcrypt.compare(
-        data.user_password,
-        user.user_password,
-      );
-      if (!isPasswordValid)
-        throw new HttpException('Password not match', HttpStatus.UNAUTHORIZED);
-    });
+    const user = await this.userRepository.findOneByUserId(data.user_id);
+    if (!user)
+      throw new HttpException('User not found', HttpStatus.BAD_REQUEST);
+    const isPasswordValid = await bcrypt.compare(
+      data.user_password,
+      user.user_password,
+    );
+    if (!isPasswordValid)
+      throw new HttpException('Password not match', HttpStatus.UNAUTHORIZED);
     const accessToken = await this.userRepository.getJwtAccessToken(
       data.user_id,
       UserRegisterType.LOCAL,
@@ -56,29 +51,22 @@ export class AuthService {
     const kakaoUserData: KakaoUserDataDto = await this.getKaKaoUserData(
       data.access_token,
     );
-    return await this.dataSource.transaction(
-      async (transctionEntityManager) => {
-        const user = await this.userService.findByUserId(kakaoUserData.user_id);
-        if (user) {
-          const accessToken = await this.getJwtAccessToken(
-            user.user_id,
-            UserRegisterType.KAKAO,
-          );
-          return { access_token: accessToken, new_user: false };
-        } else {
-          await this.verifyDuplicateUser(kakaoUserData.user_id);
-          await this.userRepository.setNewUserByKakao(
-            transctionEntityManager,
-            kakaoUserData,
-          );
-          const access_token = await this.getJwtAccessToken(
-            kakaoUserData.user_id,
-            UserRegisterType.KAKAO,
-          );
-          return { access_token: access_token, new_user: true };
-        }
-      },
-    );
+    const user = await this.userService.findByUserId(kakaoUserData.user_id);
+    if (user) {
+      const accessToken = await this.getJwtAccessToken(
+        user.user_id,
+        UserRegisterType.KAKAO,
+      );
+      return { access_token: accessToken, new_user: false };
+    } else {
+      await this.verifyDuplicateUser(kakaoUserData.user_id);
+      await this.userRepository.setNewUserByKakao(kakaoUserData);
+      const access_token = await this.getJwtAccessToken(
+        kakaoUserData.user_id,
+        UserRegisterType.KAKAO,
+      );
+      return { access_token: access_token, new_user: true };
+    }
   }
 
   public async getKaKaoUserData(
@@ -106,32 +94,25 @@ export class AuthService {
   }
 
   public async appleLogin(data: AppleRequestDto): Promise<LoginResponseType> {
-    return await this.dataSource.transaction(
-      async (transctionEntityManager) => {
-        const user = await this.userService.findByUserId(data.user_identifier);
-        if (user) {
-          const accessToken = await this.getJwtAccessToken(
-            user.user_id,
-            UserRegisterType.APPLE,
-          );
-          return { access_token: accessToken, new_user: false };
-        } else {
-          const appleUserData: AppleUserDataDto = new AppleUserDataDto();
-          appleUserData.user_id = data.user_identifier;
-          appleUserData.user_nickname = data.given_name ?? 'SPRIT 사용자';
-          await this.verifyDuplicateUser(data.user_identifier);
-          await this.userRepository.setNewUserByApple(
-            transctionEntityManager,
-            appleUserData,
-          );
-          const access_token = await this.getJwtAccessToken(
-            data.user_identifier,
-            UserRegisterType.APPLE,
-          );
-          return { access_token: access_token, new_user: true };
-        }
-      },
-    );
+    const user = await this.userService.findByUserId(data.user_identifier);
+    if (user) {
+      const accessToken = await this.getJwtAccessToken(
+        user.user_id,
+        UserRegisterType.APPLE,
+      );
+      return { access_token: accessToken, new_user: false };
+    } else {
+      const appleUserData: AppleUserDataDto = new AppleUserDataDto();
+      appleUserData.user_id = data.user_identifier;
+      appleUserData.user_nickname = data.given_name ?? 'SPRIT 사용자';
+      await this.verifyDuplicateUser(data.user_identifier);
+      await this.userRepository.setNewUserByApple(appleUserData);
+      const access_token = await this.getJwtAccessToken(
+        data.user_identifier,
+        UserRegisterType.APPLE,
+      );
+      return { access_token: access_token, new_user: true };
+    }
   }
 
   public async getJwtAccessToken(

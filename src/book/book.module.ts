@@ -7,6 +7,8 @@ import { JwtModule } from '@nestjs/jwt';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { UserService } from 'src/user/user.service';
 import { UserRepository } from 'src/user/user.repository';
+import { TypeOrmModule } from '@nestjs/typeorm';
+import { Book } from 'src/global/entities/book.entity';
 
 @Module({
   imports: [
@@ -21,6 +23,7 @@ import { UserRepository } from 'src/user/user.repository';
       }),
     }),
     HttpModule,
+    TypeOrmModule.forFeature([Book]),
   ],
   providers: [BookService, ReviewService, UserService, UserRepository],
   controllers: [BookController],

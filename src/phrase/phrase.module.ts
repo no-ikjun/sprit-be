@@ -9,6 +9,8 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
 import { HttpModule } from '@nestjs/axios';
 import { BookService } from 'src/book/book.service';
 import { ReviewService } from 'src/review/review.service';
+import { TypeOrmModule } from '@nestjs/typeorm';
+import { Book } from 'src/global/entities/book.entity';
 @Module({
   imports: [
     JwtModule.registerAsync({
@@ -22,6 +24,7 @@ import { ReviewService } from 'src/review/review.service';
       }),
     }),
     HttpModule,
+    TypeOrmModule.forFeature([Book]),
   ],
   controllers: [PhraseController],
   providers: [

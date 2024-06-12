@@ -32,9 +32,7 @@ export class BannerService {
     banner_data.banner_url = banner.banner_url;
     banner_data.created_at = new Date();
     banner_data.click_url = banner.click_url;
-    await this.dataSource.transaction(async (transctionEntityManager) => {
-      await transctionEntityManager.save(Banner, banner_data);
-    });
+    await this.dataSource.manager.save(Banner, banner_data);
     return { message: 'success' };
   }
 }

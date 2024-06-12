@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { Book } from 'src/global/entities/book.entity';
-import { DataSource } from 'typeorm';
+import { Repository } from 'typeorm';
 import { BookInfoDto, NewBookDto } from './dto/book.dto';
 import { generateRamdomId, getRandomString, getToday } from 'src/global/utils';
 import { HttpService } from '@nestjs/axios';
@@ -12,11 +12,13 @@ import {
   PopularBookResponseType,
 } from 'src/global/types/response.type';
 import { ReviewService } from 'src/review/review.service';
+import { InjectRepository } from '@nestjs/typeorm';
 
 @Injectable()
 export class BookService {
   constructor(
-    private readonly dataSource: DataSource,
+    @InjectRepository(Book)
+    private readonly bookRepository: Repository<Book>,
     private readonly httpService: HttpService,
     private readonly reviewService: ReviewService,
   ) {}
@@ -26,19 +28,17 @@ export class BookService {
     let star = 0;
     let star_count = 0;
     try {
-      await this.dataSource.transaction(async (transctionEntityManager) => {
-        book = await transctionEntityManager.findOne(Book, {
-          where: { isbn: isbn },
-        });
-        if (book) {
-          star = await this.reviewService.getAverageScoreByBookUuid(
-            book.book_uuid,
-          );
-          star_count = await this.reviewService.getReviewCountByBookUuid(
-            book.book_uuid,
-          );
-        }
+      book = await this.bookRepository.findOne({
+        where: { isbn: isbn },
       });
+      if (book) {
+        star = await this.reviewService.getAverageScoreByBookUuid(
+          book.book_uuid,
+        );
+        star_count = await this.reviewService.getReviewCountByBookUuid(
+          book.book_uuid,
+        );
+      }
       if (book) {
         await this.addScoreToBook(book.book_uuid, 4);
         return {
@@ -100,17 +100,15 @@ export class BookService {
     let star = 0;
     let star_count = 0;
     try {
-      await this.dataSource.transaction(async (transctionEntityManager) => {
-        book = await transctionEntityManager.findOne(Book, {
-          where: { book_uuid: book_uuid },
-        });
-        if (book) {
-          star = await this.reviewService.getAverageScoreByBookUuid(book_uuid);
-          star_count = await this.reviewService.getReviewCountByBookUuid(
-            book_uuid,
-          );
-        }
+      book = await this.bookRepository.findOne({
+        where: { book_uuid: book_uuid },
       });
+      if (book) {
+        star = await this.reviewService.getAverageScoreByBookUuid(book_uuid);
+        star_count = await this.reviewService.getReviewCountByBookUuid(
+          book_uuid,
+        );
+      }
       if (book) {
         await this.addScoreToBook(book.book_uuid, 4);
         return {
@@ -197,9 +195,7 @@ export class BookService {
     bookData.updated_at = new Date();
     bookData.score = 0;
     try {
-      await this.dataSource.transaction(async (transactionEntityManager) => {
-        await transactionEntityManager.save(Book, bookData);
-      });
+      await this.bookRepository.save(bookData);
       await this.addScoreToBook(book_uuid, 5);
       return { new_book: true, book_data: bookData };
     } catch (error) {
@@ -214,21 +210,19 @@ export class BookService {
       getToday(),
       getRandomString(8),
     );
-    await this.dataSource.transaction(async (transctionEntityManager) => {
-      await transctionEntityManager.save(Book, {
-        book_uuid: book_uuid,
-        isbn: bookData.isbn,
-        title: bookData.title,
-        authors: bookData.authors,
-        publisher: bookData.publisher,
-        translators: bookData.translators,
-        search_url: bookData.search_url,
-        thumbnail: bookData.thumbnail,
-        content: bookData.content,
-        published_at: new Date(bookData.datetime),
-        updated_at: new Date(),
-        score: 0,
-      });
+    await this.bookRepository.save({
+      book_uuid: book_uuid,
+      isbn: bookData.isbn,
+      title: bookData.title,
+      authors: bookData.authors,
+      publisher: bookData.publisher,
+      translators: bookData.translators,
+      search_url: bookData.search_url,
+      thumbnail: bookData.thumbnail,
+      content: bookData.content,
+      published_at: new Date(bookData.datetime),
+      updated_at: new Date(),
+      score: 0,
     });
   }
 
@@ -254,42 +248,39 @@ export class BookService {
   async getPopularBookList(page: number): Promise<PopularBookResponseType> {
     if (page > 10) return { books: [], more_available: false };
     const pageSize = 10;
-    let bookList: Book[];
     const bookListWithScore: BookInfoResponseType[] = [];
     let moreAvailable = false;
-    await this.dataSource.transaction(async (transctionEntityManager) => {
-      bookList = await transctionEntityManager.find(Book, {
-        order: { score: 'DESC' },
-        skip: (page - 1) * pageSize,
-        take: pageSize,
-      });
-      const totalCount = await transctionEntityManager.count(Book);
-      moreAvailable = totalCount > page * pageSize;
-      for (const book of bookList) {
-        const star = await this.reviewService.getAverageScoreByBookUuid(
-          book.book_uuid,
-        );
-        const star_count = await this.reviewService.getReviewCountByBookUuid(
-          book.book_uuid,
-        );
-        bookListWithScore.push({
-          book_uuid: book.book_uuid,
-          isbn: book.isbn,
-          title: book.title,
-          authors: book.authors,
-          publisher: book.publisher,
-          translators: book.translators,
-          search_url: book.search_url,
-          thumbnail: book.thumbnail,
-          content: book.content,
-          published_at: book.published_at,
-          updated_at: book.updated_at,
-          score: book.score,
-          star: star,
-          star_count: star_count,
-        });
-      }
+    const bookList = await this.bookRepository.find({
+      order: { score: 'DESC' },
+      skip: (page - 1) * pageSize,
+      take: pageSize,
     });
+    const totalCount = await this.bookRepository.count();
+    moreAvailable = totalCount > page * pageSize;
+    for (const book of bookList) {
+      const star = await this.reviewService.getAverageScoreByBookUuid(
+        book.book_uuid,
+      );
+      const star_count = await this.reviewService.getReviewCountByBookUuid(
+        book.book_uuid,
+      );
+      bookListWithScore.push({
+        book_uuid: book.book_uuid,
+        isbn: book.isbn,
+        title: book.title,
+        authors: book.authors,
+        publisher: book.publisher,
+        translators: book.translators,
+        search_url: book.search_url,
+        thumbnail: book.thumbnail,
+        content: book.content,
+        published_at: book.published_at,
+        updated_at: book.updated_at,
+        score: book.score,
+        star: star,
+        star_count: star_count,
+      });
+    }
     return {
       books: bookListWithScore,
       more_available: moreAvailable,
@@ -297,12 +288,10 @@ export class BookService {
   }
 
   async addScoreToBook(book_uuid: string, score: number): Promise<void> {
-    await this.dataSource.transaction(async (transctionEntityManager) => {
-      const book = await transctionEntityManager.findOne(Book, {
-        where: { book_uuid: book_uuid },
-      });
-      book.score += score;
-      await transctionEntityManager.save(Book, book);
+    const book = await this.bookRepository.findOne({
+      where: { book_uuid: book_uuid },
     });
+    book.score += score;
+    await this.bookRepository.save(book);
   }
 }
