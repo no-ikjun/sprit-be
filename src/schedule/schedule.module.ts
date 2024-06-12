@@ -16,6 +16,15 @@ import { ReviewService } from 'src/review/review.service';
 import { PhraseRepository } from 'src/phrase/phrase.repository';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { Book } from 'src/global/entities/book.entity';
+import { FcmToken } from 'src/global/entities/fcm_token.entity';
+import { TimeAgree } from 'src/global/entities/time_agree.entity';
+import { RemindAgree } from 'src/global/entities/remind_agree.entity';
+import { QuestAgree } from 'src/global/entities/quest_agree.entity';
+import { Phrase } from 'src/global/entities/phrase.entity';
+import { Record } from 'src/global/entities/record.entity';
+import { BookLibrary } from 'src/global/entities/book_library.entity';
+import { User } from 'src/global/entities/user.entity';
+import { Review } from 'src/global/entities/review.entity';
 
 @Module({
   imports: [
@@ -31,7 +40,18 @@ import { Book } from 'src/global/entities/book.entity';
       }),
     }),
     HttpModule,
-    TypeOrmModule.forFeature([Book]),
+    TypeOrmModule.forFeature([
+      Book,
+      BookLibrary,
+      FcmToken,
+      TimeAgree,
+      RemindAgree,
+      QuestAgree,
+      Phrase,
+      Record,
+      User,
+      Review,
+    ]),
   ],
   providers: [
     ScheduleService,

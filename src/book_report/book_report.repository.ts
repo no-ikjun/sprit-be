@@ -1,18 +1,19 @@
 import { Injectable } from '@nestjs/common';
+import { InjectRepository } from '@nestjs/typeorm';
 import { BookService } from 'src/book/book.service';
 import { BookReport } from 'src/global/entities/book_report.entity';
 import { generateRamdomId, getRandomString, getToday } from 'src/global/utils';
-import { DataSource, EntityManager } from 'typeorm';
+import { Repository } from 'typeorm';
 
 @Injectable()
 export class BookReportRepository {
   constructor(
-    private readonly dataSource: DataSource,
     private readonly bookService: BookService,
+    @InjectRepository(BookReport)
+    private readonly bookReportRepository: Repository<BookReport>,
   ) {}
 
   async setBookReport(
-    transactionEntityManager: EntityManager,
     book_uuid: string,
     user_uuid: string,
     report: string,
@@ -22,7 +23,7 @@ export class BookReportRepository {
       getToday(),
       getRandomString(8),
     );
-    await transactionEntityManager.save(BookReport, {
+    await this.bookReportRepository.save({
       book_report_uuid: book_report_uuid,
       book_uuid: book_uuid,
       user_uuid: user_uuid,
@@ -33,60 +34,47 @@ export class BookReportRepository {
   }
 
   async getBookReportByBookReportUuid(
-    transactionEntityManager: EntityManager,
     book_report_uuid: string,
   ): Promise<BookReport> {
-    return await transactionEntityManager.findOne(BookReport, {
+    return await this.bookReportRepository.findOne({
       where: { book_report_uuid: book_report_uuid },
     });
   }
 
-  async getBookReportByUserUuid(
-    transactionEntityManager: EntityManager,
-    user_uuid: string,
-  ): Promise<BookReport[]> {
-    return await transactionEntityManager.find(BookReport, {
+  async getBookReportByUserUuid(user_uuid: string): Promise<BookReport[]> {
+    return await this.bookReportRepository.find({
       where: { user_uuid: user_uuid },
       order: { created_at: 'DESC' },
     });
   }
 
-  async getBookReportByBookUuid(
-    transactionEntityManager: EntityManager,
-    book_uuid: string,
-  ): Promise<BookReport[]> {
-    return await transactionEntityManager.find(BookReport, {
+  async getBookReportByBookUuid(book_uuid: string): Promise<BookReport[]> {
+    return await this.bookReportRepository.find({
       where: { book_uuid: book_uuid },
     });
   }
 
   async getBookReportByBookUuidAndUserUuid(
-    transactionEntityManager: EntityManager,
     book_uuid: string,
     user_uuid: string,
   ): Promise<BookReport> {
-    return await transactionEntityManager.findOne(BookReport, {
+    return await this.bookReportRepository.findOne({
       where: { book_uuid: book_uuid, user_uuid: user_uuid },
     });
   }
 
   async updateBookReport(
-    transactionEntityManager: EntityManager,
     book_report_uuid: string,
     report: string,
   ): Promise<void> {
-    await transactionEntityManager.update(
-      BookReport,
+    await this.bookReportRepository.update(
       { book_report_uuid: book_report_uuid },
       { report: report },
     );
   }
 
-  async deleteBookReport(
-    transactionEntityManager: EntityManager,
-    book_report_uuid: string,
-  ): Promise<void> {
-    await transactionEntityManager.delete(BookReport, {
+  async deleteBookReport(book_report_uuid: string): Promise<void> {
+    await this.bookReportRepository.delete({
       book_report_uuid: book_report_uuid,
     });
   }

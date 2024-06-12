@@ -1,11 +1,15 @@
 import { Injectable } from '@nestjs/common';
+import { InjectRepository } from '@nestjs/typeorm';
 import { Version } from 'src/global/entities/version.entity';
 import { generateRamdomId, getRandomString, getToday } from 'src/global/utils';
-import { DataSource } from 'typeorm';
+import { Repository } from 'typeorm';
 
 @Injectable()
 export class VersionRepository {
-  constructor(private readonly dataSource: DataSource) {}
+  constructor(
+    @InjectRepository(Version)
+    private readonly versionRepository: Repository<Version>,
+  ) {}
 
   async setNewVersion(
     versionNumber: string,
@@ -18,26 +22,20 @@ export class VersionRepository {
       getToday(),
       getRandomString(8),
     );
-    await this.dataSource.transaction(async (transactionEntityManager) => {
-      await transactionEntityManager.save(Version, {
-        version_uuid: version_uuid,
-        version_number: versionNumber,
-        build_number: buildNumber,
-        update_required: updateRequired,
-        description: description,
-        created_at: new Date(),
-      });
+    await this.versionRepository.save({
+      version_uuid: version_uuid,
+      version_number: versionNumber,
+      build_number: buildNumber,
+      update_required: updateRequired,
+      description: description,
+      created_at: new Date(),
     });
   }
 
   async getLatestVersion(): Promise<Version> {
-    return await this.dataSource.transaction(
-      async (transactionEntityManager) => {
-        return await transactionEntityManager.findOne(Version, {
-          order: { created_at: 'DESC' },
-          where: {},
-        });
-      },
-    );
+    return await this.versionRepository.findOne({
+      order: { created_at: 'DESC' },
+      where: {},
+    });
   }
 }

@@ -5,6 +5,9 @@ import { UserService } from 'src/user/user.service';
 import { UserRepository } from 'src/user/user.repository';
 import { JwtModule } from '@nestjs/jwt';
 import { ConfigModule, ConfigService } from '@nestjs/config';
+import { TypeOrmModule } from '@nestjs/typeorm';
+import { User } from 'src/global/entities/user.entity';
+import { Review } from 'src/global/entities/review.entity';
 
 @Module({
   imports: [
@@ -18,6 +21,7 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
         },
       }),
     }),
+    TypeOrmModule.forFeature([User, Review]),
   ],
   controllers: [ReviewController],
   providers: [ReviewService, UserService, UserRepository],

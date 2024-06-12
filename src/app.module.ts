@@ -32,6 +32,15 @@ import { NoticeModule } from './notice/notice.module';
 import { VersionModule } from './version/version.module';
 import { PhraseRepository } from './phrase/phrase.repository';
 import { Book } from './global/entities/book.entity';
+import { FcmToken } from './global/entities/fcm_token.entity';
+import { TimeAgree } from './global/entities/time_agree.entity';
+import { RemindAgree } from './global/entities/remind_agree.entity';
+import { QuestAgree } from './global/entities/quest_agree.entity';
+import { BookLibrary } from './global/entities/book_library.entity';
+import { Record } from './global/entities/record.entity';
+import { Phrase } from './global/entities/phrase.entity';
+import { User } from './global/entities/user.entity';
+import { Review } from './global/entities/review.entity';
 
 @Module({
   imports: [
@@ -61,7 +70,18 @@ import { Book } from './global/entities/book.entity';
     ScheduleModule,
     NoticeModule,
     VersionModule,
-    TypeOrmModule.forFeature([Book]),
+    TypeOrmModule.forFeature([
+      Book,
+      BookLibrary,
+      Record,
+      FcmToken,
+      TimeAgree,
+      RemindAgree,
+      QuestAgree,
+      Phrase,
+      User,
+      Review,
+    ]),
   ],
   controllers: [AppController],
   providers: [

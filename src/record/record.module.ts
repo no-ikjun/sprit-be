@@ -11,6 +11,10 @@ import { BookService } from 'src/book/book.service';
 import { ReviewService } from 'src/review/review.service';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { Book } from 'src/global/entities/book.entity';
+import { Record } from 'src/global/entities/record.entity';
+import { BookLibrary } from 'src/global/entities/book_library.entity';
+import { User } from 'src/global/entities/user.entity';
+import { Review } from 'src/global/entities/review.entity';
 
 @Module({
   imports: [
@@ -25,7 +29,7 @@ import { Book } from 'src/global/entities/book.entity';
       }),
     }),
     HttpModule,
-    TypeOrmModule.forFeature([Book]),
+    TypeOrmModule.forFeature([Book, BookLibrary, Record, User, Review]),
   ],
   controllers: [RecordController],
   providers: [

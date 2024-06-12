@@ -5,6 +5,8 @@ import { UserRepository } from './user.repository';
 import { JwtModule } from '@nestjs/jwt';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { HttpModule } from '@nestjs/axios';
+import { TypeOrmModule } from '@nestjs/typeorm';
+import { User } from 'src/global/entities/user.entity';
 
 @Module({
   imports: [
@@ -19,6 +21,7 @@ import { HttpModule } from '@nestjs/axios';
       }),
     }),
     HttpModule,
+    TypeOrmModule.forFeature([User]),
   ],
   controllers: [UserController],
   providers: [UserService, UserRepository],

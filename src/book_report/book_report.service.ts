@@ -18,54 +18,30 @@ export class BookReportService {
     data: NewBookReportDto,
   ): Promise<void> {
     const user_info = await this.userService.getUserInfo(access_token);
-    return await this.dataSource.transaction(
-      async (transactionEntityManager) => {
-        return await this.bookReportRepository.setBookReport(
-          transactionEntityManager,
-          data.book_uuid,
-          user_info.user_uuid,
-          data.report,
-        );
-      },
+    return await this.bookReportRepository.setBookReport(
+      data.book_uuid,
+      user_info.user_uuid,
+      data.report,
     );
   }
 
   async getBookReportByBookReportUuid(
     book_report_uuid: string,
   ): Promise<BookReport> {
-    return await this.dataSource.transaction(
-      async (transactionEntityManager) => {
-        const book_report =
-          await this.bookReportRepository.getBookReportByBookReportUuid(
-            transactionEntityManager,
-            book_report_uuid,
-          );
-        return book_report;
-      },
+    return await this.bookReportRepository.getBookReportByBookReportUuid(
+      book_report_uuid,
     );
   }
 
   async getBookReportByUserUuid(access_token: string): Promise<BookReport[]> {
     const user_info = await this.userService.getUserInfo(access_token);
-    return await this.dataSource.transaction(
-      async (transactionEntityManager) => {
-        return await this.bookReportRepository.getBookReportByUserUuid(
-          transactionEntityManager,
-          user_info.user_uuid,
-        );
-      },
+    return await this.bookReportRepository.getBookReportByUserUuid(
+      user_info.user_uuid,
     );
   }
 
   async getBookReportByBookUuid(book_uuid: string): Promise<BookReport[]> {
-    return await this.dataSource.transaction(
-      async (transactionEntityManager) => {
-        return await this.bookReportRepository.getBookReportByBookUuid(
-          transactionEntityManager,
-          book_uuid,
-        );
-      },
-    );
+    return await this.bookReportRepository.getBookReportByBookUuid(book_uuid);
   }
 
   async getBookReportByBookUuidAndUserUuid(
@@ -73,39 +49,20 @@ export class BookReportService {
     book_uuid: string,
   ): Promise<BookReport> {
     const user_info = await this.userService.getUserInfo(access_token);
-    return await this.dataSource.transaction(
-      async (transactionEntityManager) => {
-        const book_report =
-          await this.bookReportRepository.getBookReportByBookUuidAndUserUuid(
-            transactionEntityManager,
-            book_uuid,
-            user_info.user_uuid,
-          );
-        return book_report;
-      },
+    return await this.bookReportRepository.getBookReportByBookUuidAndUserUuid(
+      book_uuid,
+      user_info.user_uuid,
     );
   }
 
   async updateBookReport(data: UpdateBookReportDto): Promise<void> {
-    return await this.dataSource.transaction(
-      async (transactionEntityManager) => {
-        return await this.bookReportRepository.updateBookReport(
-          transactionEntityManager,
-          data.book_report_uuid,
-          data.report,
-        );
-      },
+    return await this.bookReportRepository.updateBookReport(
+      data.book_report_uuid,
+      data.report,
     );
   }
 
   async deleteBookReport(book_report_uuid: string): Promise<void> {
-    return await this.dataSource.transaction(
-      async (transactionEntityManager) => {
-        return await this.bookReportRepository.deleteBookReport(
-          transactionEntityManager,
-          book_report_uuid,
-        );
-      },
-    );
+    return await this.bookReportRepository.deleteBookReport(book_report_uuid);
   }
 }

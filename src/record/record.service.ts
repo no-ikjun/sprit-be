@@ -1,5 +1,4 @@
 import { Injectable } from '@nestjs/common';
-import { DataSource } from 'typeorm';
 import { RecordRepository } from './record.repository';
 import { UserService } from 'src/user/user.service';
 import { NewRecordDto } from './dto/record.dto';
@@ -13,71 +12,41 @@ import {
 @Injectable()
 export class RecordService {
   constructor(
-    private readonly dataSource: DataSource,
     private readonly recordRepository: RecordRepository,
     private readonly userService: UserService,
   ) {}
 
   async setRecord(data: NewRecordDto, access_token: string): Promise<string> {
-    return await this.dataSource.transaction(
-      async (transactionEntityManager) => {
-        const user_info = await this.userService.getUserInfo(access_token);
-        return await this.recordRepository.setRecord(
-          transactionEntityManager,
-          data.book_uuid,
-          user_info.user_uuid,
-          data.goal_type,
-          data.goal_scale,
-          data.page_start ?? 0,
-        );
-      },
+    const user_info = await this.userService.getUserInfo(access_token);
+    return await this.recordRepository.setRecord(
+      data.book_uuid,
+      user_info.user_uuid,
+      data.goal_type,
+      data.goal_scale,
+      data.page_start ?? 0,
     );
   }
 
   async getRecordByRecordUuid(record_uuid: string): Promise<Record> {
-    return await this.dataSource.transaction(
-      async (transactionEntityManager) => {
-        return await this.recordRepository.getRecordByRecordUuid(
-          transactionEntityManager,
-          record_uuid,
-        );
-      },
-    );
+    return await this.recordRepository.getRecordByRecordUuid(record_uuid);
   }
 
   async getRecordByUserUuid(access_token: string): Promise<Record[]> {
     const user_info = await this.userService.getUserInfo(access_token);
-    return await this.dataSource.transaction(
-      async (transactionEntityManager) => {
-        return await this.recordRepository.getRecordByUserUuid(
-          transactionEntityManager,
-          user_info.user_uuid,
-        );
-      },
-    );
+    return await this.recordRepository.getRecordByUserUuid(user_info.user_uuid);
   }
 
   async getNotEndedRecordByUserUuid(access_token: string): Promise<Record> {
     const user_info = await this.userService.getUserInfo(access_token);
-    return await this.dataSource.transaction(
-      async (transactionEntityManager) => {
-        return await this.recordRepository.getNotEndedRecordByUserUuid(
-          transactionEntityManager,
-          user_info.user_uuid,
-        );
-      },
+    return await this.recordRepository.getNotEndedRecordByUserUuid(
+      user_info.user_uuid,
     );
   }
 
   async getEndedRecordByUserUuid(access_token: string): Promise<Record[]> {
     const user_info = await this.userService.getUserInfo(access_token);
-    return await this.dataSource.transaction(
-      async (transactionEntityManager) => {
-        return await this.recordRepository.getEndedRecordByUserUuid(
-          transactionEntityManager,
-          user_info.user_uuid,
-        );
-      },
+    return await this.recordRepository.getEndedRecordByUserUuid(
+      user_info.user_uuid,
     );
   }
 
@@ -86,36 +55,18 @@ export class RecordService {
     page_end: number,
     total_time: number,
   ): Promise<void> {
-    await this.dataSource.transaction(async (transactionEntityManager) => {
-      await this.recordRepository.endRecord(
-        transactionEntityManager,
-        record_uuid,
-        page_end ?? 0,
-        total_time ?? 0,
-      );
-    });
+    await this.recordRepository.endRecord(record_uuid, page_end, total_time);
   }
 
   async deleteRecord(record_uuid: string): Promise<void> {
-    await this.dataSource.transaction(async (transactionEntityManager) => {
-      await this.recordRepository.deleteRecord(
-        transactionEntityManager,
-        record_uuid,
-      );
-    });
+    await this.recordRepository.deleteRecord(record_uuid);
   }
 
   async updateGoalAchieved(
     record_uuid: string,
     goal_achieved: boolean,
   ): Promise<void> {
-    await this.dataSource.transaction(async (transactionEntityManager) => {
-      await this.recordRepository.updateGoalAchieved(
-        transactionEntityManager,
-        record_uuid,
-        goal_achieved,
-      );
-    });
+    await this.recordRepository.updateGoalAchieved(record_uuid, goal_achieved);
   }
 
   async getLastPage(
@@ -124,15 +75,10 @@ export class RecordService {
     is_before_record: boolean,
   ): Promise<number> {
     const user_info = await this.userService.getUserInfo(access_token);
-    return await this.dataSource.transaction(
-      async (transactionEntityManager) => {
-        return await this.recordRepository.getLastPage(
-          transactionEntityManager,
-          user_info.user_uuid,
-          book_uuid,
-          is_before_record,
-        );
-      },
+    return await this.recordRepository.getLastPage(
+      user_info.user_uuid,
+      book_uuid,
+      is_before_record,
     );
   }
 
@@ -141,14 +87,9 @@ export class RecordService {
     count: number,
   ): Promise<number[]> {
     const user_info = await this.userService.getUserInfo(access_token);
-    return await this.dataSource.transaction(
-      async (transactionEntityManager) => {
-        return await this.recordRepository.getRecordCountByUserUuid(
-          transactionEntityManager,
-          user_info.user_uuid,
-          count,
-        );
-      },
+    return await this.recordRepository.getRecordCountByUserUuid(
+      user_info.user_uuid,
+      count,
     );
   }
 
@@ -159,16 +100,11 @@ export class RecordService {
     date: number,
   ): Promise<number> {
     const user_info = await this.userService.getUserInfo(access_token);
-    return await this.dataSource.transaction(
-      async (transactionEntityManager) => {
-        return await this.recordRepository.getDailyRecordTotalTime(
-          transactionEntityManager,
-          user_info.user_uuid,
-          year,
-          month,
-          date,
-        );
-      },
+    return await this.recordRepository.getDailyRecordTotalTime(
+      user_info.user_uuid,
+      year,
+      month,
+      date,
     );
   }
 
@@ -179,16 +115,11 @@ export class RecordService {
     todayDay: number,
   ): Promise<BookRecordHistoryType[][]> {
     const user_info = await this.userService.getUserInfo(access_token);
-    return await this.dataSource.transaction(
-      async (transactionEntityManager) => {
-        return await this.recordRepository.getWeeklyRecordHistory(
-          transactionEntityManager,
-          user_info.user_uuid,
-          back_week,
-          count,
-          todayDay,
-        );
-      },
+    return await this.recordRepository.getWeeklyRecordHistory(
+      user_info.user_uuid,
+      back_week,
+      count,
+      todayDay,
     );
   }
 
@@ -199,16 +130,11 @@ export class RecordService {
     todayDay: number,
   ): Promise<BookRecordHistoryTypeV2[][]> {
     const user_info = await this.userService.getUserInfo(access_token);
-    return await this.dataSource.transaction(
-      async (transactionEntityManager) => {
-        return await this.recordRepository.getWeeklyRecordHistoryV2(
-          transactionEntityManager,
-          user_info.user_uuid,
-          back_week,
-          count,
-          todayDay,
-        );
-      },
+    return await this.recordRepository.getWeeklyRecordHistoryV2(
+      user_info.user_uuid,
+      back_week,
+      count,
+      todayDay,
     );
   }
 
@@ -219,16 +145,11 @@ export class RecordService {
     kind: string,
   ): Promise<MonthlyRecordResponseType> {
     const user_info = await this.userService.getUserInfo(access_token);
-    return await this.dataSource.transaction(
-      async (transactionEntityManager) => {
-        return await this.recordRepository.getReadingRecordCountsByMonth(
-          transactionEntityManager,
-          user_info.user_uuid,
-          year,
-          month,
-          kind,
-        );
-      },
+    return await this.recordRepository.getReadingRecordCountsByMonth(
+      user_info.user_uuid,
+      year,
+      month,
+      kind,
     );
   }
 }

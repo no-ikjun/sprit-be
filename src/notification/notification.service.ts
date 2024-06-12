@@ -1,6 +1,5 @@
 import { Injectable } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
-import { DataSource } from 'typeorm';
 import { NotificationRepository } from './notification.repository';
 import { SetFcmTokenResponseType } from 'src/global/types/response.type';
 import { UserInfoDto } from 'src/user/dto/user.dto';
@@ -16,7 +15,6 @@ import { BookService } from 'src/book/book.service';
 @Injectable()
 export class NotificationService {
   constructor(
-    private readonly dataSource: DataSource,
     private readonly jwtService: JwtService,
     private readonly notificationRepository: NotificationRepository,
     private readonly userService: UserService,
@@ -34,39 +32,28 @@ export class NotificationService {
       access_token,
     );
     const token = await this.notificationRepository.getTokenInfoByFcmToken(
-      this.dataSource.manager,
       fcm_token,
     );
     if (token) {
       if (token.user_uuid === userInfo.user_uuid)
         return { fcm_token: fcm_token, agree_uuid: token.agree_uuid };
       return await this.notificationRepository.updtateUserByFcmTokenUuid(
-        this.dataSource.manager,
         token.fcm_token_uuid,
         userInfo.user_uuid,
       );
     }
-    return await this.dataSource.transaction(
-      async (transactionEntityManager) => {
-        return await this.notificationRepository.setFcmToken(
-          transactionEntityManager,
-          userInfo.user_uuid,
-          fcm_token,
-        );
-      },
-    );
-  }
-
-  async deleteFcmToken(fcm_token: string): Promise<void> {
-    await this.notificationRepository.deleteFcmToken(
-      this.dataSource.manager,
+    return await this.notificationRepository.setFcmToken(
+      userInfo.user_uuid,
       fcm_token,
     );
   }
 
+  async deleteFcmToken(fcm_token: string): Promise<void> {
+    await this.notificationRepository.deleteFcmToken(fcm_token);
+  }
+
   async getMarketingAgree(fcm_token: string): Promise<boolean> {
     const token = await this.notificationRepository.getTokenInfoByFcmToken(
-      this.dataSource.manager,
       fcm_token,
     );
     return token.marketing_agree;
@@ -77,11 +64,9 @@ export class NotificationService {
     marketing_agree: boolean,
   ): Promise<void> {
     const token = await this.notificationRepository.getTokenInfoByFcmToken(
-      this.dataSource.manager,
       fcm_token,
     );
     await this.notificationRepository.updateMarketingAgreeByFcmToken(
-      this.dataSource.manager,
       token.fcm_token_uuid,
       marketing_agree,
     );
@@ -89,11 +74,9 @@ export class NotificationService {
 
   async getTimeAgree(fcm_token: string): Promise<TimeAgree> {
     const token = await this.notificationRepository.getTokenInfoByFcmToken(
-      this.dataSource.manager,
       fcm_token,
     );
     const timeAgree = await this.notificationRepository.getTimeAgreeByAgreeUuid(
-      this.dataSource.manager,
       token.agree_uuid,
     );
     return timeAgree;
@@ -101,12 +84,10 @@ export class NotificationService {
 
   async getRemindAgree(fcm_token: string): Promise<RemindAgree> {
     const token = await this.notificationRepository.getTokenInfoByFcmToken(
-      this.dataSource.manager,
       fcm_token,
     );
     const remindAgree =
       await this.notificationRepository.getRemindAgreeByAgreeUuid(
-        this.dataSource.manager,
         token.agree_uuid,
       );
     return remindAgree;
@@ -114,12 +95,10 @@ export class NotificationService {
 
   async getQuestAgree(fcm_token: string): Promise<QuestAgree> {
     const token = await this.notificationRepository.getTokenInfoByFcmToken(
-      this.dataSource.manager,
       fcm_token,
     );
     const questAgree =
       await this.notificationRepository.getQuestAgreeByAgreeUuid(
-        this.dataSource.manager,
         token.agree_uuid,
       );
     return questAgree;
@@ -132,15 +111,12 @@ export class NotificationService {
     agree_02: boolean,
   ): Promise<void> {
     const token = await this.notificationRepository.getTokenInfoByFcmToken(
-      this.dataSource.manager,
       fcm_token,
     );
     const timeAgree = await this.notificationRepository.getTimeAgreeByAgreeUuid(
-      this.dataSource.manager,
       token.agree_uuid,
     );
     await this.notificationRepository.updateTimeAgree(
-      this.dataSource.manager,
       timeAgree.agree_uuid,
       agree_01,
       time_01,
@@ -149,15 +125,12 @@ export class NotificationService {
   }
   async updateOnlyTime(fcm_token: string, time_01: number): Promise<void> {
     const token = await this.notificationRepository.getTokenInfoByFcmToken(
-      this.dataSource.manager,
       fcm_token,
     );
     const timeAgree = await this.notificationRepository.getTimeAgreeByAgreeUuid(
-      this.dataSource.manager,
       token.agree_uuid,
     );
-    await this.notificationRepository.updataOnlyTime(
-      this.dataSource.manager,
+    await this.notificationRepository.updateOnlyTime(
       timeAgree.agree_uuid,
       time_01,
     );
@@ -168,16 +141,13 @@ export class NotificationService {
     time_01: number,
   ): Promise<void> {
     const token = await this.notificationRepository.getTokenInfoByFcmToken(
-      this.dataSource.manager,
       fcm_token,
     );
     const remindAgree =
       await this.notificationRepository.getRemindAgreeByAgreeUuid(
-        this.dataSource.manager,
         token.agree_uuid,
       );
     await this.notificationRepository.updateRemindAgree(
-      this.dataSource.manager,
       remindAgree.agree_uuid,
       agree_01,
       time_01,
@@ -190,16 +160,13 @@ export class NotificationService {
     agree_03: boolean,
   ): Promise<void> {
     const token = await this.notificationRepository.getTokenInfoByFcmToken(
-      this.dataSource.manager,
       fcm_token,
     );
     const questAgree =
       await this.notificationRepository.getQuestAgreeByAgreeUuid(
-        this.dataSource.manager,
         token.agree_uuid,
       );
     await this.notificationRepository.updateQuestAgree(
-      this.dataSource.manager,
       questAgree.agree_uuid,
       agree_01,
       agree_02,
@@ -214,7 +181,6 @@ export class NotificationService {
     data: { [key: string]: string },
   ): Promise<void> {
     const fcm_token = await this.notificationRepository.getFcmTokenByUserUuid(
-      this.dataSource.manager,
       user_uuid,
     );
     fcm_token.forEach((fcm_token) => {
@@ -250,9 +216,7 @@ export class NotificationService {
     body: string,
     data: { [key: string]: string },
   ): Promise<void> {
-    const fcm_token = await this.notificationRepository.getMarketingFcmToken(
-      this.dataSource.manager,
-    );
+    const fcm_token = await this.notificationRepository.getMarketingFcmToken();
     fcm_token.forEach((fcm_token) => {
       this.globalFcmService.postMessage(
         title,
@@ -273,7 +237,6 @@ export class NotificationService {
     time: number,
   ): Promise<void> {
     const fcm_token = await this.notificationRepository.getTimeAgreeFcmToken(
-      this.dataSource.manager,
       type,
       time,
     );
@@ -290,15 +253,11 @@ export class NotificationService {
   }
 
   async sendRemindMessage(data?: { [key: string]: string }): Promise<void> {
-    const fcm_token = await this.notificationRepository.getRemindAgreeFcmToken(
-      this.dataSource.manager,
-    );
+    const fcm_token =
+      await this.notificationRepository.getRemindAgreeFcmToken();
     fcm_token.forEach(async (fcm_token) => {
       const user_uuid = fcm_token.user_uuid;
-      const phrases = await this.phraseRepository.getRemindPhrase(
-        this.dataSource.manager,
-        user_uuid,
-      );
+      const phrases = await this.phraseRepository.getRemindPhrase(user_uuid);
       if (phrases.length > 0) {
         const randomIndex = Math.floor(Math.random() * phrases.length);
         const randomPhrase = phrases[randomIndex].phrase;
@@ -328,7 +287,6 @@ export class NotificationService {
     type: string,
   ): Promise<void> {
     const fcm_token = await this.notificationRepository.getQuestAgreeFcmToken(
-      this.dataSource.manager,
       type,
     );
     fcm_token.forEach((fcm_token) => {
@@ -348,7 +306,6 @@ export class NotificationService {
     fcm_token: string,
   ): Promise<void> {
     const thisWeek = await this.recordRepository.getWeeklyRecordHistory(
-      this.dataSource.manager,
       user_uuid,
       0,
       7,
@@ -356,7 +313,6 @@ export class NotificationService {
     );
 
     const lastWeek = await this.recordRepository.getWeeklyRecordHistory(
-      this.dataSource.manager,
       user_uuid,
       1,
       7,

@@ -7,6 +7,8 @@ import { JwtModule } from '@nestjs/jwt';
 import { HttpModule } from '@nestjs/axios';
 import { UserService } from 'src/user/user.service';
 import { JwtAccessStrategy } from './guard/jwtAccess.strategy';
+import { TypeOrmModule } from '@nestjs/typeorm';
+import { User } from 'src/global/entities/user.entity';
 
 @Module({
   imports: [
@@ -21,6 +23,7 @@ import { JwtAccessStrategy } from './guard/jwtAccess.strategy';
       }),
     }),
     HttpModule,
+    TypeOrmModule.forFeature([User]),
   ],
   providers: [AuthService, UserRepository, UserService, JwtAccessStrategy],
   controllers: [AuthController],

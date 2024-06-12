@@ -1,4 +1,5 @@
 import { Injectable } from '@nestjs/common';
+import { InjectRepository } from '@nestjs/typeorm';
 import { BookService } from 'src/book/book.service';
 import { BookLibrary } from 'src/global/entities/book_library.entity';
 import { Record } from 'src/global/entities/record.entity';
@@ -13,17 +14,19 @@ import {
   getToday,
   getWeekRange,
 } from 'src/global/utils';
-import { Between, DataSource, EntityManager, IsNull, Not } from 'typeorm';
+import { Between, IsNull, Not, Repository } from 'typeorm';
 
 @Injectable()
 export class RecordRepository {
   constructor(
-    private readonly dataSource: DataSource,
     private readonly bookService: BookService,
+    @InjectRepository(Record)
+    private readonly recordRepository: Repository<Record>,
+    @InjectRepository(BookLibrary)
+    private readonly bookLibraryRepository: Repository<BookLibrary>,
   ) {}
 
   async setRecord(
-    transactionEntityManager: EntityManager,
     book_uuid: string,
     user_uuid: string,
     goal_type: string,
@@ -35,7 +38,7 @@ export class RecordRepository {
       getToday(),
       getRandomString(8),
     );
-    await transactionEntityManager.save(Record, {
+    await this.recordRepository.save({
       record_uuid: record_uuid,
       book_uuid: book_uuid,
       user_uuid: user_uuid,
@@ -49,91 +52,71 @@ export class RecordRepository {
     return record_uuid;
   }
 
-  async getRecordByRecordUuid(
-    transactionEntityManager: EntityManager,
-    record_uuid: string,
-  ): Promise<Record> {
-    return await transactionEntityManager.findOne(Record, {
+  async getRecordByRecordUuid(record_uuid: string): Promise<Record> {
+    return await this.recordRepository.findOne({
       where: { record_uuid: record_uuid },
     });
   }
 
-  async getRecordByUserUuid(
-    transactionEntityManager: EntityManager,
-    user_uuid: string,
-  ): Promise<Record[]> {
-    return await transactionEntityManager.find(Record, {
+  async getRecordByUserUuid(user_uuid: string): Promise<Record[]> {
+    return await this.recordRepository.find({
       where: { user_uuid: user_uuid },
       order: { created_at: 'DESC' },
     });
   }
 
-  async getNotEndedRecordByUserUuid(
-    transactionEntityManager: EntityManager,
-    user_uuid: string,
-  ): Promise<Record> {
-    return await transactionEntityManager.findOne(Record, {
+  async getNotEndedRecordByUserUuid(user_uuid: string): Promise<Record> {
+    return await this.recordRepository.findOne({
       where: { user_uuid: user_uuid, end: IsNull() },
       order: { created_at: 'DESC' },
     });
   }
 
-  async getEndedRecordByUserUuid(
-    transactionEntityManager: EntityManager,
-    user_uuid: string,
-  ): Promise<Record[]> {
-    return await transactionEntityManager.find(Record, {
+  async getEndedRecordByUserUuid(user_uuid: string): Promise<Record[]> {
+    return await this.recordRepository.find({
       where: { user_uuid: user_uuid, end: Not(IsNull()) },
       order: { created_at: 'DESC' },
     });
   }
 
   async endRecord(
-    transactionEntityManager: EntityManager,
     record_uuid: string,
     page_end?: number,
     total_time?: number,
   ): Promise<void> {
-    await transactionEntityManager.update(
-      Record,
+    await this.recordRepository.update(
       { record_uuid: record_uuid },
       { end: new Date(), page_end: page_end, total_time: total_time },
     );
   }
 
-  async deleteRecord(
-    transactionEntityManager: EntityManager,
-    record_uuid: string,
-  ): Promise<void> {
-    await transactionEntityManager.delete(Record, { record_uuid: record_uuid });
+  async deleteRecord(record_uuid: string): Promise<void> {
+    await this.recordRepository.delete({ record_uuid: record_uuid });
   }
 
   async updateGoalAchieved(
-    transactionEntityManager: EntityManager,
     record_uuid: string,
     goal_achieved: boolean,
   ): Promise<void> {
-    await transactionEntityManager.update(
-      Record,
+    await this.recordRepository.update(
       { record_uuid: record_uuid },
       { goal_achieved: goal_achieved },
     );
   }
 
   async getLastPage(
-    transactionEntityManager: EntityManager,
     user_uuid: string,
     book_uuid: string,
     is_before_record: boolean,
   ): Promise<number> {
-    const read_history = await transactionEntityManager.findOne(BookLibrary, {
+    const read_history = await this.bookLibraryRepository.findOne({
       where: { user_uuid: user_uuid, book_uuid: book_uuid, state: 'AFTER' },
       order: { created_at: 'DESC' },
     });
     if (read_history !== null) {
       return 0;
     }
-    const records = await transactionEntityManager.find(Record, {
+    const records = await this.recordRepository.find({
       where: { user_uuid: user_uuid, book_uuid: book_uuid },
       order: { created_at: 'DESC' },
     });
@@ -147,17 +130,15 @@ export class RecordRepository {
   }
 
   async getRecordCountByBookUuidandUserUuid(
-    transactionEntityManager: EntityManager,
     book_uuid: string,
     user_uuid: string,
   ): Promise<number> {
-    return await transactionEntityManager.count(Record, {
+    return await this.recordRepository.count({
       where: { book_uuid: book_uuid, user_uuid: user_uuid },
     });
   }
 
   async getDailyRecordTotalTime(
-    transactionEntityManager: EntityManager,
     user_uuid: string,
     year: number,
     month: number,
@@ -167,7 +148,7 @@ export class RecordRepository {
     startOfDay.setHours(0, 0, 0, 0);
     const endOfDay = new Date(Date.UTC(year, month - 1, date));
     endOfDay.setHours(23, 59, 59, 999);
-    const records = await transactionEntityManager.find(Record, {
+    const records = await this.recordRepository.find({
       where: {
         user_uuid: user_uuid,
         end: Between(startOfDay, endOfDay),
@@ -181,7 +162,6 @@ export class RecordRepository {
   }
 
   async getRecordCountByUserUuid(
-    transactionEntityManager: EntityManager,
     user_uuid: string,
     count: number,
   ): Promise<number[]> {
@@ -195,7 +175,7 @@ export class RecordRepository {
       endOfDay.setDate(endOfDay.getDate() - i);
       endOfDay.setHours(23, 59, 59, 999);
 
-      const count = await transactionEntityManager.count(Record, {
+      const count = await this.recordRepository.count({
         where: {
           user_uuid: user_uuid,
           end: Between(startOfDay, endOfDay),
@@ -207,7 +187,6 @@ export class RecordRepository {
   }
 
   async getWeeklyRecordHistory(
-    transactionEntityManager: EntityManager,
     user_uuid: string,
     back_week: number,
     count: number,
@@ -229,7 +208,7 @@ export class RecordRepository {
       endOfDay.setDate(endOfDay.getDate() - i - minusCount);
       endOfDay.setHours(23, 59, 59, 999);
 
-      const record_data = await transactionEntityManager.find(Record, {
+      const record_data = await this.recordRepository.find({
         where: {
           user_uuid: user_uuid,
           end: Between(startOfDay, endOfDay),
@@ -264,7 +243,6 @@ export class RecordRepository {
   }
 
   async getWeeklyRecordHistoryV2(
-    transactionEntityManager: EntityManager,
     user_uuid: string,
     back_week: number,
     count: number,
@@ -286,7 +264,7 @@ export class RecordRepository {
       endOfDay.setDate(endOfDay.getDate() - i - minusCount);
       endOfDay.setHours(23, 59, 59, 999);
 
-      const recordData = await transactionEntityManager.find(Record, {
+      const recordData = await this.recordRepository.find({
         where: {
           user_uuid: user_uuid,
           end: Between(startOfDay, endOfDay),
@@ -325,7 +303,6 @@ export class RecordRepository {
   }
 
   async getReadingRecordCountsByMonth(
-    transactionEntityManager: EntityManager,
     user_uuid: string,
     year: number,
     month: number,
@@ -343,13 +320,13 @@ export class RecordRepository {
 
     switch (kind) {
       case 'COUNT':
-        presentMonthCount = await transactionEntityManager.count(Record, {
+        presentMonthCount = await this.recordRepository.count({
           where: {
             user_uuid: user_uuid,
             created_at: Between(presentMonthStart, presentMonthEnd),
           },
         });
-        pastMonthCount = await transactionEntityManager.count(Record, {
+        pastMonthCount = await this.recordRepository.count({
           where: {
             user_uuid: user_uuid,
             created_at: Between(pastMonthStart, pastMonthEnd),
@@ -357,14 +334,14 @@ export class RecordRepository {
         });
         break;
       case 'GOAL':
-        presentMonthCount = await transactionEntityManager.count(Record, {
+        presentMonthCount = await this.recordRepository.count({
           where: {
             user_uuid: user_uuid,
             created_at: Between(presentMonthStart, presentMonthEnd),
             goal_achieved: true,
           },
         });
-        pastMonthCount = await transactionEntityManager.count(Record, {
+        pastMonthCount = await this.recordRepository.count({
           where: {
             user_uuid: user_uuid,
             created_at: Between(pastMonthStart, pastMonthEnd),
@@ -373,8 +350,8 @@ export class RecordRepository {
         });
         break;
       case 'BOOK':
-        const presentMonthBooks = await transactionEntityManager
-          .createQueryBuilder(Record, 'record')
+        const presentMonthBooks = await this.recordRepository
+          .createQueryBuilder('record')
           .select('COUNT(DISTINCT record.book_uuid)', 'count')
           .where('record.user_uuid = :user_uuid', { user_uuid })
           .andWhere('record.created_at BETWEEN :start AND :end', {
@@ -385,8 +362,8 @@ export class RecordRepository {
 
         presentMonthCount = parseInt(presentMonthBooks.count, 10);
 
-        const pastMonthBooks = await transactionEntityManager
-          .createQueryBuilder(Record, 'record')
+        const pastMonthBooks = await this.recordRepository
+          .createQueryBuilder('record')
           .select('COUNT(DISTINCT record.book_uuid)', 'count')
           .where('record.user_uuid = :user_uuid', { user_uuid })
           .andWhere('record.created_at BETWEEN :start AND :end', {
@@ -405,18 +382,14 @@ export class RecordRepository {
     };
   }
 
-  async getWeeklyData(
-    transactionEntityManager: EntityManager,
-    offset: number,
-    user_uuid: string,
-  ): Promise<number> {
+  async getWeeklyData(offset: number, user_uuid: string): Promise<number> {
     let weeklyDataCount = 0;
 
     const startWeek = getWeekRange(offset).startOfWeek;
     const endWeek = getWeekRange(offset).endOfWeek;
 
-    const weeklyRecordData = await transactionEntityManager
-      .createQueryBuilder(Record, 'record')
+    const weeklyRecordData = await this.recordRepository
+      .createQueryBuilder('record')
       .select('COUNT(DISTINCT record.book_uuid)', 'count')
       .where('record.user_uuid = :user_uuid', { user_uuid })
       .andWhere('record.created_at BETWEEN :start AND :end', {

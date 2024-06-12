@@ -1,4 +1,5 @@
 import { Injectable } from '@nestjs/common';
+import { InjectRepository } from '@nestjs/typeorm';
 import { BookService } from 'src/book/book.service';
 import { Phrase } from 'src/global/entities/phrase.entity';
 import {
@@ -8,17 +9,17 @@ import {
   LibraryPhraseTypeV2,
 } from 'src/global/types/response.type';
 import { generateRamdomId, getRandomString, getToday } from 'src/global/utils';
-import { DataSource, EntityManager } from 'typeorm';
+import { Repository } from 'typeorm';
 
 @Injectable()
 export class PhraseRepository {
   constructor(
-    private readonly dataSource: DataSource,
     private readonly bookService: BookService,
+    @InjectRepository(Phrase)
+    private readonly phraseRepository: Repository<Phrase>,
   ) {}
 
   async setPhrase(
-    transactionEntityManager: EntityManager,
     book_uuid: string,
     user_uuid: string,
     phrase: string,
@@ -30,7 +31,7 @@ export class PhraseRepository {
       getToday(),
       getRandomString(8),
     );
-    await transactionEntityManager.save(Phrase, {
+    await this.phraseRepository.save({
       phrase_uuid: phrase_uuid,
       book_uuid: book_uuid,
       user_uuid: user_uuid,
@@ -43,80 +44,60 @@ export class PhraseRepository {
     return phrase_uuid;
   }
 
-  async getPhrasesByUserUuid(
-    transactionEntityManager: EntityManager,
-    user_uuid: string,
-  ): Promise<Phrase[]> {
-    return await transactionEntityManager.find(Phrase, {
+  async getPhrasesByUserUuid(user_uuid: string): Promise<Phrase[]> {
+    return await this.phraseRepository.find({
       where: { user_uuid: user_uuid },
       order: { created_at: 'DESC' },
     });
   }
 
-  async getPhraseByPhraseUuid(
-    transactionEntityManager: EntityManager,
-    phrase_uuid: string,
-  ): Promise<Phrase> {
-    return await transactionEntityManager.findOne(Phrase, {
+  async getPhraseByPhraseUuid(phrase_uuid: string): Promise<Phrase> {
+    return await this.phraseRepository.findOne({
       where: { phrase_uuid: phrase_uuid },
     });
   }
 
   async updatePhraseRemind(
-    transactionEntityManager: EntityManager,
     phrase_uuid: string,
     remind: boolean,
   ): Promise<void> {
-    await transactionEntityManager.update(
-      Phrase,
+    await this.phraseRepository.update(
       { phrase_uuid: phrase_uuid },
       { remind: remind },
     );
   }
 
-  async updatePhrase(
-    transactionEntityManager: EntityManager,
-    phrase_uuid: string,
-    phrase: string,
-  ): Promise<void> {
-    await transactionEntityManager.update(
-      Phrase,
+  async updatePhrase(phrase_uuid: string, phrase: string): Promise<void> {
+    await this.phraseRepository.update(
       { phrase_uuid: phrase_uuid },
       { phrase: phrase },
     );
   }
 
-  async getRemindPhrase(
-    transactionEntityManager: EntityManager,
-    user_uuid: string,
-  ): Promise<Phrase[]> {
-    return await transactionEntityManager.find(Phrase, {
+  async getRemindPhrase(user_uuid: string): Promise<Phrase[]> {
+    return await this.phraseRepository.find({
       where: { user_uuid: user_uuid, remind: true },
     });
   }
 
-  async deletePhrase(
-    transactionEntityManager: EntityManager,
-    phrase_uuid: string,
-  ): Promise<void> {
-    await transactionEntityManager.delete(Phrase, { phrase_uuid: phrase_uuid });
+  async deletePhrase(phrase_uuid: string): Promise<void> {
+    await this.phraseRepository.delete({ phrase_uuid: phrase_uuid });
   }
 
   async getPhrasesForLibrary(
-    transactionEntityManager: EntityManager,
     user_uuid: string,
     page: number,
   ): Promise<LibraryPhraseResponseType> {
     const pageSize = 3;
     const phraseList: LibraryPhraseType[] = [];
     let moreAvailable = false;
-    const phraseListFromDB = await transactionEntityManager.find(Phrase, {
+    const phraseListFromDB = await this.phraseRepository.find({
       order: { created_at: 'DESC' },
       where: { user_uuid: user_uuid },
       skip: (page - 1) * pageSize,
       take: pageSize,
     });
-    const totalCount = await transactionEntityManager.count(Phrase, {
+    const totalCount = await this.phraseRepository.count({
       where: { user_uuid: user_uuid },
     });
     for (const phrase of phraseListFromDB) {
@@ -135,17 +116,17 @@ export class PhraseRepository {
   }
 
   async getPhrasesForLibraryV2(
-    transactionEntityManager: EntityManager,
     user_uuid: string,
   ): Promise<LibraryPhraseResponseTypeV2> {
     const pageSize = 3;
     const phraseList: LibraryPhraseTypeV2[] = [];
     const moreAvailable = false;
-    const phraseListFromDB = await transactionEntityManager.find(Phrase, {
+    const phraseListFromDB = await this.phraseRepository.find({
       order: { created_at: 'DESC' },
       where: { user_uuid: user_uuid },
       take: pageSize,
     });
+
     for (const phrase of phraseListFromDB) {
       const book_info = await this.bookService.findByBookUuid(phrase.book_uuid);
       phraseList.push({
@@ -163,20 +144,19 @@ export class PhraseRepository {
   }
 
   async getAllPhrasesInSpecificPage(
-    transactionEntityManager: EntityManager,
     user_uuid: string,
     page: number,
   ): Promise<LibraryPhraseResponseTypeV2> {
     const pageSize = 7;
     const phraseList: LibraryPhraseTypeV2[] = [];
     let moreAvailable = false;
-    const phraseListFromDB = await transactionEntityManager.find(Phrase, {
+    const phraseListFromDB = await this.phraseRepository.find({
       order: { created_at: 'DESC' },
       where: { user_uuid: user_uuid },
       skip: (page - 1) * pageSize,
       take: pageSize,
     });
-    const totalCount = await transactionEntityManager.count(Phrase, {
+    const totalCount = await this.phraseRepository.count({
       where: { user_uuid: user_uuid },
     });
     for (const phrase of phraseListFromDB) {

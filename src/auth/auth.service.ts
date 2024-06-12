@@ -13,7 +13,6 @@ import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
 import { lastValueFrom, map } from 'rxjs';
 import { HttpService } from '@nestjs/axios';
-import { DataSource } from 'typeorm';
 import { UserRegisterType } from 'src/global/types/user.enum';
 import { User } from 'src/global/entities/user.entity';
 import { UserRepository } from 'src/user/user.repository';
@@ -27,7 +26,6 @@ export class AuthService {
     private readonly configService: ConfigService,
     private readonly jwtService: JwtService,
     private readonly httpService: HttpService,
-    private readonly dataSource: DataSource,
   ) {}
 
   async login(data: LoginUserDto): Promise<LoginResponseType> {

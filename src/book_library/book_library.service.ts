@@ -1,5 +1,4 @@
 import { Injectable } from '@nestjs/common';
-import { DataSource } from 'typeorm';
 import { BookLibraryRepository } from './book_library.repository';
 import { UserService } from 'src/user/user.service';
 import { Book } from 'src/global/entities/book.entity';
@@ -13,7 +12,6 @@ import {
 @Injectable()
 export class BookLibraryService {
   constructor(
-    private readonly dataSource: DataSource,
     private readonly bookLibraryRepository: BookLibraryRepository,
     private readonly userService: UserService,
   ) {}
@@ -23,14 +21,9 @@ export class BookLibraryService {
     state: string,
   ): Promise<Book[]> {
     const userInfo = await this.userService.getUserInfo(access_token);
-    return await this.dataSource.transaction(
-      async (transactionEntityManager) => {
-        return await this.bookLibraryRepository.getBookLibraryListByUserUuid(
-          transactionEntityManager,
-          userInfo.user_uuid,
-          state,
-        );
-      },
+    return await this.bookLibraryRepository.getBookLibraryListByUserUuid(
+      userInfo.user_uuid,
+      state,
     );
   }
 
@@ -40,15 +33,10 @@ export class BookLibraryService {
     page: number,
   ): Promise<BookLibraryListResponseType> {
     const userInfo = await this.userService.getUserInfo(access_token);
-    return await this.dataSource.transaction(
-      async (transactionEntityManager) => {
-        return await this.bookLibraryRepository.getBookLibraryListWithStateList(
-          transactionEntityManager,
-          userInfo.user_uuid,
-          state_list,
-          page,
-        );
-      },
+    return await this.bookLibraryRepository.getBookLibraryListWithStateList(
+      userInfo.user_uuid,
+      state_list,
+      page,
     );
   }
 
@@ -57,15 +45,10 @@ export class BookLibraryService {
     book_info: RegisterLibraryDto,
   ): Promise<boolean> {
     const userInfo = await this.userService.getUserInfo(access_token);
-    return await this.dataSource.transaction(
-      async (transactionEntityManager) => {
-        return await this.bookLibraryRepository.setBookLibrary(
-          transactionEntityManager,
-          userInfo.user_uuid,
-          book_info.book_uuid,
-          book_info.state,
-        );
-      },
+    return await this.bookLibraryRepository.setBookLibrary(
+      userInfo.user_uuid,
+      book_info.book_uuid,
+      book_info.state,
     );
   }
 
@@ -74,14 +57,9 @@ export class BookLibraryService {
     book_uuid: string,
   ): Promise<void> {
     const userInfo = await this.userService.getUserInfo(access_token);
-    return await this.dataSource.transaction(
-      async (transactionEntityManager) => {
-        return await this.bookLibraryRepository.deleteBookLibrary(
-          transactionEntityManager,
-          userInfo.user_uuid,
-          book_uuid,
-        );
-      },
+    return await this.bookLibraryRepository.deleteBookLibrary(
+      userInfo.user_uuid,
+      book_uuid,
     );
   }
 
@@ -91,15 +69,10 @@ export class BookLibraryService {
     state: string,
   ): Promise<void> {
     const userInfo = await this.userService.getUserInfo(access_token);
-    return await this.dataSource.transaction(
-      async (transactionEntityManager) => {
-        return await this.bookLibraryRepository.updateBookLibrary(
-          transactionEntityManager,
-          userInfo.user_uuid,
-          book_uuid,
-          state,
-        );
-      },
+    return await this.bookLibraryRepository.updateBookLibrary(
+      userInfo.user_uuid,
+      book_uuid,
+      state,
     );
   }
 
@@ -108,14 +81,9 @@ export class BookLibraryService {
     book_uuid: string,
   ): Promise<BookLibrary> {
     const userInfo = await this.userService.getUserInfo(access_token);
-    return await this.dataSource.transaction(
-      async (transactionEntityManager) => {
-        return await this.bookLibraryRepository.getBookLibraryByBookUuidAndUserUuid(
-          transactionEntityManager,
-          book_uuid,
-          userInfo.user_uuid,
-        );
-      },
+    return await this.bookLibraryRepository.getBookLibraryByBookUuidAndUserUuid(
+      book_uuid,
+      userInfo.user_uuid,
     );
   }
 
@@ -124,14 +92,9 @@ export class BookLibraryService {
     page: number,
   ): Promise<BookMarkResponseType> {
     const userInfo = await this.userService.getUserInfo(access_token);
-    return await this.dataSource.transaction(
-      async (transactionEntityManager) => {
-        return await this.bookLibraryRepository.getBookMark(
-          transactionEntityManager,
-          userInfo.user_uuid,
-          page,
-        );
-      },
+    return await this.bookLibraryRepository.getBookMark(
+      userInfo.user_uuid,
+      page,
     );
   }
 }

@@ -1,6 +1,5 @@
 import { Injectable } from '@nestjs/common';
 import { User } from 'src/global/entities/user.entity';
-import { DataSource } from 'typeorm';
 import { CreateUserDto } from './dto/user.dto';
 import { generateRamdomId, getRandomString, getToday } from 'src/global/utils';
 import { AppleUserDataDto, KakaoUserDataDto } from 'src/auth/dto/auth.dto';
@@ -8,27 +7,28 @@ import { UserRegisterType } from 'src/global/types/user.enum';
 import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
 import * as bcrypt from 'bcrypt';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
 
 @Injectable()
 export class UserRepository {
   constructor(
-    private readonly dataSource: DataSource,
     private readonly jwtService: JwtService,
     private readonly configService: ConfigService,
+    @InjectRepository(User)
+    private readonly userReposiotry: Repository<User>,
   ) {}
 
   async findOneByUserUuid(userUuid: string): Promise<User> {
-    const user = await this.dataSource.manager.findOne(User, {
+    return await this.userReposiotry.findOne({
       where: { user_uuid: userUuid },
     });
-    return user;
   }
 
   async findOneByUserId(userId: string): Promise<User> {
-    const user = await this.dataSource.manager.findOne(User, {
+    return await this.userReposiotry.findOne({
       where: { user_id: userId },
     });
-    return user;
   }
 
   async setNewUser(userData: CreateUserDto): Promise<void> {
@@ -38,7 +38,7 @@ export class UserRepository {
       getRandomString(8),
     );
     await this.encryptPassword(userData);
-    await this.dataSource.manager.save(User, {
+    await this.userReposiotry.save({
       user_uuid: user_uuid,
       user_nickname: userData.user_nickname,
       user_id: userData.user_id,
@@ -61,7 +61,7 @@ export class UserRepository {
     kakaoUser.user_password = '';
     kakaoUser.register_type = UserRegisterType.KAKAO;
     kakaoUser.registered_at = new Date();
-    await this.dataSource.manager.save(User, kakaoUser);
+    await this.userReposiotry.save(kakaoUser);
     return user_uuid;
   }
 
@@ -78,7 +78,7 @@ export class UserRepository {
     appleUser.user_password = '';
     appleUser.register_type = UserRegisterType.APPLE;
     appleUser.registered_at = new Date();
-    await this.dataSource.manager.save(User, appleUser);
+    await this.userReposiotry.save(appleUser);
     return user_uuid;
   }
 
@@ -108,8 +108,7 @@ export class UserRepository {
     user_uuid: string,
     user_nickname: string,
   ): Promise<void> {
-    await this.dataSource.manager.update(
-      User,
+    await this.userReposiotry.update(
       { user_uuid: user_uuid },
       { user_nickname: user_nickname },
     );
@@ -120,8 +119,7 @@ export class UserRepository {
     user_password: string,
   ): Promise<void> {
     const encryptedPassword = await bcrypt.hash(user_password, 10);
-    await this.dataSource.manager.update(
-      User,
+    await this.userReposiotry.update(
       { user_uuid: user_uuid },
       { user_password: encryptedPassword },
     );

@@ -1,4 +1,5 @@
 import { Injectable } from '@nestjs/common';
+import { InjectRepository } from '@nestjs/typeorm';
 import { BookService } from 'src/book/book.service';
 import { Book } from 'src/global/entities/book.entity';
 import { BookLibrary } from 'src/global/entities/book_library.entity';
@@ -10,18 +11,20 @@ import {
 } from 'src/global/types/response.type';
 import { generateRamdomId, getRandomString, getToday } from 'src/global/utils';
 import { RecordRepository } from 'src/record/record.repository';
-import { DataSource, EntityManager, In } from 'typeorm';
+import { In, Repository } from 'typeorm';
 
 @Injectable()
 export class BookLibraryRepository {
   constructor(
-    private readonly dataSource: DataSource,
     private readonly recordRepository: RecordRepository,
     private readonly bookService: BookService,
+    @InjectRepository(BookLibrary)
+    private readonly bookLibraryRepository: Repository<BookLibrary>,
+    @InjectRepository(Book)
+    private readonly bookRepository: Repository<Book>,
   ) {}
 
   async getBookLibraryListWithStateList(
-    transactionEntityManager: EntityManager,
     user_uuid: string,
     state_list: string[],
     page: number,
@@ -29,20 +32,19 @@ export class BookLibraryRepository {
     const libraryList: BookLibraryResponseType[] = [];
     let moreAvailable = false;
     const pageSize = 3;
-    const bookLibraryList = await transactionEntityManager.find(BookLibrary, {
+    const bookLibraryList = await this.bookLibraryRepository.find({
       where: { user_uuid: user_uuid, state: In(state_list) },
       order: { updated_at: 'DESC' },
       skip: (page - 1) * pageSize,
       take: pageSize,
     });
-    const totalCount = await transactionEntityManager.count(BookLibrary, {
+    const totalCount = await this.bookLibraryRepository.count({
       where: { user_uuid: user_uuid, state: In(state_list) },
     });
     moreAvailable = totalCount > page * pageSize;
     for (const bookLibrary of bookLibraryList) {
       const count =
         await this.recordRepository.getRecordCountByBookUuidandUserUuid(
-          transactionEntityManager,
           bookLibrary.book_uuid,
           user_uuid,
         );
@@ -56,18 +58,17 @@ export class BookLibraryRepository {
   }
 
   async getBookLibraryListByUserUuid(
-    transactionEntityManager: EntityManager,
     user_uuid: string,
     state: string,
   ): Promise<Book[]> {
-    const library_info = await transactionEntityManager.find(BookLibrary, {
+    const library_info = await this.bookLibraryRepository.find({
       where: { user_uuid: user_uuid, state: state },
       order: { created_at: 'DESC' },
     });
     const book_uuid_list = library_info.map((book) => book.book_uuid);
     const book_list = [];
     for (let i = 0; i < book_uuid_list.length; i++) {
-      const book = await transactionEntityManager.findOne(Book, {
+      const book = await this.bookRepository.findOne({
         where: { book_uuid: book_uuid_list[i] },
       });
       book_list.push(book);
@@ -76,12 +77,11 @@ export class BookLibraryRepository {
   }
 
   async setBookLibrary(
-    transactionEntityManager: EntityManager,
     user_uuid: string,
     book_uuid: string,
     state: string,
   ): Promise<boolean> {
-    const already_book = await transactionEntityManager.findOne(BookLibrary, {
+    const already_book = await this.bookLibraryRepository.findOne({
       where: { user_uuid: user_uuid, book_uuid: book_uuid },
     });
     if (already_book) {
@@ -92,7 +92,7 @@ export class BookLibraryRepository {
       getToday(),
       getRandomString(8),
     );
-    await transactionEntityManager.save(BookLibrary, {
+    await this.bookLibraryRepository.save({
       library_register_uuid: library_register_uuid,
       user_uuid: user_uuid,
       book_uuid: book_uuid,
@@ -104,55 +104,47 @@ export class BookLibraryRepository {
     return true;
   }
 
-  async deleteBookLibrary(
-    transactionEntityManager: EntityManager,
-    user_uuid: string,
-    book_uuid: string,
-  ): Promise<void> {
-    await transactionEntityManager.delete(BookLibrary, {
+  async deleteBookLibrary(user_uuid: string, book_uuid: string): Promise<void> {
+    await this.bookLibraryRepository.delete({
       user_uuid: user_uuid,
       book_uuid: book_uuid,
     });
   }
 
   async updateBookLibrary(
-    transactionEntityManager: EntityManager,
     user_uuid: string,
     book_uuid: string,
     state: string,
   ): Promise<void> {
-    await transactionEntityManager.update(
-      BookLibrary,
+    await this.bookLibraryRepository.update(
       { user_uuid: user_uuid, book_uuid: book_uuid },
       { state: state, updated_at: new Date() },
     );
   }
 
   async getBookLibraryByBookUuidAndUserUuid(
-    transactionEntityManager: EntityManager,
     book_uuid: string,
     user_uuid: string,
   ): Promise<BookLibrary> {
-    return await transactionEntityManager.findOne(BookLibrary, {
+    return await this.bookLibraryRepository.findOne({
       where: { book_uuid: book_uuid, user_uuid: user_uuid },
     });
   }
 
   async getBookMark(
-    transactionEntityManager: EntityManager,
     user_uuid: string,
     page: number,
   ): Promise<BookMarkResponseType> {
     const pageSize = 3;
     const bookMarkList: BookMarkType[] = [];
     let moreAvailable = false;
-    const bookLibraryList = await transactionEntityManager.find(BookLibrary, {
+    const bookLibraryList = await this.bookLibraryRepository.find({
       order: { updated_at: 'DESC' },
       where: { user_uuid: user_uuid, state: 'READING' },
       skip: (page - 1) * pageSize,
       take: pageSize,
     });
-    const totalCount = await transactionEntityManager.count(BookLibrary, {
+    const totalCount = await this.bookLibraryRepository.count({
       where: { user_uuid: user_uuid, state: 'READING' },
     });
     moreAvailable = totalCount > page * pageSize;
@@ -161,7 +153,6 @@ export class BookLibraryRepository {
         bookLibrary.book_uuid,
       );
       const lastPage = await this.recordRepository.getLastPage(
-        transactionEntityManager,
         user_uuid,
         bookLibrary.book_uuid,
         true,

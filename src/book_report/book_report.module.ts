@@ -11,6 +11,9 @@ import { HttpModule } from '@nestjs/axios';
 import { ReviewService } from 'src/review/review.service';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { Book } from 'src/global/entities/book.entity';
+import { BookReport } from 'src/global/entities/book_report.entity';
+import { User } from 'src/global/entities/user.entity';
+import { Review } from 'src/global/entities/review.entity';
 
 @Module({
   imports: [
@@ -25,7 +28,7 @@ import { Book } from 'src/global/entities/book.entity';
       }),
     }),
     HttpModule,
-    TypeOrmModule.forFeature([Book]),
+    TypeOrmModule.forFeature([Book, BookReport, User, Review]),
   ],
   controllers: [BookReportController],
   providers: [

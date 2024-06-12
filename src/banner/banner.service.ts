@@ -1,22 +1,22 @@
 import { Injectable } from '@nestjs/common';
 import { Banner } from 'src/global/entities/banner.entity';
-import { DataSource } from 'typeorm';
+import { Repository } from 'typeorm';
 import { NewBannerDto } from './dto/banner.dto';
 import { BannerRegisterResponseType } from 'src/global/types/response.type';
 import { generateRamdomId, getRandomString, getToday } from 'src/global/utils';
+import { InjectRepository } from '@nestjs/typeorm';
 
 @Injectable()
 export class BannerService {
-  constructor(private readonly dataSource: DataSource) {}
+  constructor(
+    @InjectRepository(Banner)
+    private readonly bannerRepository: Repository<Banner>,
+  ) {}
 
   async getBannerList(): Promise<Banner[]> {
-    let bannerList: Banner[];
-    await this.dataSource.transaction(async (transctionEntityManager) => {
-      bannerList = await transctionEntityManager.find(Banner, {
-        order: { created_at: 'DESC' },
-      });
+    return await this.bannerRepository.find({
+      order: { created_at: 'DESC' },
     });
-    return bannerList;
   }
 
   async setNewBanner(
@@ -32,7 +32,7 @@ export class BannerService {
     banner_data.banner_url = banner.banner_url;
     banner_data.created_at = new Date();
     banner_data.click_url = banner.click_url;
-    await this.dataSource.manager.save(Banner, banner_data);
+    await this.bannerRepository.save(banner_data);
     return { message: 'success' };
   }
 }
