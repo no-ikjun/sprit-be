@@ -32,8 +32,9 @@ export class UserService {
 
   async findByUserUuid(access_token: string): Promise<User> {
     const userInfo = await this.getUserInfo(access_token);
-    let user: User;
-    await this.userRepository.findOneByUserUuid(userInfo.user_uuid);
+    const user = await this.userRepository.findOneByUserUuid(
+      userInfo.user_uuid,
+    );
     return user;
   }
 

@@ -41,7 +41,6 @@ import { Record } from './global/entities/record.entity';
 import { Phrase } from './global/entities/phrase.entity';
 import { User } from './global/entities/user.entity';
 import { Review } from './global/entities/review.entity';
-
 @Module({
   imports: [
     ScheduleModule,
