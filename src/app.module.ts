@@ -41,6 +41,7 @@ import { Record } from './global/entities/record.entity';
 import { Phrase } from './global/entities/phrase.entity';
 import { User } from './global/entities/user.entity';
 import { Review } from './global/entities/review.entity';
+import { ProfileModule } from './profile/profile.module';
 @Module({
   imports: [
     ScheduleModule,
@@ -81,6 +82,7 @@ import { Review } from './global/entities/review.entity';
       User,
       Review,
     ]),
+    ProfileModule,
   ],
   controllers: [AppController],
   providers: [
