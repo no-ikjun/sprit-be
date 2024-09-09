@@ -4,7 +4,7 @@ import { AppService } from './app.service';
 import { AuthModule } from './auth/auth.module';
 import { UserModule } from './user/user.module';
 import { DatabaseModule } from './global/config/database/database.module';
-import { ConfigModule } from '@nestjs/config';
+import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { DatabaseService } from './global/config/database/database.service';
 import { BookModule } from './book/book.module';
@@ -27,7 +27,7 @@ import { RecordService } from './record/record.service';
 import { RecordRepository } from './record/record.repository';
 import { BookService } from './book/book.service';
 import { ReviewService } from './review/review.service';
-import { JwtService } from '@nestjs/jwt';
+import { JwtModule, JwtService } from '@nestjs/jwt';
 import { NoticeModule } from './notice/notice.module';
 import { VersionModule } from './version/version.module';
 import { PhraseRepository } from './phrase/phrase.repository';
@@ -83,6 +83,17 @@ import { ProfileModule } from './profile/profile.module';
       Review,
     ]),
     ProfileModule,
+    JwtModule.registerAsync({
+      imports: [ConfigModule],
+      inject: [ConfigService],
+      useFactory: async (config: ConfigService) => ({
+        secret: config.get<string>('JWT_ACCESS_TOKEN_SECRET'),
+        signOptions: {
+          expiresIn: `${config.get('JWT_ACCESS_TOKEN_EXPIRATION_TIME')}`,
+        },
+      }),
+      global: true,
+    }),
   ],
   controllers: [AppController],
   providers: [

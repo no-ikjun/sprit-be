@@ -1,4 +1,5 @@
-import { Column, Entity, PrimaryColumn } from 'typeorm';
+import { Column, Entity, OneToOne, PrimaryColumn } from 'typeorm';
+import { Profile } from './profile.entity';
 
 @Entity('user')
 export class User {
@@ -19,4 +20,7 @@ export class User {
 
   @Column()
   registered_at: Date;
+
+  @OneToOne(() => Profile, (profile) => profile.user)
+  profile: Profile;
 }

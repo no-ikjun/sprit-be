@@ -1,8 +1,6 @@
 import { Module } from '@nestjs/common';
 import { ScheduleModule as NestScheduleModule } from '@nestjs/schedule';
 import { ScheduleService } from './schedule.service';
-import { JwtModule } from '@nestjs/jwt';
-import { ConfigModule, ConfigService } from '@nestjs/config';
 import { HttpModule } from '@nestjs/axios';
 import { NotificationService } from 'src/notification/notification.service';
 import { NotificationRepository } from 'src/notification/notification.repository';
@@ -29,16 +27,6 @@ import { Review } from 'src/global/entities/review.entity';
 @Module({
   imports: [
     NestScheduleModule.forRoot(),
-    JwtModule.registerAsync({
-      imports: [ConfigModule],
-      inject: [ConfigService],
-      useFactory: async (config: ConfigService) => ({
-        secret: config.get<string>('JWT_ACCESS_TOKEN_SECRET'),
-        signOptions: {
-          expiresIn: `${config.get('JWT_ACCESS_TOKEN_EXPIRATION_TIME')}`,
-        },
-      }),
-    }),
     HttpModule,
     TypeOrmModule.forFeature([
       Book,

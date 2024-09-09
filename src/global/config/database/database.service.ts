@@ -8,6 +8,8 @@ import { BookReport } from 'src/global/entities/book_report.entity';
 import { FcmToken } from 'src/global/entities/fcm_token.entity';
 import { Notice } from 'src/global/entities/notice.entity';
 import { Phrase } from 'src/global/entities/phrase.entity';
+import { Profile } from 'src/global/entities/profile.entity';
+import { ProfileRecommendBook } from 'src/global/entities/profile_book.entity';
 import { Quest } from 'src/global/entities/quest.entity';
 import { QuestAgree } from 'src/global/entities/quest_agree.entity';
 import { QuestApply } from 'src/global/entities/quest_apply.entity';
@@ -48,8 +50,10 @@ export class DatabaseService implements TypeOrmOptionsFactory {
         BookReport,
         Notice,
         Version,
+        Profile,
+        ProfileRecommendBook,
       ],
-      synchronize: false,
+      synchronize: true,
     };
   }
 }

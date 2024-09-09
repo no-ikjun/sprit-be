@@ -1,4 +1,5 @@
-import { Column, Entity, PrimaryColumn } from 'typeorm';
+import { Column, Entity, OneToMany, PrimaryColumn } from 'typeorm';
+import { ProfileRecommendBook } from './profile_book.entity';
 
 @Entity('book')
 export class Book {
@@ -37,4 +38,7 @@ export class Book {
 
   @Column()
   score: number;
+
+  @OneToMany(() => ProfileRecommendBook, (recommend) => recommend.book)
+  recommendedProfiles: ProfileRecommendBook[];
 }
