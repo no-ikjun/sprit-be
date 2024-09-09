@@ -2,15 +2,15 @@ import { Column, Entity, PrimaryColumn } from 'typeorm';
 
 @Entity('time_agree')
 export class TimeAgree {
-  @PrimaryColumn()
+  @PrimaryColumn({ nullable: false })
   agree_uuid: string;
 
-  @Column()
+  @Column({ nullable: false, default: true })
   agree_01: boolean;
 
-  @Column()
+  @Column({ nullable: false, default: 20 })
   time_01: number;
 
-  @Column()
+  @Column({ nullable: false, default: true })
   agree_02: boolean;
 }

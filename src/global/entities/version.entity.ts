@@ -2,21 +2,21 @@ import { Column, Entity, PrimaryColumn } from 'typeorm';
 
 @Entity('version')
 export class Version {
-  @PrimaryColumn()
+  @PrimaryColumn({ nullable: false })
   version_uuid: string;
 
-  @Column()
+  @Column({ nullable: false })
   version_number: string;
 
-  @Column()
+  @Column({ nullable: false })
   build_number: string;
 
-  @Column()
+  @Column({ nullable: false })
   update_required: boolean;
 
-  @Column()
+  @Column({ nullable: false })
   description: string;
 
-  @Column()
+  @Column({ nullable: false, default: () => 'CURRENT_TIMESTAMP' })
   created_at: Date;
 }

@@ -94,7 +94,7 @@ export class ProfileRepository {
       bookInfo.thumbnail = book.thumbnail;
       bookInfo.content = book.content;
       bookInfo.published_at = book.published_at;
-      bookInfo.updated_at = book.updated_at;
+      bookInfo.updated_at = book.updated_at ?? new Date();
       bookInfo.score = book.score;
 
       recommendBook.book = bookInfo;

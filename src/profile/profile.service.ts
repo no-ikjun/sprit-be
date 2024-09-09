@@ -73,7 +73,7 @@ export class ProfileService {
     user_uuid: string,
     image: string,
     description: string,
-    recommend_book_ids: string[] = [], // 기본값으로 빈 배열 설정
+    recommend_book_ids: string[] = [],
   ): Promise<Profile> {
     // 1. User가 존재하는지 확인
     const user = await this.userRepository.findOne({ where: { user_uuid } });

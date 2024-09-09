@@ -3,40 +3,40 @@ import { ProfileRecommendBook } from './profile_book.entity';
 
 @Entity('book')
 export class Book {
-  @PrimaryColumn()
+  @PrimaryColumn({ nullable: false })
   book_uuid: string;
 
-  @Column()
+  @Column({ nullable: false })
   isbn: string;
 
-  @Column()
+  @Column({ nullable: true })
   title: string;
 
-  @Column()
+  @Column({ nullable: true, default: '' })
   authors: string;
 
-  @Column()
+  @Column({ nullable: true, default: '' })
   publisher: string;
 
-  @Column()
+  @Column({ nullable: true })
   translators: string;
 
-  @Column()
+  @Column({ nullable: true, default: '' })
   search_url: string;
 
-  @Column()
+  @Column({ nullable: true, default: '' })
   thumbnail: string;
 
-  @Column()
+  @Column({ nullable: true, default: '' })
   content: string;
 
-  @Column()
+  @Column({ nullable: true })
   published_at: Date;
 
-  @Column()
+  @Column({ nullable: true, default: () => 'CURRENT_TIMESTAMP' })
   updated_at: Date;
 
-  @Column()
+  @Column({ nullable: true, default: 0 })
   score: number;
 
   @OneToMany(() => ProfileRecommendBook, (recommend) => recommend.book)

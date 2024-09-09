@@ -2,24 +2,24 @@ import { Column, Entity, PrimaryColumn } from 'typeorm';
 
 @Entity('phrase')
 export class Phrase {
-  @PrimaryColumn()
+  @PrimaryColumn({ nullable: false })
   phrase_uuid: string;
 
-  @Column()
+  @Column({ nullable: false })
   book_uuid: string;
 
-  @Column()
+  @Column({ nullable: false })
   user_uuid: string;
 
   @Column()
   phrase: string;
 
-  @Column()
+  @Column({ nullable: false, default: 0 })
   page: number;
 
-  @Column()
+  @Column({ nullable: false, default: false })
   remind: boolean;
 
-  @Column()
+  @Column({ nullable: false, default: () => 'CURRENT_TIMESTAMP' })
   created_at: Date;
 }

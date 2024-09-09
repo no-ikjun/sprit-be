@@ -2,15 +2,15 @@ import { Column, Entity, PrimaryColumn } from 'typeorm';
 
 @Entity('quest_agree')
 export class QuestAgree {
-  @PrimaryColumn()
+  @PrimaryColumn({ nullable: false })
   agree_uuid: string;
 
-  @Column()
+  @Column({ nullable: false, default: true })
   agree_01: boolean;
 
-  @Column()
+  @Column({ nullable: false, default: true })
   agree_02: boolean;
 
-  @Column()
+  @Column({ nullable: false, default: true })
   agree_03: boolean;
 }

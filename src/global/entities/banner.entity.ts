@@ -2,13 +2,13 @@ import { Column, Entity, PrimaryColumn } from 'typeorm';
 
 @Entity('banner')
 export class Banner {
-  @PrimaryColumn()
+  @PrimaryColumn({ nullable: false, default: '' })
   banner_uuid: string;
 
   @Column()
   banner_url: string;
 
-  @Column()
+  @Column({ default: () => 'CURRENT_TIMESTAMP' })
   created_at: Date;
 
   @Column()

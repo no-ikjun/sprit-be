@@ -2,18 +2,18 @@ import { Column, Entity, PrimaryColumn } from 'typeorm';
 
 @Entity('notice')
 export class Notice {
-  @PrimaryColumn()
+  @PrimaryColumn({ nullable: false })
   notice_uuid: string;
 
-  @Column()
+  @Column({ nullable: false })
   title: string;
 
   @Column()
   body: string;
 
-  @Column()
+  @Column({ nullable: false, default: '' })
   type: string;
 
-  @Column()
+  @Column({ nullable: false, default: () => 'CURRENT_TIMESTAMP' })
   created_at: Date;
 }
