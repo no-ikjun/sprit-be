@@ -10,10 +10,15 @@ import { User } from 'src/global/entities/user.entity';
 import { Repository } from 'typeorm';
 import { Book } from 'src/global/entities/book.entity';
 import { ProfileRecommendBook } from 'src/global/entities/profile_book.entity';
+import { ProfileResponseType } from 'src/global/types/response.type';
+import { ProfileRepository } from './profile.repository';
+import { UserService } from 'src/user/user.service';
 
 @Injectable()
 export class ProfileService {
   constructor(
+    private readonly profileRepositories: ProfileRepository,
+    private readonly userService: UserService,
     @InjectRepository(Profile)
     private profileRepository: Repository<Profile>,
     @InjectRepository(User)
@@ -58,7 +63,14 @@ export class ProfileService {
         });
 
         const result = await upload.done();
-        res.status(201).json(result.Location.split('amazonaws.com/')[1]);
+        const image = result.Location.split('amazonaws.com/')[1];
+        const access_token = req.headers.authorization.split(' ')[1];
+        const user_info = await this.userService.getUserInfo(access_token);
+        await this.profileRepositories.updateProfileImage(
+          user_info.user_uuid,
+          image,
+        );
+        res.status(201).json({ image });
       } catch (uploadError) {
         console.error(uploadError);
         res.status(500).json('파일 업로드에 실패했습니다.');
@@ -120,5 +132,38 @@ export class ProfileService {
 
     // 6. 프로필 저장
     return await this.profileRepository.save(profile);
+  }
+
+  async getProfile(user_uuid: string): Promise<ProfileResponseType> {
+    const profile = await this.profileRepository.findOne({
+      where: { user: { user_uuid } },
+      relations: ['user', 'recommend_list'],
+    });
+
+    if (!profile) {
+      console.log("Profile doesn't exist. Creating a new profile...");
+      const user = await this.userRepository.findOne({ where: { user_uuid } });
+      if (!user) {
+        throw new Error(`User with user_uuid ${user_uuid} not found`);
+      } else {
+        this.setProfile(user_uuid, 'profiles/default.png', user.user_nickname);
+      }
+      return {
+        user_uuid,
+        nickname: user.user_nickname,
+        image: 'profiles/default.png',
+        description: '',
+        recommend_list: [],
+      };
+    }
+    return {
+      user_uuid: profile.user.user_uuid,
+      nickname: profile.user.user_nickname,
+      image: profile.image,
+      description: profile.description,
+      recommend_list: profile.recommend_list.map((recommendBook) => {
+        return recommendBook.book.book_uuid;
+      }),
+    };
   }
 }

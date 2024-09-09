@@ -124,3 +124,11 @@ export type MonthlyRecordResponseType = {
   present_month: number;
   past_month: number;
 };
+
+export type ProfileResponseType = {
+  user_uuid: string;
+  nickname: string;
+  image: string;
+  description: string;
+  recommend_list: string[];
+};
