@@ -53,7 +53,7 @@ export class DatabaseService implements TypeOrmOptionsFactory {
         Profile,
         ProfileRecommendBook,
       ],
-      synchronize: true,
+      synchronize: false,
     };
   }
 }
