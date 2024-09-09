@@ -42,6 +42,7 @@ import { Phrase } from './global/entities/phrase.entity';
 import { User } from './global/entities/user.entity';
 import { Review } from './global/entities/review.entity';
 import { ProfileModule } from './profile/profile.module';
+import { FollowModule } from './follow/follow.module';
 @Module({
   imports: [
     ScheduleModule,
@@ -94,6 +95,7 @@ import { ProfileModule } from './profile/profile.module';
       }),
       global: true,
     }),
+    FollowModule,
   ],
   controllers: [AppController],
   providers: [
