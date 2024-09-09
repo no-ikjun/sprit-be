@@ -66,4 +66,22 @@ export class FollowService {
 
     return !!follow;
   }
+
+  async getFollowingList(follower_uuid: string): Promise<string[]> {
+    const followings = await this.followRepository.find({
+      where: { follower: { user_uuid: follower_uuid } },
+      relations: ['followee'],
+    });
+
+    return followings.map((follow) => follow.followee.user_uuid);
+  }
+
+  async getFollowerList(user_uuid: string): Promise<string[]> {
+    const followers = await this.followRepository.find({
+      where: { followee: { user_uuid } },
+      relations: ['follower'],
+    });
+
+    return followers.map((follow) => follow.follower.user_uuid);
+  }
 }

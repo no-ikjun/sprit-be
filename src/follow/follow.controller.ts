@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Post, UseGuards } from '@nestjs/common';
+import { Body, Controller, Get, Post, Query, UseGuards } from '@nestjs/common';
 import { FollowService } from './follow.service';
 import { JwtAccessGuard } from 'src/auth/guard/jwtAccess.guard';
 import { FollowDto } from './dto/follow.dto';
@@ -32,5 +32,17 @@ export class FollowController {
       body.follower_uuid,
       body.followee_uuid,
     );
+  }
+
+  @UseGuards(JwtAccessGuard)
+  @Get('followers')
+  async getFollowers(@Query() query) {
+    return await this.followService.getFollowerList(query.user_uuid);
+  }
+
+  @UseGuards(JwtAccessGuard)
+  @Get('following')
+  async getFollowing(@Query() query) {
+    return await this.followService.getFollowingList(query.user_uuid);
   }
 }
