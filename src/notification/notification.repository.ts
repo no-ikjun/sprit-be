@@ -233,17 +233,20 @@ export class NotificationRepository {
   }
 
   async getRemindAgreeFcmToken(): Promise<FcmToken[]> {
-    const result: FcmToken[] = [];
     const remind_agree = await this.remindAgreeRepository.find({
       where: { agree_01: true },
     });
-    remind_agree.map(async (agree: RemindAgree) => {
-      const fcm_token = await this.fcmTokenRepository.findOne({
-        where: { agree_uuid: agree.agree_uuid },
-      });
-      result.push(fcm_token);
-    });
-    return result;
+
+    const result = await Promise.all(
+      remind_agree.map(async (agree: RemindAgree) => {
+        const fcm_token = await this.fcmTokenRepository.findOne({
+          where: { agree_uuid: agree.agree_uuid },
+        });
+        return fcm_token;
+      }),
+    );
+
+    return result.filter((token) => token !== null && token !== undefined);
   }
 
   async getQuestAgreeFcmToken(type: string): Promise<FcmToken[]> {

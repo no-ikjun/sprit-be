@@ -153,7 +153,7 @@ export class ScheduleService {
     });
   }
 
-  @Cron('0 0 8 * * 1')
+  @Cron('0 8 * * 1')
   async handleRemindPhrase() {
     this.notificationService.sendRemindMessage();
   }
