@@ -3,7 +3,7 @@ import { FollowService } from './follow.service';
 import { JwtAccessGuard } from 'src/auth/guard/jwtAccess.guard';
 import { FollowDto } from './dto/follow.dto';
 
-@Controller('follow')
+@Controller('v1/follow')
 export class FollowController {
   constructor(private readonly followService: FollowService) {}
 
@@ -41,7 +41,7 @@ export class FollowController {
   }
 
   @UseGuards(JwtAccessGuard)
-  @Get('following')
+  @Get('followings')
   async getFollowing(@Query() query) {
     return await this.followService.getFollowingList(query.user_uuid);
   }

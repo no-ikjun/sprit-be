@@ -2,7 +2,7 @@ import {
   CreateDateColumn,
   Entity,
   JoinColumn,
-  OneToOne,
+  ManyToOne,
   PrimaryGeneratedColumn,
 } from 'typeorm';
 import { User } from './user.entity';
@@ -12,13 +12,15 @@ export class Follow {
   @PrimaryGeneratedColumn('uuid')
   follow_uuid: string;
 
-  @OneToOne(() => User)
-  @JoinColumn({ name: 'follower_uuid' })
-  follower: User; // 팔로우 하는 유저
+  // 팔로우 하는 유저 (follower)
+  @ManyToOne(() => User)
+  @JoinColumn({ name: 'follower' })
+  follower: User;
 
-  @OneToOne(() => User)
-  @JoinColumn({ name: 'followee_uuid' })
-  followee: User; // 팔로우 받는 유저
+  // 팔로우 받는 유저 (followee)
+  @ManyToOne(() => User)
+  @JoinColumn({ name: 'followee' })
+  followee: User;
 
   @CreateDateColumn({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP' })
   created_at: Date;

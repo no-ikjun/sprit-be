@@ -37,7 +37,7 @@ export class ProfileService {
     },
   });
 
-  upload = multer({ dest: 'uploads/' }).single('upload'); // 파일을 임시로 로컬에 저장
+  upload = multer({ dest: 'uploads/' }).single('upload');
 
   async fileUpload(@Req() req, @Res() res) {
     this.upload(req, res, async (error) => {
