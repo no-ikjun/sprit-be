@@ -8,7 +8,7 @@ import {
 import { Profile } from './profile.entity';
 import { Book } from './book.entity';
 
-@Entity()
+@Entity('profile_recommend_book')
 export class ProfileRecommendBook {
   @PrimaryGeneratedColumn('uuid')
   recommend_uuid: string;

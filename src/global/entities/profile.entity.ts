@@ -9,7 +9,7 @@ import {
 import { User } from './user.entity';
 import { ProfileRecommendBook } from './profile_recommend_book.entity';
 
-@Entity('profile_recommend_book')
+@Entity('profile')
 export class Profile {
   @PrimaryGeneratedColumn('uuid')
   profile_uuid: string;
@@ -22,7 +22,7 @@ export class Profile {
     type: 'varchar',
     length: 255,
     nullable: false,
-    default: 'https://d3ob3cint7tr3s.cloudfront.net/profiles/default.png',
+    default: 'profiles/default.png',
   })
   image: string;
 

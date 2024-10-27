@@ -136,7 +136,7 @@ export class ProfileService {
 
   async getProfile(user_uuid: string): Promise<ProfileResponseType> {
     const profile = await this.profileRepository.findOne({
-      where: { user: { user_uuid: user_uuid } },
+      where: { user: { user_uuid } },
       relations: ['user', 'recommend_list'],
     });
 
