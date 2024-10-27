@@ -1,5 +1,5 @@
 import { Column, Entity, OneToMany, PrimaryColumn } from 'typeorm';
-import { ProfileRecommendBook } from './profile_book.entity';
+import { ProfileRecommendBook } from './profile_recommend_book.entity';
 
 @Entity('book')
 export class Book {

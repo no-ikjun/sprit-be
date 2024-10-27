@@ -7,7 +7,7 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { Profile } from 'src/global/entities/profile.entity';
 import { User } from 'src/global/entities/user.entity';
 import { Book } from 'src/global/entities/book.entity';
-import { ProfileRecommendBook } from 'src/global/entities/profile_book.entity';
+import { ProfileRecommendBook } from 'src/global/entities/profile_recommend_book.entity';
 import { BookService } from 'src/book/book.service';
 import { HttpModule } from '@nestjs/axios';
 import { ReviewService } from 'src/review/review.service';

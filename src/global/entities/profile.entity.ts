@@ -7,7 +7,7 @@ import {
   OneToMany,
 } from 'typeorm';
 import { User } from './user.entity';
-import { ProfileRecommendBook } from './profile_book.entity';
+import { ProfileRecommendBook } from './profile_recommend_book.entity';
 
 @Entity()
 export class Profile {

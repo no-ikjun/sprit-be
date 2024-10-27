@@ -3,7 +3,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { BookService } from 'src/book/book.service';
 import { Book } from 'src/global/entities/book.entity';
 import { Profile } from 'src/global/entities/profile.entity';
-import { ProfileRecommendBook } from 'src/global/entities/profile_book.entity';
+import { ProfileRecommendBook } from 'src/global/entities/profile_recommend_book.entity';
 import { Repository } from 'typeorm';
 
 @Injectable()

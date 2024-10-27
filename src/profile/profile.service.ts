@@ -9,7 +9,7 @@ import { Profile } from 'src/global/entities/profile.entity';
 import { User } from 'src/global/entities/user.entity';
 import { Repository } from 'typeorm';
 import { Book } from 'src/global/entities/book.entity';
-import { ProfileRecommendBook } from 'src/global/entities/profile_book.entity';
+import { ProfileRecommendBook } from 'src/global/entities/profile_recommend_book.entity';
 import { ProfileResponseType } from 'src/global/types/response.type';
 import { ProfileRepository } from './profile.repository';
 import { UserService } from 'src/user/user.service';
@@ -136,7 +136,7 @@ export class ProfileService {
 
   async getProfile(user_uuid: string): Promise<ProfileResponseType> {
     const profile = await this.profileRepository.findOne({
-      where: { user: { user_uuid } },
+      where: { user: { user_uuid: user_uuid } },
       relations: ['user', 'recommend_list'],
     });
 

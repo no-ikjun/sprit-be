@@ -10,7 +10,7 @@ import { Follow } from 'src/global/entities/follow.entity';
 import { Notice } from 'src/global/entities/notice.entity';
 import { Phrase } from 'src/global/entities/phrase.entity';
 import { Profile } from 'src/global/entities/profile.entity';
-import { ProfileRecommendBook } from 'src/global/entities/profile_book.entity';
+import { ProfileRecommendBook } from 'src/global/entities/profile_recommend_book.entity';
 import { Quest } from 'src/global/entities/quest.entity';
 import { QuestAgree } from 'src/global/entities/quest_agree.entity';
 import { QuestApply } from 'src/global/entities/quest_apply.entity';
