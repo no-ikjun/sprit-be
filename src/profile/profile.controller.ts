@@ -1,6 +1,8 @@
 import {
+  Body,
   Controller,
   Get,
+  Patch,
   Post,
   Query,
   Req,
@@ -23,6 +25,15 @@ export class ProfileController {
     } catch (error) {
       return res.status(500).json({ message: error.message });
     }
+  }
+
+  @UseGuards(JwtAccessGuard)
+  @Patch('desc')
+  async updateProfileDesc(@Body() body) {
+    return await this.profileService.updateProfileDesc(
+      body.user_uuid,
+      body.desc,
+    );
   }
 
   @UseGuards(JwtAccessGuard)

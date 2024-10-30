@@ -70,6 +70,7 @@ export class ProfileService {
           user_info.user_uuid,
           image,
         );
+        console.log(result.Location);
         res.status(201).json({ image });
       } catch (uploadError) {
         console.error(uploadError);
@@ -165,5 +166,16 @@ export class ProfileService {
         return recommendBook.book.book_uuid;
       }),
     };
+  }
+
+  async updateProfileDesc(user_uuid: string, description: string) {
+    const profile = await this.profileRepository.findOne({
+      where: { user: { user_uuid } },
+    });
+    if (!profile) {
+      throw new Error(`Profile with user_uuid ${user_uuid} not found`);
+    }
+    profile.description = description;
+    await this.profileRepository.save(profile);
   }
 }
