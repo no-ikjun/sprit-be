@@ -7,12 +7,13 @@ import * as path from 'path';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Profile } from 'src/global/entities/profile.entity';
 import { User } from 'src/global/entities/user.entity';
-import { Repository } from 'typeorm';
+import { Like, Not, Repository } from 'typeorm';
 import { Book } from 'src/global/entities/book.entity';
 import { ProfileRecommendBook } from 'src/global/entities/profile_recommend_book.entity';
 import { ProfileResponseType } from 'src/global/types/response.type';
 import { ProfileRepository } from './profile.repository';
 import { UserService } from 'src/user/user.service';
+import { FollowService } from 'src/follow/follow.service';
 
 @Injectable()
 export class ProfileService {
@@ -27,6 +28,7 @@ export class ProfileService {
     private bookRepository: Repository<Book>,
     @InjectRepository(ProfileRecommendBook)
     private profileRecommendBookRepository: Repository<ProfileRecommendBook>,
+    private readonly followService: FollowService,
   ) {}
 
   private s3 = new S3Client({
@@ -177,5 +179,63 @@ export class ProfileService {
     }
     profile.description = description;
     await this.profileRepository.save(profile);
+  }
+
+  async getProfileRecommendList(
+    user_uuid: string,
+  ): Promise<ProfileResponseType[]> {
+    // 프로필 전체 ID를 무작위로 가져와 20개의 ID를 샘플링
+    const randomIds = await this.profileRepository
+      .createQueryBuilder('profile')
+      .select('profile.user_uuid')
+      .orderBy('RAND()')
+      .limit(20)
+      .getRawMany();
+
+    // 추천 프로필을 해당 ID 목록을 기준으로 조회
+    const profiles = await this.profileRepository
+      .createQueryBuilder('profile')
+      .leftJoinAndSelect('profile.user', 'user')
+      .leftJoinAndSelect('profile.recommend_list', 'recommend_list')
+      .leftJoinAndSelect('recommend_list.book', 'book')
+      .where('profile.user_uuid != :user_uuid', { user_uuid })
+      .andWhere('profile.user_uuid IN (:...randomIds)', {
+        randomIds: randomIds.map((id) => id.user_uuid),
+      })
+      .getMany();
+
+    return profiles.map((profile) => ({
+      user_uuid: profile.user.user_uuid,
+      nickname: profile.user.user_nickname,
+      image: profile.image,
+      description: profile.description,
+      recommend_list: profile.recommend_list
+        ? profile.recommend_list.map((book) => book.book.book_uuid)
+        : [],
+    }));
+  }
+
+  async searchProfileByNickname(
+    nickname: string,
+    user_uuid: string,
+  ): Promise<ProfileResponseType[]> {
+    const profiles = await this.profileRepository.find({
+      where: {
+        user: {
+          user_nickname: Like(`%${nickname}%`),
+          user_uuid: Not(user_uuid),
+        },
+      },
+      relations: ['user', 'recommend_list'],
+    });
+    return profiles.map((profile) => ({
+      user_uuid: profile.user.user_uuid,
+      nickname: profile.user.user_nickname,
+      image: profile.image,
+      description: profile.description,
+      recommend_list: profile.recommend_list
+        ? profile.recommend_list.map((book) => book.book.book_uuid)
+        : [],
+    }));
   }
 }

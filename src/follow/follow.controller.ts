@@ -1,4 +1,12 @@
-import { Body, Controller, Get, Post, Query, UseGuards } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Delete,
+  Get,
+  Post,
+  Query,
+  UseGuards,
+} from '@nestjs/common';
 import { FollowService } from './follow.service';
 import { JwtAccessGuard } from 'src/auth/guard/jwtAccess.guard';
 import { FollowDto } from './dto/follow.dto';
@@ -17,7 +25,7 @@ export class FollowController {
   }
 
   @UseGuards(JwtAccessGuard)
-  @Post('cancel')
+  @Delete()
   async unfollowUser(@Body() body: FollowDto) {
     return await this.followService.unfollowUser(
       body.follower_uuid,

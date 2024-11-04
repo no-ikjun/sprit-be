@@ -43,6 +43,7 @@ import { User } from './global/entities/user.entity';
 import { Review } from './global/entities/review.entity';
 import { ProfileModule } from './profile/profile.module';
 import { FollowModule } from './follow/follow.module';
+import { ArticleModule } from './article/article.module';
 @Module({
   imports: [
     ScheduleModule,
@@ -96,6 +97,7 @@ import { FollowModule } from './follow/follow.module';
       global: true,
     }),
     FollowModule,
+    ArticleModule,
   ],
   controllers: [AppController],
   providers: [

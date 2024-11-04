@@ -2,6 +2,8 @@ import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Follow } from 'src/global/entities/follow.entity';
 import { User } from 'src/global/entities/user.entity';
+import { ProfileResponseType } from 'src/global/types/response.type';
+import { ProfileRepository } from 'src/profile/profile.repository';
 import { Repository } from 'typeorm';
 
 @Injectable()
@@ -11,6 +13,7 @@ export class FollowService {
     private readonly followRepository: Repository<Follow>,
     @InjectRepository(User)
     private readonly userRepository: Repository<User>,
+    private readonly profileRepository: ProfileRepository,
   ) {}
 
   async followUser(
@@ -67,21 +70,58 @@ export class FollowService {
     return !!follow;
   }
 
-  async getFollowingList(follower_uuid: string): Promise<string[]> {
+  async getFollowingList(
+    follower_uuid: string,
+  ): Promise<ProfileResponseType[]> {
     const followings = await this.followRepository.find({
       where: { follower: { user_uuid: follower_uuid } },
       relations: ['followee'],
     });
 
-    return followings.map((follow) => follow.followee.user_uuid);
+    const result = await Promise.all(
+      followings.map(async (follow) => {
+        const profile = await this.profileRepository.getProfileByUserUuid(
+          follow.followee.user_uuid,
+        );
+        return {
+          user_uuid: follow.followee.user_uuid,
+          nickname: follow.followee.user_nickname,
+          image: profile.image,
+          description: profile.description,
+          recommend_list: [],
+          // recommend_list: profile.recommend_list.map((recommendBook) => {
+          //   return recommendBook.book.book_uuid;
+          // }),
+        };
+      }),
+    );
+
+    return result;
   }
 
-  async getFollowerList(user_uuid: string): Promise<string[]> {
+  async getFollowerList(user_uuid: string): Promise<ProfileResponseType[]> {
     const followers = await this.followRepository.find({
       where: { followee: { user_uuid } },
       relations: ['follower'],
     });
+    const result = await Promise.all(
+      followers.map(async (follow) => {
+        const profile = await this.profileRepository.getProfileByUserUuid(
+          follow.follower.user_uuid,
+        );
+        return {
+          user_uuid: follow.follower.user_uuid,
+          nickname: follow.follower.user_nickname,
+          image: profile.image,
+          description: profile.description,
+          recommend_list: [],
+          // recommend_list: profile.recommend_list.map((recommendBook) => {
+          //   return recommendBook.book.book_uuid;
+          // }),
+        };
+      }),
+    );
 
-    return followers.map((follow) => follow.follower.user_uuid);
+    return result;
   }
 }

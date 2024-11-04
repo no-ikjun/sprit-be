@@ -14,6 +14,8 @@ import { ReviewService } from 'src/review/review.service';
 import { UserService } from 'src/user/user.service';
 import { Review } from 'src/global/entities/review.entity';
 import { UserRepository } from 'src/user/user.repository';
+import { Follow } from 'src/global/entities/follow.entity';
+import { FollowService } from 'src/follow/follow.service';
 
 @Module({
   imports: [
@@ -25,6 +27,7 @@ import { UserRepository } from 'src/user/user.repository';
       Book,
       ProfileRecommendBook,
       Review,
+      Follow,
     ]),
   ],
   controllers: [ProfileController],
@@ -35,6 +38,7 @@ import { UserRepository } from 'src/user/user.repository';
     ReviewService,
     UserService,
     UserRepository,
+    FollowService,
   ],
 })
 export class ProfileModule {}

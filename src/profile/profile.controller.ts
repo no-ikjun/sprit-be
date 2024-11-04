@@ -41,4 +41,21 @@ export class ProfileController {
   async getProfile(@Query() query): Promise<ProfileResponseType> {
     return await this.profileService.getProfile(query.user_uuid);
   }
+
+  @UseGuards(JwtAccessGuard)
+  @Get('recommend')
+  async getProfileRecommendList(
+    @Query() query,
+  ): Promise<ProfileResponseType[]> {
+    return await this.profileService.getProfileRecommendList(query.user_uuid);
+  }
+
+  @UseGuards(JwtAccessGuard)
+  @Get('search')
+  async searchProfile(@Query() query): Promise<ProfileResponseType[]> {
+    return await this.profileService.searchProfileByNickname(
+      query.keyword,
+      query.user_uuid,
+    );
+  }
 }
