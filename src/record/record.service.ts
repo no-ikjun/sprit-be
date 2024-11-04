@@ -82,6 +82,10 @@ export class RecordService {
     );
   }
 
+  async updatePage(record_uuid: string, page_end: number): Promise<void> {
+    return await this.recordRepository.updatePageEnd(record_uuid, page_end);
+  }
+
   async getRecordCountByUserUuid(
     access_token: string,
     count: number,

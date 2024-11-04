@@ -93,6 +93,12 @@ export class RecordController {
     );
   }
 
+  @Patch('page-end')
+  @UseGuards(JwtAccessGuard)
+  async updatePage(@Query() query): Promise<void> {
+    await this.recordService.updatePage(query.record_uuid, query.page_end);
+  }
+
   @Get('record-count')
   @UseGuards(JwtAccessGuard)
   async getRecordCount(@Req() req, @Query() query): Promise<number[]> {

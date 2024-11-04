@@ -129,6 +129,13 @@ export class RecordRepository {
     return last_page;
   }
 
+  async updatePageEnd(record_uuid: string, page_end: number): Promise<void> {
+    await this.recordRepository.update(
+      { record_uuid: record_uuid },
+      { page_end: page_end },
+    );
+  }
+
   async getRecordCountByBookUuidandUserUuid(
     book_uuid: string,
     user_uuid: string,
