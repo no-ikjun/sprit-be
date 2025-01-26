@@ -41,4 +41,11 @@ export class BookController {
   async getPopularBook(@Query() query): Promise<PopularBookResponseType> {
     return await this.bookService.getPopularBookList(query.page ?? 1);
   }
+
+  @Get('best')
+  @UseGuards(JwtAccessGuard)
+  async getBestBook() {
+    await this.bookService.weeklyBestSeller();
+    return { message: 'success' };
+  }
 }

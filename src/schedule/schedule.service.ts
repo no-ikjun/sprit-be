@@ -1,5 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { Cron } from '@nestjs/schedule';
+import { BookService } from 'src/book/book.service';
 import { NotificationRepository } from 'src/notification/notification.repository';
 import { NotificationService } from 'src/notification/notification.service';
 
@@ -8,6 +9,7 @@ export class ScheduleService {
   constructor(
     private readonly notificationService: NotificationService,
     private readonly notificationRepository: NotificationRepository,
+    private readonly bookService: BookService,
   ) {}
 
   timeMessage(time: number) {
@@ -156,5 +158,10 @@ export class ScheduleService {
   @Cron('0 8 * * 1')
   async handleRemindPhrase() {
     this.notificationService.sendRemindMessage();
+  }
+
+  @Cron('0 0 0 * * 1')
+  async handlePopularBook() {
+    this.bookService.weeklyBestSeller();
   }
 }
