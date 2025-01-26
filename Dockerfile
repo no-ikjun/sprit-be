@@ -13,6 +13,9 @@ RUN npm install
 # 소스 코드 복사
 COPY . .
 
+# 빌드
+RUN npm run build
+
 # 포트를 노출
 EXPOSE 3000
 
