@@ -38,17 +38,15 @@ jobs:
           key: ${{ secrets.LIGHTSAIL_SSH_KEY }}
           port: ${{ secrets.SSH_PORT }}
           script: |
-            # .env 파일 생성
-            echo "${{ secrets.ENV_FILE }}" > /home/ubuntu/.env
-
-            # Docker 컨테이너 중지 및 제거
-            docker rm -f sprit || true
+            # 기존 컨테이너 중지 및 제거
+            docker stop sprit || true
+            docker rm sprit || true
 
             # 최신 Docker 이미지 가져오기
             docker pull ${{ secrets.DOCKER_USERNAME }}/sprit:latest
 
             # 새로운 컨테이너 실행
-            docker run --rm -d --name sprit \
+            docker run -d --name sprit \
               -p 3000:3000 \
               --env-file /home/ubuntu/.env \
               --restart always \
