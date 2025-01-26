@@ -13,7 +13,7 @@ import {
 } from 'src/global/types/response.type';
 import { ReviewService } from 'src/review/review.service';
 import { InjectRepository } from '@nestjs/typeorm';
-import puppeteer from 'puppeteer';
+import axios from 'axios';
 
 @Injectable()
 export class BookService {
@@ -300,78 +300,23 @@ export class BookService {
   }
 
   async getBestSellerK() {
-    const browser = await puppeteer.launch();
-    const page = await browser.newPage();
-
-    await page.setUserAgent(
-      'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36',
-    );
-    await page.goto(
-      'https://store.kyobobook.co.kr/bestseller/total/weekly?page=1&per=100',
+    const response = await axios.get(
+      'https://store.kyobobook.co.kr/api/gw/best/best-seller/total?page=1&per=100&period=002&bsslBksClstCode=A',
       {
-        waitUntil: 'domcontentloaded',
+        headers: {
+          'User-Agent':
+            'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36',
+        },
       },
     );
+    const books = response.data.data.bestSeller;
 
-    await page.waitForSelector(
-      'a.prod_link.font-weight-medium.line-clamp-2.text-black.hover\\:underline',
-      { timeout: 20000 },
-    );
-
-    const books = await page.evaluate(() => {
-      const elements = document.querySelectorAll(
-        'a.prod_link.font-weight-medium.line-clamp-2.text-black.hover\\:underline',
-      );
-      return Array.from(elements).map((el, index) => ({
+    return books.map((book: any, index: number) => {
+      return {
         rank: index + 1,
-        title: el.textContent?.trim(),
-      }));
+        title: book.cmdtName,
+      };
     });
-
-    await browser.close();
-    return books;
-  }
-
-  async getBestSellerY() {
-    const browser = await puppeteer.launch({
-      headless: true, // 브라우저가 보이지 않게 실행
-      args: [
-        '--no-sandbox',
-        '--disable-setuid-sandbox',
-        '--disable-dev-shm-usage',
-        '--disable-accelerated-2d-canvas',
-        '--disable-gpu',
-        '--no-zygote',
-        '--single-process',
-      ],
-      executablePath: '/usr/bin/chromium-browser',
-    });
-    const page = await browser.newPage();
-
-    await page.setUserAgent(
-      'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36',
-    );
-    await page.goto(
-      'https://www.yes24.com/Product/Category/MonthWeekBestSeller?categoryNumber=001&pageNumber=1&pageSize=100&type=week',
-      {
-        waitUntil: 'domcontentloaded',
-      },
-    );
-
-    // 데이터가 로드되기까지 대기
-    await page.waitForSelector('a.gd_name', { timeout: 20000 });
-
-    // 데이터 추출
-    const books = await page.evaluate(() => {
-      const elements = document.querySelectorAll('a.gd_name');
-      return Array.from(elements).map((el, index) => ({
-        rank: index + 1,
-        title: el.textContent?.trim(),
-      }));
-    });
-
-    await browser.close();
-    return books;
   }
 
   // 일주일 단위 인기 책 점수 초기화
@@ -385,10 +330,6 @@ export class BookService {
 
     const booksK = await this.getBestSellerK();
     booksK.forEach((book) => {
-      this.setScoreByBookTitle(book.title, calculateScore(book.rank));
-    });
-    const booksY = await this.getBestSellerY();
-    booksY.forEach((book) => {
       this.setScoreByBookTitle(book.title, calculateScore(book.rank));
     });
   }

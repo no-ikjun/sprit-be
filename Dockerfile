@@ -1,18 +1,8 @@
 # Node.js 이미지를 베이스로 사용
 FROM node:18-alpine
 
-# Puppeteer 실행에 필요한 라이브러리 설치 (Alpine용)
-RUN apk update && apk add --no-cache \
-  mariadb-client \
-  chromium \
-  nss \
-  freetype \
-  harfbuzz \
-  ca-certificates \
-  ttf-freefont
-
-# Puppeteer가 사용하는 Chrome의 경로 설정
-ENV PUPPETEER_EXECUTABLE_PATH=/usr/bin/chromium-browser
+USER root
+RUN apk update && apk add --no-cache mariadb-client
 
 # 작업 디렉토리 생성
 WORKDIR /app
