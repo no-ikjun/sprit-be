@@ -42,6 +42,9 @@ jobs:
             docker stop sprit || true
             docker rm -f sprit || true
 
+            # .env 파일 생성
+            echo "${{ secrets.ENV_FILE }}" > /home/ubuntu/.env
+
             # 최신 Docker 이미지 가져오기
             docker pull ${{ secrets.DOCKER_USERNAME }}/sprit:latest
 
