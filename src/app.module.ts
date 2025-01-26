@@ -50,6 +50,7 @@ import { ArticleModule } from './article/article.module';
     ConfigModule.forRoot({
       cache: true,
       isGlobal: true,
+      envFilePath: '.env',
     }),
     TypeOrmModule.forRootAsync({
       imports: [DatabaseModule],
