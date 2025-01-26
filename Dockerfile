@@ -2,7 +2,7 @@
 FROM node:18-alpine
 
 USER root
-RUN apt-get update && apt-get install -y mariadb-client
+RUN apk update && apk add --no-cache mariadb-client
 
 # 작업 디렉토리 생성
 WORKDIR /app
