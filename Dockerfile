@@ -1,6 +1,9 @@
 # Node.js 이미지를 베이스로 사용
 FROM node:18-alpine
 
+USER root
+RUN apt-get update && apt-get install -y mariadb-client
+
 # 작업 디렉토리 생성
 WORKDIR /app
 
