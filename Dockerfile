@@ -10,6 +10,9 @@ COPY package*.json ./
 # 패키지 설치
 RUN npm install
 
+# 환경 변수 설정
+COPY .env .env
+
 # 소스 코드 복사
 COPY . .
 
