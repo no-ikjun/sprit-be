@@ -38,9 +38,9 @@ jobs:
           key: ${{ secrets.LIGHTSAIL_SSH_KEY }}
           port: ${{ secrets.SSH_PORT }}
           script: |
-            # 기존 컨테이너 중지 및 제거
+            # 기존 컨테이너 강제 중지 및 제거
             docker stop sprit || true
-            docker rm sprit || true
+            docker rm -f sprit || true
 
             # 최신 Docker 이미지 가져오기
             docker pull ${{ secrets.DOCKER_USERNAME }}/sprit:latest
