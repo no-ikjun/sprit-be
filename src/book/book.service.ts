@@ -333,7 +333,19 @@ export class BookService {
   }
 
   async getBestSellerY() {
-    const browser = await puppeteer.launch();
+    const browser = await puppeteer.launch({
+      headless: true, // 브라우저가 보이지 않게 실행
+      args: [
+        '--no-sandbox',
+        '--disable-setuid-sandbox',
+        '--disable-dev-shm-usage',
+        '--disable-accelerated-2d-canvas',
+        '--disable-gpu',
+        '--no-zygote',
+        '--single-process',
+      ],
+      executablePath: '/usr/bin/chromium-browser',
+    });
     const page = await browser.newPage();
 
     await page.setUserAgent(
