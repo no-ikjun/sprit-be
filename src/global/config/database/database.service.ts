@@ -1,6 +1,8 @@
 import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { TypeOrmModuleOptions, TypeOrmOptionsFactory } from '@nestjs/typeorm';
+import { Article } from 'src/global/entities/article.entity';
+import { ArticleLike } from 'src/global/entities/article_like.entity';
 import { Banner } from 'src/global/entities/banner.entity';
 import { Book } from 'src/global/entities/book.entity';
 import { BookLibrary } from 'src/global/entities/book_library.entity';
@@ -54,6 +56,8 @@ export class DatabaseService implements TypeOrmOptionsFactory {
         Profile,
         ProfileRecommendBook,
         Follow,
+        Article,
+        ArticleLike,
       ],
       synchronize: false,
     };

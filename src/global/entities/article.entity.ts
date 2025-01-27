@@ -1,8 +1,8 @@
-import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
+import { Column, Entity, PrimaryColumn } from 'typeorm';
 
 @Entity('article')
 export class Article {
-  @PrimaryGeneratedColumn('uuid')
+  @PrimaryColumn()
   article_uuid: string;
 
   @Column({ nullable: false })
@@ -14,7 +14,7 @@ export class Article {
   @Column({ nullable: false })
   type: string;
 
-  @Column()
+  @Column({ nullable: true })
   data: string;
 
   @Column({ default: () => 'CURRENT_TIMESTAMP' })

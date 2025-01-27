@@ -7,16 +7,26 @@ import {
   LibraryPhraseResponseType,
   LibraryPhraseResponseTypeV2,
 } from 'src/global/types/response.type';
+import { ArticleService } from 'src/article/article.service';
 
 @Injectable()
 export class PhraseService {
   constructor(
     private readonly phraseRepository: PhraseRepository,
     private readonly userService: UserService,
+    private readonly articleService: ArticleService,
   ) {}
 
   async setPhrase(data: NewPhraseDto, access_token: string): Promise<string> {
     const user_info = await this.userService.getUserInfo(access_token);
+    if (data.share) {
+      await this.articleService.setNewArticle(
+        user_info.user_uuid,
+        data.book_uuid,
+        'phrase',
+        JSON.stringify({ phrase: data.phrase, page: data.page }),
+      );
+    }
     return await this.phraseRepository.setPhrase(
       data.book_uuid,
       user_info.user_uuid,

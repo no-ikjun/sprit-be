@@ -3,6 +3,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { FollowService } from 'src/follow/follow.service';
 import { Article } from 'src/global/entities/article.entity';
 import { ArticleLike } from 'src/global/entities/article_like.entity';
+import { generateRamdomId, getRandomString, getToday } from 'src/global/utils';
 import { Repository } from 'typeorm';
 
 @Injectable()
@@ -22,6 +23,11 @@ export class ArticleService {
     data?: string,
   ): Promise<Article> {
     const article = new Article();
+    article.article_uuid = generateRamdomId(
+      'AT' + getRandomString(6),
+      getToday(),
+      getRandomString(8),
+    );
     article.user_uuid = user_uuid;
     article.book_uuid = book_uuid;
     article.type = type;
