@@ -8,7 +8,7 @@ import { User } from 'src/global/entities/user.entity';
 import { Review } from 'src/global/entities/review.entity';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([User, Review])],
+  imports: [TypeOrmModule.forFeature([Review, User])],
   controllers: [ReviewController],
   providers: [ReviewService, UserService, UserRepository],
 })

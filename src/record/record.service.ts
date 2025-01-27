@@ -8,16 +8,29 @@ import {
   BookRecordHistoryTypeV2,
   MonthlyRecordResponseType,
 } from 'src/global/types/response.type';
+import { ArticleService } from 'src/article/article.service';
 
 @Injectable()
 export class RecordService {
   constructor(
     private readonly recordRepository: RecordRepository,
     private readonly userService: UserService,
+    private readonly articleService: ArticleService,
   ) {}
 
   async setRecord(data: NewRecordDto, access_token: string): Promise<string> {
     const user_info = await this.userService.getUserInfo(access_token);
+    const isFirst = await this.recordRepository.checkIsFirst(
+      data.book_uuid,
+      user_info.user_uuid,
+    );
+    if (isFirst) {
+      await this.articleService.setNewArticle(
+        user_info.user_uuid,
+        data.book_uuid,
+        'record',
+      );
+    }
     return await this.recordRepository.setRecord(
       data.book_uuid,
       user_info.user_uuid,

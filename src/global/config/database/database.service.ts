@@ -1,6 +1,8 @@
 import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { TypeOrmModuleOptions, TypeOrmOptionsFactory } from '@nestjs/typeorm';
+import { Article } from 'src/global/entities/article.entity';
+import { ArticleLike } from 'src/global/entities/article_like.entity';
 import { Banner } from 'src/global/entities/banner.entity';
 import { Book } from 'src/global/entities/book.entity';
 import { BookLibrary } from 'src/global/entities/book_library.entity';
@@ -35,25 +37,27 @@ export class DatabaseService implements TypeOrmOptionsFactory {
       database: this.configService.get<string>('DATABASE_NAME'),
       timezone: '+09:00',
       entities: [
-        User,
-        Book,
+        Article,
+        ArticleLike,
         Banner,
-        Review,
-        Quest,
-        QuestApply,
-        FcmToken,
-        TimeAgree,
-        RemindAgree,
-        QuestAgree,
+        Book,
         BookLibrary,
-        Record,
-        Phrase,
         BookReport,
+        FcmToken,
         Notice,
-        Version,
+        Phrase,
         Profile,
         ProfileRecommendBook,
+        Quest,
+        QuestAgree,
+        QuestApply,
+        Record,
+        RemindAgree,
+        Review,
+        TimeAgree,
+        User,
         Follow,
+        Version,
       ],
       synchronize: false,
     };

@@ -44,6 +44,12 @@ import { Review } from './global/entities/review.entity';
 import { ProfileModule } from './profile/profile.module';
 import { FollowModule } from './follow/follow.module';
 import { ArticleModule } from './article/article.module';
+import { ArticleService } from './article/article.service';
+import { Article } from './global/entities/article.entity';
+import { ArticleLike } from './global/entities/article_like.entity';
+import { Follow } from './global/entities/follow.entity';
+import { FollowService } from './follow/follow.service';
+import { EventEmitterModule } from '@nestjs/event-emitter';
 @Module({
   imports: [
     ScheduleModule,
@@ -84,6 +90,9 @@ import { ArticleModule } from './article/article.module';
       Phrase,
       User,
       Review,
+      Article,
+      ArticleLike,
+      Follow,
     ]),
     ProfileModule,
     JwtModule.registerAsync({
@@ -99,6 +108,7 @@ import { ArticleModule } from './article/article.module';
     }),
     FollowModule,
     ArticleModule,
+    EventEmitterModule.forRoot(),
   ],
   controllers: [AppController],
   providers: [
@@ -114,6 +124,8 @@ import { ArticleModule } from './article/article.module';
     ReviewService,
     JwtService,
     PhraseRepository,
+    ArticleService,
+    FollowService,
   ],
 })
 export class AppModule {}

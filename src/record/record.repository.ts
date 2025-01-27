@@ -52,6 +52,16 @@ export class RecordRepository {
     return record_uuid;
   }
 
+  async checkIsFirst(book_uuid: string, user_uuid: string): Promise<boolean> {
+    const record = await this.recordRepository.findOne({
+      where: { book_uuid: book_uuid, user_uuid: user_uuid },
+    });
+    if (record === null) {
+      return true;
+    }
+    return false;
+  }
+
   async getRecordByRecordUuid(record_uuid: string): Promise<Record> {
     return await this.recordRepository.findOne({
       where: { record_uuid: record_uuid },

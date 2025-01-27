@@ -1,3 +1,4 @@
+import { Transform } from 'class-transformer';
 import { IsBoolean, IsNumber, IsString } from 'class-validator';
 
 export class NewPhraseDto {
@@ -12,4 +13,8 @@ export class NewPhraseDto {
 
   @IsBoolean()
   remind: boolean;
+
+  @IsBoolean()
+  @Transform(({ value }) => value ?? false)
+  share?: boolean;
 }

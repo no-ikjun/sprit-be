@@ -6,6 +6,7 @@ import { generateRamdomId, getRandomString, getToday } from 'src/global/utils';
 import { UserService } from 'src/user/user.service';
 import { UserInfoDto } from 'src/user/dto/user.dto';
 import { InjectRepository } from '@nestjs/typeorm';
+import { EventEmitter2 } from '@nestjs/event-emitter';
 
 @Injectable()
 export class ReviewService {
@@ -13,6 +14,7 @@ export class ReviewService {
     private readonly userService: UserService,
     @InjectRepository(Review)
     private readonly reviewRepository: Repository<Review>,
+    private readonly eventEmitter: EventEmitter2,
   ) {}
 
   async getReviewByBookUuid(book_uuid: string): Promise<Review[]> {
@@ -47,6 +49,17 @@ export class ReviewService {
     const userInfo: UserInfoDto = await this.userService.getUserInfo(
       access_token,
     );
+
+    // article 생성 이벤트 발생
+    this.eventEmitter.emit('review.created', {
+      user_uuid: userInfo.user_uuid,
+      book_uuid: reviewData.book_uuid,
+      type: 'review',
+      data: JSON.stringify({
+        score: reviewData.score,
+        content: reviewData.content,
+      }),
+    });
 
     try {
       const review = this.reviewRepository.create({

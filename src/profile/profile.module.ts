@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { forwardRef, Module } from '@nestjs/common';
 import { ProfileController } from './profile.controller';
 import { ProfileService } from './profile.service';
 import { ProfileRepository } from './profile.repository';
@@ -16,6 +16,8 @@ import { Review } from 'src/global/entities/review.entity';
 import { UserRepository } from 'src/user/user.repository';
 import { Follow } from 'src/global/entities/follow.entity';
 import { FollowService } from 'src/follow/follow.service';
+import { RecordModule } from 'src/record/record.module';
+import { BookModule } from 'src/book/book.module';
 
 @Module({
   imports: [
@@ -29,16 +31,20 @@ import { FollowService } from 'src/follow/follow.service';
       Review,
       Follow,
     ]),
+    forwardRef(() => RecordModule),
+    forwardRef(() => BookModule),
   ],
   controllers: [ProfileController],
   providers: [
-    ProfileService,
-    ProfileRepository,
     BookService,
     ReviewService,
     UserService,
     UserRepository,
     FollowService,
+    ProfileService,
+    ProfileRepository,
+    BookService,
   ],
+  exports: [ProfileService, ProfileRepository],
 })
 export class ProfileModule {}
