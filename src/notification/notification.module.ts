@@ -24,6 +24,15 @@ import { BookLibrary } from 'src/global/entities/book_library.entity';
 import { Phrase } from 'src/global/entities/phrase.entity';
 import { User } from 'src/global/entities/user.entity';
 import { Review } from 'src/global/entities/review.entity';
+import { Article } from 'src/global/entities/article.entity';
+import { ArticleLike } from 'src/global/entities/article_like.entity';
+import { ArticleService } from 'src/article/article.service';
+import { Follow } from 'src/global/entities/follow.entity';
+import { FollowService } from 'src/follow/follow.service';
+import { Profile } from 'src/global/entities/profile.entity';
+import { ProfileRecommendBook } from 'src/global/entities/profile_recommend_book.entity';
+import { ProfileService } from 'src/profile/profile.service';
+import { ProfileRepository } from 'src/profile/profile.repository';
 
 @Module({
   imports: [
@@ -49,6 +58,11 @@ import { Review } from 'src/global/entities/review.entity';
       Phrase,
       User,
       Review,
+      Article,
+      ArticleLike,
+      Follow,
+      Profile,
+      ProfileRecommendBook,
     ]),
   ],
   controllers: [NotificationController],
@@ -63,6 +77,10 @@ import { Review } from 'src/global/entities/review.entity';
     BookService,
     ReviewService,
     PhraseRepository,
+    ArticleService,
+    FollowService,
+    ProfileService,
+    ProfileRepository,
   ],
 })
 export class NotificationModule {}

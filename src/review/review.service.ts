@@ -6,15 +6,13 @@ import { generateRamdomId, getRandomString, getToday } from 'src/global/utils';
 import { UserService } from 'src/user/user.service';
 import { UserInfoDto } from 'src/user/dto/user.dto';
 import { InjectRepository } from '@nestjs/typeorm';
-import { ArticleService } from 'src/article/article.service';
 
 @Injectable()
 export class ReviewService {
   constructor(
     private readonly userService: UserService,
     @InjectRepository(Review)
-    private readonly reviewRepository: Repository<Review>,
-    private readonly articleService: ArticleService,
+    private readonly reviewRepository: Repository<Review>, // private readonly articleService: ArticleService,
   ) {}
 
   async getReviewByBookUuid(book_uuid: string): Promise<Review[]> {
@@ -50,12 +48,12 @@ export class ReviewService {
       access_token,
     );
 
-    await this.articleService.setNewArticle(
-      userInfo.user_uuid,
-      reviewData.book_uuid,
-      'review',
-      JSON.stringify({ score: reviewData.score, content: reviewData.content }),
-    );
+    // await this.articleService.setNewArticle(
+    //   userInfo.user_uuid,
+    //   reviewData.book_uuid,
+    //   'review',
+    //   JSON.stringify({ score: reviewData.score, content: reviewData.content }),
+    // );
 
     try {
       const review = this.reviewRepository.create({

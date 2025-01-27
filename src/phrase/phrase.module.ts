@@ -20,6 +20,8 @@ import { ArticleService } from 'src/article/article.service';
 import { ProfileService } from 'src/profile/profile.service';
 import { ProfileRepository } from 'src/profile/profile.repository';
 import { ArticleLike } from 'src/global/entities/article_like.entity';
+import { Follow } from 'src/global/entities/follow.entity';
+import { FollowService } from 'src/follow/follow.service';
 @Module({
   imports: [
     HttpModule,
@@ -33,6 +35,7 @@ import { ArticleLike } from 'src/global/entities/article_like.entity';
       ArticleLike,
       Profile,
       ProfileRecommendBook,
+      Follow,
     ]),
   ],
   controllers: [PhraseController],
@@ -46,6 +49,7 @@ import { ArticleLike } from 'src/global/entities/article_like.entity';
     ProfileService,
     ProfileRepository,
     BookService,
+    FollowService,
   ],
 })
 export class PhraseModule {}

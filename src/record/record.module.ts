@@ -21,11 +21,10 @@ import { ProfileRepository } from 'src/profile/profile.repository';
 import { ArticleLike } from 'src/global/entities/article_like.entity';
 import { Follow } from 'src/global/entities/follow.entity';
 import { FollowService } from 'src/follow/follow.service';
-import { BookModule } from 'src/book/book.module';
-import { UserModule } from 'src/user/user.module';
-import { ArticleModule } from 'src/article/article.module';
-import { FollowModule } from 'src/follow/follow.module';
 import { ProfileModule } from 'src/profile/profile.module';
+import { BookLibrary } from 'src/global/entities/book_library.entity';
+import { BookLibraryService } from 'src/book_library/book_library.service';
+import { BookLibraryRepository } from 'src/book_library/book_library.repository';
 
 @Module({
   imports: [
@@ -40,11 +39,8 @@ import { ProfileModule } from 'src/profile/profile.module';
       Follow,
       Profile,
       ProfileRecommendBook,
+      BookLibrary,
     ]),
-    forwardRef(() => BookModule),
-    forwardRef(() => UserModule),
-    forwardRef(() => ArticleModule),
-    forwardRef(() => FollowModule),
     forwardRef(() => ProfileModule),
   ],
   controllers: [RecordController],
@@ -57,8 +53,9 @@ import { ProfileModule } from 'src/profile/profile.module';
     UserRepository,
     ArticleService,
     FollowService,
-    ProfileService,
-    ProfileRepository,
+    BookLibraryService,
+    BookLibraryRepository,
   ],
+  exports: [RecordService, RecordRepository],
 })
 export class RecordModule {}
