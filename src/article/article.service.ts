@@ -22,27 +22,13 @@ export class ArticleService {
 
   @OnEvent('review.created', { async: true })
   async handleReviewCreatedEvent(event: ReviewCreatedEvent) {
-    const eventKey = `${event.user_uuid}-${event.book_uuid}-${event.type}`;
-
-    if (this.processingPromises.has(eventKey)) {
-      console.log('Duplicate event detected, skipping processing');
-      return; // 이미 처리 중인 이벤트는 무시
-    }
-
-    const processPromise = this.setNewArticle(
+    await this.setNewArticle(
       event.user_uuid,
       event.book_uuid,
       event.type,
       event.data,
     );
-
-    this.processingPromises.set(eventKey, processPromise);
-
-    try {
-      await processPromise; // 작업 완료 대기
-    } finally {
-      this.processingPromises.delete(eventKey); // 작업 완료 후 제거
-    }
+    await this.cleanUpDuplicateArticles(event);
   }
 
   async setNewArticle(
@@ -66,6 +52,25 @@ export class ArticleService {
       return await this.articleRepository.save(article);
     } catch (error) {
       throw new Error('Failed to save article');
+    }
+  }
+
+  async cleanUpDuplicateArticles(event: ReviewCreatedEvent): Promise<void> {
+    const duplicates = await this.articleRepository.find({
+      where: {
+        user_uuid: event.user_uuid,
+        book_uuid: event.book_uuid,
+        type: event.type,
+        data: event.data,
+      },
+      order: { created_at: 'DESC' }, // 가장 최신 데이터를 남기기 위해 정렬
+    });
+
+    // 2. 중복된 데이터가 2개 이상인 경우 삭제
+    if (duplicates.length > 1) {
+      // 최신 항목 하나만 남기고 나머지 삭제
+      const articlesToDelete = duplicates.slice(1); // 첫 번째 항목 제외
+      await this.articleRepository.remove(articlesToDelete);
     }
   }
 
