@@ -97,6 +97,10 @@ export class ArticleService {
     return articles;
   }
 
+  async getLikeCount(article_uuid: string): Promise<number> {
+    return await this.articleLikeRepository.count({ where: { article_uuid } });
+  }
+
   async likeArticle(article_uuid: string, user_uuid: string): Promise<void> {
     const article = await this.getArticleByArticleUuid(article_uuid);
     if (!article) {
