@@ -49,6 +49,7 @@ import { Article } from './global/entities/article.entity';
 import { ArticleLike } from './global/entities/article_like.entity';
 import { Follow } from './global/entities/follow.entity';
 import { FollowService } from './follow/follow.service';
+import { EventEmitterModule } from '@nestjs/event-emitter';
 @Module({
   imports: [
     ScheduleModule,
@@ -107,6 +108,7 @@ import { FollowService } from './follow/follow.service';
     }),
     FollowModule,
     ArticleModule,
+    EventEmitterModule.forRoot(),
   ],
   controllers: [AppController],
   providers: [

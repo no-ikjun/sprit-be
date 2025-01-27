@@ -1,13 +1,17 @@
 import { Injectable } from '@nestjs/common';
+import { OnEvent } from '@nestjs/event-emitter';
 import { InjectRepository } from '@nestjs/typeorm';
 import { FollowService } from 'src/follow/follow.service';
 import { Article } from 'src/global/entities/article.entity';
 import { ArticleLike } from 'src/global/entities/article_like.entity';
 import { generateRamdomId, getRandomString, getToday } from 'src/global/utils';
+import { ReviewCreatedEvent } from 'src/review/dto/review.dto';
 import { Repository } from 'typeorm';
 
 @Injectable()
 export class ArticleService {
+  private processingPromises = new Map<string, Promise<Article>>();
+
   constructor(
     @InjectRepository(Article)
     private readonly articleRepository: Repository<Article>,
@@ -15,6 +19,31 @@ export class ArticleService {
     private readonly articleLikeRepository: Repository<ArticleLike>,
     private readonly followService: FollowService,
   ) {}
+
+  @OnEvent('review.created', { async: true })
+  async handleReviewCreatedEvent(event: ReviewCreatedEvent) {
+    const eventKey = `${event.user_uuid}-${event.book_uuid}-${event.type}`;
+
+    if (this.processingPromises.has(eventKey)) {
+      console.log('Duplicate event detected, skipping processing');
+      return; // 이미 처리 중인 이벤트는 무시
+    }
+
+    const processPromise = this.setNewArticle(
+      event.user_uuid,
+      event.book_uuid,
+      event.type,
+      event.data,
+    );
+
+    this.processingPromises.set(eventKey, processPromise);
+
+    try {
+      await processPromise; // 작업 완료 대기
+    } finally {
+      this.processingPromises.delete(eventKey); // 작업 완료 후 제거
+    }
+  }
 
   async setNewArticle(
     user_uuid: string,
@@ -33,7 +62,11 @@ export class ArticleService {
     article.type = type;
     article.data = data ?? '';
     article.created_at = new Date();
-    return await this.articleRepository.save(article);
+    try {
+      return await this.articleRepository.save(article);
+    } catch (error) {
+      throw new Error('Failed to save article');
+    }
   }
 
   async getArticleByArticleUuid(article_uuid: string): Promise<Article> {

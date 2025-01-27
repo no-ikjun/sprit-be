@@ -16,8 +16,6 @@ import { Article } from 'src/global/entities/article.entity';
 import { Profile } from 'src/global/entities/profile.entity';
 import { ProfileRecommendBook } from 'src/global/entities/profile_recommend_book.entity';
 import { ArticleService } from 'src/article/article.service';
-import { ProfileService } from 'src/profile/profile.service';
-import { ProfileRepository } from 'src/profile/profile.repository';
 import { ArticleLike } from 'src/global/entities/article_like.entity';
 import { Follow } from 'src/global/entities/follow.entity';
 import { FollowService } from 'src/follow/follow.service';

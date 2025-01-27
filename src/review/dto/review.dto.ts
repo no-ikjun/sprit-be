@@ -10,3 +10,10 @@ export class CreateReviewDto {
   @IsString()
   content: string;
 }
+
+export class ReviewCreatedEvent {
+  user_uuid: string;
+  book_uuid: string;
+  type: string;
+  data: string;
+}
