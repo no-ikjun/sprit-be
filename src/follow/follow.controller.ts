@@ -53,4 +53,10 @@ export class FollowController {
   async getFollowing(@Query() query) {
     return await this.followService.getFollowingList(query.user_uuid);
   }
+
+  @UseGuards(JwtAccessGuard)
+  @Get('count')
+  async getFollowCount(@Query() query) {
+    return await this.followService.getFollowCount(query.user_uuid);
+  }
 }

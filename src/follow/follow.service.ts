@@ -124,4 +124,15 @@ export class FollowService {
 
     return result;
   }
+
+  async getFollowCount(user_uuid: string): Promise<number[]> {
+    const followings = await this.followRepository.count({
+      where: { follower: { user_uuid } },
+    });
+    const followers = await this.followRepository.count({
+      where: { followee: { user_uuid } },
+    });
+
+    return [followers, followings];
+  }
 }

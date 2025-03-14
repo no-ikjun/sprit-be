@@ -12,6 +12,12 @@ export class ArticleController {
     return this.articleService.getArticleList(query.user_uuid, query.page);
   }
 
+  @Get('user')
+  @UseGuards(JwtAccessGuard)
+  async getArticleByUser(@Query() query): Promise<Article[]> {
+    return this.articleService.getArticleByUser(query.user_uuid);
+  }
+
   @Post('like')
   @UseGuards(JwtAccessGuard)
   async likeArticle(@Query() query): Promise<void> {

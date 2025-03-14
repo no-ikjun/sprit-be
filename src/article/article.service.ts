@@ -97,6 +97,15 @@ export class ArticleService {
     return articles;
   }
 
+  async getArticleByUser(user_uuid: string, page = 1): Promise<Article[]> {
+    return await this.articleRepository.find({
+      where: { user_uuid },
+      order: { created_at: 'DESC' },
+      take: 10,
+      skip: (page - 1) * 10,
+    });
+  }
+
   async getLikeCount(article_uuid: string): Promise<number> {
     return await this.articleLikeRepository.count({ where: { article_uuid } });
   }
