@@ -42,6 +42,7 @@ export class ProfileService {
   upload = multer({ dest: 'uploads/' }).single('upload');
 
   async fileUpload(@Req() req, @Res() res) {
+    console.log('fileUpload');
     this.upload(req, res, async (error) => {
       if (error) {
         console.log(error);
@@ -49,6 +50,7 @@ export class ProfileService {
       }
 
       const filePath = path.join(__dirname, '../../uploads', req.file.filename);
+      console.log('filepath: ', filePath);
       const fileStream = fs.createReadStream(filePath);
 
       const uploadParams = {
@@ -59,13 +61,16 @@ export class ProfileService {
       };
 
       try {
+        console.log('[AWS S3] Uploading file to S3...');
         const upload = new Upload({
           client: this.s3,
           params: uploadParams,
         });
 
         const result = await upload.done();
+        console.log('[AWS S3] Upload success:', result);
         const image = result.Location.split('amazonaws.com/')[1];
+        console.log('[Image URL]', image);
         const access_token = req.headers.authorization.split(' ')[1];
         const user_info = await this.userService.getUserInfo(access_token);
         await this.profileRepositories.updateProfileImage(
