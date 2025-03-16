@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { RecordRepository } from './record.repository';
 import { UserService } from 'src/user/user.service';
-import { NewRecordDto } from './dto/record.dto';
+import { AddRecordDto, NewRecordDto } from './dto/record.dto';
 import { Record } from 'src/global/entities/record.entity';
 import {
   BookRecordHistoryType,
@@ -167,6 +167,34 @@ export class RecordService {
       year,
       month,
       kind,
+    );
+  }
+
+  async addRecordAfterRead(
+    data: AddRecordDto,
+    access_token: string,
+  ): Promise<string> {
+    const user_info = await this.userService.getUserInfo(access_token);
+    const isFirst = await this.recordRepository.checkIsFirst(
+      data.book_uuid,
+      user_info.user_uuid,
+    );
+    if (isFirst) {
+      await this.articleService.setNewArticle(
+        user_info.user_uuid,
+        data.book_uuid,
+        'record',
+      );
+    }
+    return await this.recordRepository.addRecordAfterRead(
+      data.book_uuid,
+      user_info.user_uuid,
+      data.goal_type,
+      data.read_time,
+      data.page_start,
+      data.page_end,
+      data.start_time,
+      data.end_time,
     );
   }
 }

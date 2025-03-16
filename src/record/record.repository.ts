@@ -52,6 +52,39 @@ export class RecordRepository {
     return record_uuid;
   }
 
+  async addRecordAfterRead(
+    book_uuid: string,
+    user_uuid: string,
+    goal_type: string,
+    read_time: number,
+    page_start: number,
+    page_end: number,
+    start_time: Date,
+    end_time: Date,
+  ) {
+    const record_uuid = generateRamdomId(
+      'RE' + getRandomString(6),
+      getToday(),
+      getRandomString(8),
+    );
+    await this.recordRepository.save({
+      record_uuid: record_uuid,
+      book_uuid: book_uuid,
+      user_uuid: user_uuid,
+      goal_type: goal_type,
+      goal_scale: 0,
+      total_time: read_time * 60,
+      page_start: page_start,
+      page_end: page_end,
+      start: start_time,
+      end: end_time,
+      goal_achieved: true,
+      created_at: new Date(),
+    });
+    await this.bookService.addScoreToBook(book_uuid, 10);
+    return record_uuid;
+  }
+
   async checkIsFirst(book_uuid: string, user_uuid: string): Promise<boolean> {
     const record = await this.recordRepository.findOne({
       where: { book_uuid: book_uuid, user_uuid: user_uuid },
