@@ -15,7 +15,7 @@ export class ArticleController {
   @Get('user')
   @UseGuards(JwtAccessGuard)
   async getArticleByUser(@Query() query): Promise<Article[]> {
-    return this.articleService.getArticleByUser(query.user_uuid);
+    return this.articleService.getArticleByUser(query.user_uuid, query.page);
   }
 
   @Post('like')
