@@ -11,7 +11,7 @@ import {
 } from '@nestjs/common';
 import { RecordService } from './record.service';
 import { JwtAccessGuard } from 'src/auth/guard/jwtAccess.guard';
-import { NewRecordDto } from './dto/record.dto';
+import { AddRecordDto, NewRecordDto } from './dto/record.dto';
 import { Record } from 'src/global/entities/record.entity';
 import {
   BookRecordHistoryType,
@@ -164,5 +164,12 @@ export class RecordController {
       JSON.parse(query.month),
       query.kind,
     );
+  }
+
+  @Post('add')
+  @UseGuards(JwtAccessGuard)
+  async addRecord(@Req() req, @Body() body: AddRecordDto): Promise<string> {
+    const access_token = req.headers.authorization.split(' ')[1];
+    return await this.recordService.addRecordAfterRead(body, access_token);
   }
 }
