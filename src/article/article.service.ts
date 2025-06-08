@@ -6,7 +6,7 @@ import { Article } from 'src/global/entities/article.entity';
 import { ArticleLike } from 'src/global/entities/article_like.entity';
 import { generateRamdomId, getRandomString, getToday } from 'src/global/utils';
 import { ReviewCreatedEvent } from 'src/review/dto/review.dto';
-import { Repository } from 'typeorm';
+import { In, Repository } from 'typeorm';
 
 @Injectable()
 export class ArticleService {
@@ -82,19 +82,20 @@ export class ArticleService {
 
   async getArticleList(user_uuid: string, page = 1): Promise<Article[]> {
     const followings = await this.followService.getFollowingList(user_uuid);
-    const articles = [];
+    const followingUuids = followings.map((f) => f.user_uuid);
 
-    for (const following_uuid of followings.map((f) => f.user_uuid)) {
-      const article = await this.articleRepository.find({
-        where: { user_uuid: following_uuid },
-        order: { created_at: 'DESC' }, // 최신순 정렬
-        take: 10, // 페이지당 10개 제한
-        skip: (page - 1) * 10, // 페이지 계산
-      });
-      articles.push(...article);
-    }
+    if (followingUuids.length === 0) return [];
 
-    return articles;
+    return this.articleRepository.find({
+      where: {
+        user_uuid: In(followingUuids),
+      },
+      order: {
+        created_at: 'DESC',
+      },
+      take: 10,
+      skip: (page - 1) * 10,
+    });
   }
 
   async getArticleByUser(user_uuid: string, page = 1): Promise<Article[]> {
