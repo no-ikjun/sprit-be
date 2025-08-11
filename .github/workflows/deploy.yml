@@ -38,19 +38,57 @@ jobs:
           key: ${{ secrets.LIGHTSAIL_SSH_KEY }}
           port: ${{ secrets.SSH_PORT }}
           script: |
-            # 기존 컨테이너 강제 중지 및 제거
-            docker stop sprit || true
-            docker rm -f sprit || true
+            set -Eeuo pipefail
 
-            # .env 파일 생성
-            echo "${{ secrets.ENV_FILE }}" > /home/ubuntu/.env
+            APP_NAME="sprit"
+            IMAGE="${{ secrets.DOCKER_USERNAME }}/sprit:latest"
+            ENV_PATH="/home/ubuntu/.env"
+            HOST_PORT="3000"
+            CONTAINER_PORT="3000"
 
-            # 최신 Docker 이미지 가져오기
-            docker pull ${{ secrets.DOCKER_USERNAME }}/sprit:latest
+            echo "[1/5] Clean old container if exists"
+            # 이름이 정확히 sprit인 컨테이너가 하나라도 있으면 전부 강제 제거
+            EXISTING_IDS=$(docker ps -aq -f name="^${APP_NAME}$" || true)
+            if [ -n "${EXISTING_IDS}" ]; then
+              docker rm -f ${EXISTING_IDS} || true
+            fi
 
-            # 새로운 컨테이너 실행
-            docker run -d --name sprit \
-              -p 3000:3000 \
-              --env-file /home/ubuntu/.env \
+            # 혹시 제거 지연에 대비해 잠깐 대기 + 재확인
+            for i in 1 2 3; do
+              sleep 1
+              LEFT=$(docker ps -aq -f name="^${APP_NAME}$" || true)
+              [ -z "${LEFT}" ] && break
+              docker rm -f ${LEFT} || true
+            done
+
+            echo "[2/5] Refresh .env (from GitHub Secret)"
+            # here-doc으로 개행/특수문자 안전하게 기록
+            cat > "${ENV_PATH}" <<'EOF'
+            ${{ secrets.ENV_FILE }}
+            EOF
+            chmod 600 "${ENV_PATH}"
+
+            echo "[3/5] Pull latest image"
+            docker pull "${IMAGE}"
+
+            echo "[4/5] Run new container"
+            docker run -d --name "${APP_NAME}" \
+              -p ${HOST_PORT}:${CONTAINER_PORT} \
+              --env-file "${ENV_PATH}" \
               --restart always \
-              ${{ secrets.DOCKER_USERNAME }}/sprit:latest
+              --health-cmd="curl -fsS http://localhost:${CONTAINER_PORT}/health || exit 1" \
+              --health-interval=10s --health-retries=5 --health-timeout=2s \
+              "${IMAGE}"
+
+            echo "[5/5] Verify container is up"
+            # 헬스체크(선택): /health 엔드포인트가 없다면 이 블록은 넘어가도 OK
+            for i in {1..15}; do
+              STATUS=$(docker inspect --format='{{json .State.Health.Status}}' "${APP_NAME}" 2>/dev/null || echo '"starting"')
+              if [ "${STATUS}" = '"healthy"' ]; then
+                echo "Container is healthy ✅"
+                break
+              fi
+              sleep 2
+            done
+
+            docker ps --filter "name=^${APP_NAME}$" --format "table {{.Names}}\t{{.Status}}\t{{.Ports}}"
