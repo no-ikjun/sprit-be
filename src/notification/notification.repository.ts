@@ -44,20 +44,20 @@ export class NotificationRepository {
     });
     await this.timeAgreeRepository.save({
       agree_uuid: agree_uuid,
-      agree_01: false,
-      time_01: 0,
-      agree_02: false,
+      agree_01: true,
+      time_01: 20,
+      agree_02: true,
     });
     await this.remindAgreeRepository.save({
       agree_uuid: agree_uuid,
-      agree_01: false,
-      time_01: 0,
+      agree_01: true,
+      time_01: 7,
     });
     await this.questAgreeRepository.save({
       agree_uuid: agree_uuid,
-      agree_01: false,
-      agree_02: false,
-      agree_03: false,
+      agree_01: true,
+      agree_02: true,
+      agree_03: true,
     });
     return {
       fcm_token: fcm_token,
