@@ -47,18 +47,21 @@ jobs:
             CONTAINER_PORT="3000"
 
             echo "[1/5] Clean old container if exists"
-            # 이름이 정확히 sprit인 컨테이너가 하나라도 있으면 전부 강제 제거
             EXISTING_IDS=$(docker ps -aq -f name="^${APP_NAME}$" || true)
             if [ -n "${EXISTING_IDS}" ]; then
+              echo "Stopping and removing existing container..."
+              docker stop ${EXISTING_IDS} || true
               docker rm -f ${EXISTING_IDS} || true
             fi
 
-            # 혹시 제거 지연에 대비해 잠깐 대기 + 재확인
-            for i in 1 2 3; do
-              sleep 1
-              LEFT=$(docker ps -aq -f name="^${APP_NAME}$" || true)
-              [ -z "${LEFT}" ] && break
-              docker rm -f ${LEFT} || true
+            # 완전히 제거될 때까지 대기
+            for i in {1..5}; do
+              if [ -z "$(docker ps -aq -f name="^${APP_NAME}$")" ]; then
+                echo "Old container removed ✅"
+                break
+              fi
+              echo "Waiting for container removal..."
+              sleep 2
             done
 
             echo "[2/5] Refresh .env (from GitHub Secret)"
