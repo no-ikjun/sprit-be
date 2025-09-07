@@ -4,14 +4,14 @@ import {
   Index,
   CreateDateColumn,
   UpdateDateColumn,
-  PrimaryGeneratedColumn,
+  PrimaryColumn,
 } from 'typeorm';
 
 export type LocationSource = 'official-library' | 'naver-local' | 'book-cafe';
 
 @Entity('location')
 export class Location {
-  @PrimaryGeneratedColumn('uuid')
+  @PrimaryColumn('uuid')
   location_uuid: string;
 
   @Column({ nullable: false })

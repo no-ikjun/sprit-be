@@ -1,4 +1,3 @@
-// src/location/location.controller.ts
 import { Controller, Get, Query, UseGuards } from '@nestjs/common';
 import { LocationService } from './location.service';
 import { JwtAccessGuard } from 'src/auth/guard/jwtAccess.guard';
