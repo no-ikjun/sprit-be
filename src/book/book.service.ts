@@ -309,7 +309,7 @@ export class BookService {
         },
       },
     );
-    const books = response.data.data.bestSeller;
+    const books = response.data.bestSeller;
 
     return books.map((book: any, index: number) => {
       return {
