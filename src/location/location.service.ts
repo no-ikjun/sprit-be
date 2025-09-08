@@ -41,7 +41,7 @@ export type Spot = {
   lng: number; // flutter_naver_map 용
   x: number; // 내부 기록용(옵션: lng * 1e7)
   y: number; // 내부 기록용(옵션: lat * 1e7)
-  source: 'official-library' | 'naver-local' | 'book-cafe';
+  source: 'official-library' | 'naver-local' | 'book-cafe' | 'park';
   tags: string[];
   region: string; // 예: "서울특별시 강남구"
   keyword: string; // 예: "공공데이터"
@@ -258,6 +258,105 @@ export class LocationService {
         y: lat * 1e7,
         source: 'book-cafe',
         tags: ['북카페', type],
+        region,
+        keyword: '공공데이터',
+      });
+    }
+
+    const cleaned = this.dedup(out).sort((a, b) =>
+      a.name.localeCompare(b.name),
+    );
+    this.logger.log(
+      `CSV 변환(보정 없음) 완료: ${cleaned.length} spots (from ${records.length} rows)`,
+    );
+    return cleaned;
+  }
+
+  // ============================================================
+  // 공공데이터 - 북카페 정보 활용 데이터 수집
+  // ============================================================
+  async loadParksFromCsv(csvPath: string): Promise<Spot[]> {
+    const raw = fs.readFileSync(csvPath);
+
+    // CP949/UTF-8 자동 처리
+    const tryDecode = (enc: 'utf8' | 'cp949') => iconv.decode(raw, enc);
+    let text = tryDecode('utf8');
+    if ((text.match(/\uFFFD/g) || []).length > 5) text = tryDecode('cp949');
+
+    // ----- 구분자 자동 감지 -----
+    const detectDelimiter = (s: string) => {
+      const firstLine = s.split(/\r?\n/).find((l) => l.trim().length > 0) ?? '';
+      const cands = [',', '\t', ';', '|', '^'];
+      const counted = cands.map((d) => ({
+        d,
+        c: (firstLine.match(new RegExp(`\\${d}`, 'g')) || []).length,
+      }));
+      counted.sort((a, b) => b.c - a.c);
+      return counted[0].c > 0 ? counted[0].d : ',';
+    };
+    const delimiter = detectDelimiter(text);
+    this.logger.log(`[CSV] delimiter detected = "${delimiter}"`);
+
+    const records: Record<string, any>[] = csvParse(text, {
+      columns: true,
+      skip_empty_lines: true,
+      bom: true,
+      trim: true,
+    });
+    if (!records.length) {
+      this.logger.warn(`CSV에서 데이터가 없습니다: ${csvPath}`);
+      return [];
+    }
+
+    // 표준 컬럼 우선 매핑
+    const headers = Object.keys(records[0]);
+    const normalize = (s: string) => s.toLowerCase().replace(/\s+/g, '').trim();
+    const pick = (cands: string[]) =>
+      headers.find((h) => cands.map(normalize).includes(normalize(h)));
+
+    const nameKey = 'POI_NM'; // 공원 이름
+    const siDo = 'CTPRVN_NM'; // 주소-시도
+    const siGunGu = 'SIGNGU_NM'; // 주소-시군구
+    const roadName = 'RDNMADR_NM'; // 주소-도로명
+    const roadNumber = 'BULD_NO'; // 주소-건물번호
+    const latKey = 'LC_LA'; // 위도
+    const lngKey = 'LC_LO'; // 경도
+    const typeKey = 'MLSFC_NM'; // 유형
+
+    const out: Spot[] = [];
+    for (const row of records) {
+      const name = String(row[nameKey] ?? '').trim();
+      // 필수 주소 요소 체크 (시도, 시군구, 도로명 중 하나라도 없으면 스킵)
+      if (!row[siDo] || !row[siGunGu] || !row[roadName]) {
+        continue;
+      }
+      const roadAddress = [
+        row[siDo],
+        row[siGunGu],
+        row[roadName],
+        row[roadNumber],
+      ]
+        .filter(Boolean)
+        .join(' ')
+        .trim();
+      const type = String(typeKey ? row[typeKey] : '').trim();
+      const lat = this.toNum(latKey ? row[latKey] : undefined);
+      const lng = this.toNum(lngKey ? row[lngKey] : undefined);
+      const region = roadAddress.split(' ').slice(0, 2).join(' ');
+      //  좌표가 유효하지 않으면 스킵
+      if (!this.validLatLng(lat, lng)) continue;
+
+      out.push({
+        name,
+        category: '공원',
+        roadAddress,
+        address: roadAddress,
+        lat,
+        lng,
+        x: lng * 1e7,
+        y: lat * 1e7,
+        source: 'park',
+        tags: [type],
         region,
         keyword: '공공데이터',
       });
@@ -530,6 +629,19 @@ export class LocationService {
     ),
   ) {
     const spots = await this.loadBookcafesFromCsv(csvPath);
+    const affected = await this.saveSpots(spots);
+    return { totalParsed: spots.length, affected };
+  }
+
+  /** 공원 수집(기존 fetchNaverSeedDefault 사용) → DB 저장 */
+  async saveFromParkDefault(
+    csvPath = path.resolve(
+      __dirname,
+      'data',
+      'KC_498_DMSTC_MCST_PBL_CT_PARK_2024.csv',
+    ),
+  ) {
+    const spots = await this.loadParksFromCsv(csvPath);
     const affected = await this.saveSpots(spots);
     return { totalParsed: spots.length, affected };
   }

@@ -50,10 +50,15 @@ export class LocationController {
   async saveAllLocation(): Promise<{ totalParsed: number; affected: number }> {
     const librariesRes = await this.service.saveLibrariesFromCsv();
     const bookCafesRes = await this.service.saveFromBookCafeDefault();
+    const parksRes = await this.service.saveFromParkDefault();
     // const naverRes = await this.service.saveFromNaverDefault();
     return {
-      totalParsed: librariesRes.totalParsed + bookCafesRes.totalParsed,
-      affected: librariesRes.affected + bookCafesRes.affected,
+      totalParsed:
+        librariesRes.totalParsed +
+        bookCafesRes.totalParsed +
+        parksRes.totalParsed,
+      affected:
+        librariesRes.affected + bookCafesRes.affected + parksRes.affected,
     };
   }
 

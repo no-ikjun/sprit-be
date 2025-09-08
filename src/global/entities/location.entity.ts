@@ -7,7 +7,11 @@ import {
   PrimaryColumn,
 } from 'typeorm';
 
-export type LocationSource = 'official-library' | 'naver-local' | 'book-cafe';
+export type LocationSource =
+  | 'official-library'
+  | 'naver-local'
+  | 'book-cafe'
+  | 'park';
 
 @Entity('location')
 export class Location {
