@@ -50,6 +50,7 @@ import { ArticleLike } from './global/entities/article_like.entity';
 import { Follow } from './global/entities/follow.entity';
 import { FollowService } from './follow/follow.service';
 import { EventEmitterModule } from '@nestjs/event-emitter';
+import { LocationModule } from './location/location.module';
 @Module({
   imports: [
     ScheduleModule,
@@ -109,6 +110,7 @@ import { EventEmitterModule } from '@nestjs/event-emitter';
     FollowModule,
     ArticleModule,
     EventEmitterModule.forRoot(),
+    LocationModule,
   ],
   controllers: [AppController],
   providers: [

@@ -9,6 +9,7 @@ import { BookLibrary } from 'src/global/entities/book_library.entity';
 import { BookReport } from 'src/global/entities/book_report.entity';
 import { FcmToken } from 'src/global/entities/fcm_token.entity';
 import { Follow } from 'src/global/entities/follow.entity';
+import { Location } from 'src/global/entities/location.entity';
 import { Notice } from 'src/global/entities/notice.entity';
 import { Phrase } from 'src/global/entities/phrase.entity';
 import { Profile } from 'src/global/entities/profile.entity';
@@ -58,6 +59,7 @@ export class DatabaseService implements TypeOrmOptionsFactory {
         User,
         Follow,
         Version,
+        Location,
       ],
       synchronize: false,
     };
