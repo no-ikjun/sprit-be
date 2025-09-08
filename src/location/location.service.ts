@@ -12,12 +12,7 @@ import { Location } from 'src/global/entities/location.entity';
 import { generateRamdomId, getRandomString, getToday } from 'src/global/utils';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import {
-  approxMetersPerDegLat,
-  approxMetersPerDegLngAtLat,
-  clusterByGrid,
-  zoomToGridMeters,
-} from './utils/geo';
+import { clusterByGrid, zoomToGridMeters } from './utils/geo';
 import { GetNearbyLocationsDto } from './dto/nearby.dto';
 
 export type LocalItem = {
@@ -100,47 +95,62 @@ export class LocationService {
     return Array.from(map.values());
   }
 
-  // ============================================================
-  // 공공데이터 - 도서관 정보 활용 데이터 수집
-  // ============================================================
-  async loadLibrariesFromCsv(csvPath: string): Promise<Spot[]> {
+  // ========== CSV 공통 유틸 ==========
+  private readAndDecodeCsv(csvPath: string): string {
     const raw = fs.readFileSync(csvPath);
-
-    // CP949/UTF-8 자동 처리
     const tryDecode = (enc: 'utf8' | 'cp949') => iconv.decode(raw, enc);
     let text = tryDecode('utf8');
     if ((text.match(/\uFFFD/g) || []).length > 5) text = tryDecode('cp949');
+    return text;
+  }
 
-    // ----- 구분자 자동 감지 -----
-    const detectDelimiter = (s: string) => {
-      const firstLine = s.split(/\r?\n/).find((l) => l.trim().length > 0) ?? '';
-      const cands = [',', '\t', ';', '|', '^'];
-      const counted = cands.map((d) => ({
-        d,
-        c: (firstLine.match(new RegExp(`\\${d}`, 'g')) || []).length,
-      }));
-      counted.sort((a, b) => b.c - a.c);
-      return counted[0].c > 0 ? counted[0].d : ',';
-    };
-    const delimiter = detectDelimiter(text);
-    this.logger.log(`[CSV] delimiter detected = "${delimiter}"`);
+  private detectDelimiter(text: string): string {
+    const firstLine =
+      text.split(/\r?\n/).find((l) => l.trim().length > 0) ?? '';
+    const cands = [',', '\t', ';', '|', '^'];
+    const counted = cands.map((d) => ({
+      d,
+      c: (firstLine.match(new RegExp(`\\${d}`, 'g')) || []).length,
+    }));
+    counted.sort((a, b) => b.c - a.c);
+    return counted[0].c > 0 ? counted[0].d : ',';
+  }
 
-    const records: Record<string, any>[] = csvParse(text, {
+  private parseCsvRecords(
+    text: string,
+    delimiter: string,
+  ): Record<string, any>[] {
+    return csvParse(text, {
       columns: true,
       skip_empty_lines: true,
       bom: true,
       trim: true,
+      delimiter,
     });
+  }
+
+  private finalizeCsvSpots(spots: Spot[], totalRows: number): Spot[] {
+    const cleaned = this.dedup(spots).sort((a, b) =>
+      a.name.localeCompare(b.name),
+    );
+    this.logger.log(
+      `CSV 변환(보정 없음) 완료: ${cleaned.length} spots (from ${totalRows} rows)`,
+    );
+    return cleaned;
+  }
+
+  // ============================================================
+  // 공공데이터 - 도서관 정보 활용 데이터 수집
+  // ============================================================
+  async loadLibrariesFromCsv(csvPath: string): Promise<Spot[]> {
+    const text = this.readAndDecodeCsv(csvPath);
+    const delimiter = this.detectDelimiter(text);
+    this.logger.log(`[CSV] delimiter detected = "${delimiter}"`);
+    const records = this.parseCsvRecords(text, delimiter);
     if (!records.length) {
       this.logger.warn(`CSV에서 데이터가 없습니다: ${csvPath}`);
       return [];
     }
-
-    // 표준 컬럼 우선 매핑
-    const headers = Object.keys(records[0]);
-    const normalize = (s: string) => s.toLowerCase().replace(/\s+/g, '').trim();
-    const pick = (cands: string[]) =>
-      headers.find((h) => cands.map(normalize).includes(normalize(h)));
 
     const nameKey = 'LBRRY_NM'; // 도서관명
     const roadKey = 'LBRRY_ADDR'; // 주소
@@ -179,56 +189,21 @@ export class LocationService {
       });
     }
 
-    const cleaned = this.dedup(out).sort((a, b) =>
-      a.name.localeCompare(b.name),
-    );
-    this.logger.log(
-      `CSV 변환(보정 없음) 완료: ${cleaned.length} spots (from ${records.length} rows)`,
-    );
-    return cleaned;
+    return this.finalizeCsvSpots(out, records.length);
   }
 
   // ============================================================
   // 공공데이터 - 북카페 정보 활용 데이터 수집
   // ============================================================
   async loadBookcafesFromCsv(csvPath: string): Promise<Spot[]> {
-    const raw = fs.readFileSync(csvPath);
-
-    // CP949/UTF-8 자동 처리
-    const tryDecode = (enc: 'utf8' | 'cp949') => iconv.decode(raw, enc);
-    let text = tryDecode('utf8');
-    if ((text.match(/\uFFFD/g) || []).length > 5) text = tryDecode('cp949');
-
-    // ----- 구분자 자동 감지 -----
-    const detectDelimiter = (s: string) => {
-      const firstLine = s.split(/\r?\n/).find((l) => l.trim().length > 0) ?? '';
-      const cands = [',', '\t', ';', '|', '^'];
-      const counted = cands.map((d) => ({
-        d,
-        c: (firstLine.match(new RegExp(`\\${d}`, 'g')) || []).length,
-      }));
-      counted.sort((a, b) => b.c - a.c);
-      return counted[0].c > 0 ? counted[0].d : ',';
-    };
-    const delimiter = detectDelimiter(text);
+    const text = this.readAndDecodeCsv(csvPath);
+    const delimiter = this.detectDelimiter(text);
     this.logger.log(`[CSV] delimiter detected = "${delimiter}"`);
-
-    const records: Record<string, any>[] = csvParse(text, {
-      columns: true,
-      skip_empty_lines: true,
-      bom: true,
-      trim: true,
-    });
+    const records = this.parseCsvRecords(text, delimiter);
     if (!records.length) {
       this.logger.warn(`CSV에서 데이터가 없습니다: ${csvPath}`);
       return [];
     }
-
-    // 표준 컬럼 우선 매핑
-    const headers = Object.keys(records[0]);
-    const normalize = (s: string) => s.toLowerCase().replace(/\s+/g, '').trim();
-    const pick = (cands: string[]) =>
-      headers.find((h) => cands.map(normalize).includes(normalize(h)));
 
     const nameKey = 'FCLTY_NM'; // 북카페 이름
     const roadKey = 'FCLTY_ROAD_NM_ADDR'; // 주소
@@ -263,56 +238,21 @@ export class LocationService {
       });
     }
 
-    const cleaned = this.dedup(out).sort((a, b) =>
-      a.name.localeCompare(b.name),
-    );
-    this.logger.log(
-      `CSV 변환(보정 없음) 완료: ${cleaned.length} spots (from ${records.length} rows)`,
-    );
-    return cleaned;
+    return this.finalizeCsvSpots(out, records.length);
   }
 
   // ============================================================
   // 공공데이터 - 북카페 정보 활용 데이터 수집
   // ============================================================
   async loadParksFromCsv(csvPath: string): Promise<Spot[]> {
-    const raw = fs.readFileSync(csvPath);
-
-    // CP949/UTF-8 자동 처리
-    const tryDecode = (enc: 'utf8' | 'cp949') => iconv.decode(raw, enc);
-    let text = tryDecode('utf8');
-    if ((text.match(/\uFFFD/g) || []).length > 5) text = tryDecode('cp949');
-
-    // ----- 구분자 자동 감지 -----
-    const detectDelimiter = (s: string) => {
-      const firstLine = s.split(/\r?\n/).find((l) => l.trim().length > 0) ?? '';
-      const cands = [',', '\t', ';', '|', '^'];
-      const counted = cands.map((d) => ({
-        d,
-        c: (firstLine.match(new RegExp(`\\${d}`, 'g')) || []).length,
-      }));
-      counted.sort((a, b) => b.c - a.c);
-      return counted[0].c > 0 ? counted[0].d : ',';
-    };
-    const delimiter = detectDelimiter(text);
+    const text = this.readAndDecodeCsv(csvPath);
+    const delimiter = this.detectDelimiter(text);
     this.logger.log(`[CSV] delimiter detected = "${delimiter}"`);
-
-    const records: Record<string, any>[] = csvParse(text, {
-      columns: true,
-      skip_empty_lines: true,
-      bom: true,
-      trim: true,
-    });
+    const records = this.parseCsvRecords(text, delimiter);
     if (!records.length) {
       this.logger.warn(`CSV에서 데이터가 없습니다: ${csvPath}`);
       return [];
     }
-
-    // 표준 컬럼 우선 매핑
-    const headers = Object.keys(records[0]);
-    const normalize = (s: string) => s.toLowerCase().replace(/\s+/g, '').trim();
-    const pick = (cands: string[]) =>
-      headers.find((h) => cands.map(normalize).includes(normalize(h)));
 
     const nameKey = 'POI_NM'; // 공원 이름
     const siDo = 'CTPRVN_NM'; // 주소-시도
@@ -362,13 +302,7 @@ export class LocationService {
       });
     }
 
-    const cleaned = this.dedup(out).sort((a, b) =>
-      a.name.localeCompare(b.name),
-    );
-    this.logger.log(
-      `CSV 변환(보정 없음) 완료: ${cleaned.length} spots (from ${records.length} rows)`,
-    );
-    return cleaned;
+    return this.finalizeCsvSpots(out, records.length);
   }
 
   // ============================================================
@@ -602,7 +536,7 @@ export class LocationService {
 
     const rows = spots.map((s) => this.spotToEntity(s));
 
-    const res = await this.locationRepo.upsert(rows, {
+    await this.locationRepo.upsert(rows, {
       conflictPaths: ['name', 'roadAddress'],
       skipUpdateIfNoValuesChanged: true,
     });
