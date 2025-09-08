@@ -12,6 +12,13 @@ import { Location } from 'src/global/entities/location.entity';
 import { generateRamdomId, getRandomString, getToday } from 'src/global/utils';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
+import {
+  approxMetersPerDegLat,
+  approxMetersPerDegLngAtLat,
+  clusterByGrid,
+  zoomToGridMeters,
+} from './utils/geo';
+import { GetNearbyLocationsDto } from './dto/nearby.dto';
 
 export type LocalItem = {
   title: string; // HTML 포함
@@ -532,5 +539,58 @@ export class LocationService {
     const spots = await this.fetchNaverSeedDefault();
     const affected = await this.saveSpots(spots);
     return { totalParsed: spots.length, affected };
+  }
+
+  async findNearbyWithClustering(dto: GetNearbyLocationsDto) {
+    const { lat, lng, radius, zoom = 14, maxCandidates = 1500 } = dto;
+
+    // 거리 식 (클램프 포함)
+    const inner = `
+    LEAST(1, GREATEST(-1,
+      cos(radians(:lat)) * cos(radians(l.lat)) * cos(radians(l.lng) - radians(:lng))
+      + sin(radians(:lat)) * sin(radians(l.lat))
+    ))
+  `;
+    const distanceExpr = `(6371000 * acos(${inner}))`;
+
+    const qb = this.locationRepo
+      .createQueryBuilder('l')
+      .addSelect('l.lat', 'lat')
+      .addSelect('l.lng', 'lng')
+      .addSelect('l.name', 'name')
+      .addSelect('COALESCE(l.roadAddress, l.address)', 'address')
+      .addSelect(distanceExpr, 'distance')
+      .where(`${distanceExpr} <= :radius`)
+      .orderBy('distance', 'ASC')
+      .limit(maxCandidates)
+      .setParameters({ lat, lng, radius });
+
+    const rows = await qb.getRawMany<{
+      lat: string | number;
+      lng: string | number;
+      name: string;
+      address: string | null;
+      distance: string | number;
+    }>();
+
+    const candidates = rows.map((r) => ({
+      entity: {
+        lat: Number(r.lat),
+        lng: Number(r.lng),
+        name: r.name,
+        address: r.address ?? '',
+      },
+      distance: Number(r.distance),
+    }));
+
+    const gridMeters = zoomToGridMeters(zoom);
+    const clustered = clusterByGrid(candidates, { gridMeters, lat, lng });
+
+    return clustered.map((c) => ({
+      lat: c.representative.entity.lat,
+      lng: c.representative.entity.lng,
+      name: c.representative.entity.name,
+      address: c.representative.entity.address,
+    }));
   }
 }

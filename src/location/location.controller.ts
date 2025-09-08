@@ -1,6 +1,7 @@
 import { Controller, Get, Query, UseGuards } from '@nestjs/common';
 import { LocationService } from './location.service';
 import { JwtAccessGuard } from 'src/auth/guard/jwtAccess.guard';
+import { GetNearbyLocationsDto } from './dto/nearby.dto';
 
 type MarkerDTO = {
   name: string;
@@ -11,7 +12,7 @@ type MarkerDTO = {
   source: 'official-library' | 'naver-local';
 };
 
-@Controller('locations')
+@Controller('v1/locations')
 export class LocationController {
   constructor(private readonly service: LocationService) {}
 
@@ -54,5 +55,12 @@ export class LocationController {
       totalParsed: librariesRes.totalParsed + bookCafesRes.totalParsed,
       affected: librariesRes.affected + bookCafesRes.affected,
     };
+  }
+
+  @Get('near')
+  @UseGuards(JwtAccessGuard)
+  async getNearby(@Query() dto: GetNearbyLocationsDto) {
+    const res = await this.service.findNearbyWithClustering(dto);
+    return res;
   }
 }
