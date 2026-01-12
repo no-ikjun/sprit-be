@@ -327,7 +327,6 @@ export class RecordRepository {
         const bookInfo = await this.bookService.findByBookUuid(
           record.book_uuid,
         );
-        console.log(bookInfo);
         if (!recordsByBookUuid[bookInfo.book_uuid]) {
           // 새로운 book_uuid라면 객체 생성
           recordsByBookUuid[bookInfo.book_uuid] = {
