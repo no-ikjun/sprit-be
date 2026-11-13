@@ -19,3 +19,9 @@ Database schema changes require a separate reviewed procedure. arrive releases w
 Inspect deployment results on the server at `/var/lib/lightsail-deploy/sprit/latest.json` (successful digest and commit), per-run directories (backups and results), and `journalctl -u lightsail-deploy-sprit-<run-id>-<attempt>`. These are root-restricted; do not upload their DB backups to GitHub. `kubectl` can show the live image and `lightsail-infra/source-revision` annotation. The actual deployed digest is authoritative; initial infra manifests must be refreshed before any full re-apply.
 
 The host helper source and recovery instructions are maintained in `lightsail-infra/k3s/ci/`.
+
+## Initial verification (2026-11-14 KST)
+
+The first [manual Actions release](https://github.com/no-ikjun/sprit-be/actions/runs/43457088263) passed build, compiled PostgreSQL contract, image publication, host preflight and production deployment. Post-release checks passed for PostgreSQL role/KST, password login, UUID/FK/CRUD with transaction rollback, authenticated HTTP and unauthenticated rejection; no synthetic rows remained.
+
+The PostgreSQL compatibility commits are now included in both main and production. Develop on main and merge into production for an automatic release. For a button release, select production in Run workflow. Never restore the old MySQL ENV_FILE or Docker deploy commands.
