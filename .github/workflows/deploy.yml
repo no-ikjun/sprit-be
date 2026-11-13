@@ -1,22 +1,105 @@
-name: Validate source (deployment is manual)
+name: CI/CD (k3s)
+
 on:
   push:
-    branches: ['production']
+    branches: [production]
   pull_request:
-    branches: ['production']
+    branches: [main, production]
   workflow_dispatch:
+
 permissions:
   contents: read
+
+# Never cancel an in-flight production deployment. The host also locks across repos.
+concurrency:
+  group: k3s-${{ github.ref }}
+  cancel-in-progress: false
+
+env:
+  APP: sprit
+  IMAGE_REPOSITORY: docker.io/ikjunchoi/sprit
+
 jobs:
   validate:
     runs-on: ubuntu-latest
+    timeout-minutes: 15
     steps:
       - uses: actions/checkout@v4
+      - name: Require the production branch for manual deployments
+        if: github.event_name == 'workflow_dispatch'
+        env:
+          SELECTED_REF: ${{ github.ref }}
+        run: |
+          if [ "$SELECTED_REF" != 'refs/heads/production' ]; then
+            echo 'Select production in the Run workflow branch dropdown.' >&2
+            exit 1
+          fi
       - uses: actions/setup-node@v4
         with:
           node-version: '18.20.8'
           cache: npm
-      - run: npm ci
-      - run: npm run build
-# Production deployment is deliberately not triggered by PRs/pushes.
-# Preserve server-side database secrets; follow docs/POSTGRESQL-CUTOVER.md.
+          cache-dependency-path: package-lock.json
+      - name: Install dependencies
+        working-directory: .
+        run: npm ci --no-audit --no-fund
+      - name: Build application
+        working-directory: .
+        run: npm run build
+      - name: Check PostgreSQL runtime contract
+        run: node scripts/ci/check-postgres-contract.cjs
+      - name: Validate deploy helper syntax
+        run: bash -n scripts/ci/deploy-k3s.sh
+
+  publish:
+    needs: validate
+    if: github.ref == 'refs/heads/production' && (github.event_name == 'push' || github.event_name == 'workflow_dispatch')
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    outputs:
+      digest: ${{ steps.image.outputs.digest }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: docker/setup-buildx-action@v3
+      - name: Log in to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
+      - name: Build and publish immutable release
+        id: image
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: Dockerfile
+          platforms: linux/amd64
+          push: true
+          tags: ${{ env.IMAGE_REPOSITORY }}:sha-${{ github.sha }}-${{ github.run_id }}-${{ github.run_attempt }}
+          labels: |
+            org.opencontainers.image.revision=${{ github.sha }}
+            org.opencontainers.image.source=https://github.com/${{ github.repository }}
+          build-args: |
+            SOURCE_REVISION=${{ github.sha }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+  deploy:
+    needs: publish
+    if: github.ref == 'refs/heads/production' && (github.event_name == 'push' || github.event_name == 'workflow_dispatch')
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+      - name: Deploy and verify on Lightsail
+        env:
+          IMAGE: ${{ env.IMAGE_REPOSITORY }}@${{ needs.publish.outputs.digest }}
+          LIGHTSAIL_HOST: ${{ secrets.LIGHTSAIL_HOST }}
+          LIGHTSAIL_USERNAME: ${{ secrets.LIGHTSAIL_USERNAME }}
+          LIGHTSAIL_SSH_KEY: ${{ secrets.LIGHTSAIL_SSH_KEY }}
+          SSH_PORT: ${{ secrets.SSH_PORT }}
+        run: bash scripts/ci/deploy-k3s.sh
+      - name: Record deployment
+        env:
+          RELEASE_IMAGE: ${{ env.IMAGE_REPOSITORY }}@${{ needs.publish.outputs.digest }}
+        run: |
+          printf '### %s deployment\n\nCommit: `%s`\n\nImage: `%s`\n' \
+            "$APP" "$GITHUB_SHA" "$RELEASE_IMAGE" >> "$GITHUB_STEP_SUMMARY"
