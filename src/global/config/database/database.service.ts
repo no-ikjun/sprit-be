@@ -29,14 +29,29 @@ export class DatabaseService implements TypeOrmOptionsFactory {
   constructor(private readonly configService: ConfigService) {}
 
   createTypeOrmOptions(): TypeOrmModuleOptions {
+    const type = this.configService.get<string>('DATABASE_TYPE', 'mysql');
+    if (type !== 'mysql' && type !== 'postgres') {
+      throw new Error('DATABASE_TYPE must be mysql or postgres');
+    }
+    // Legacy DATETIME values represent Korean wall-clock time. pg interprets
+    // timestamp without time zone using the Node process timezone.
+    if (type === 'postgres' && process.env.TZ !== 'Asia/Seoul') {
+      throw new Error('PostgreSQL requires TZ=Asia/Seoul');
+    }
     return {
-      type: 'mysql',
+      type,
+      ...(type === 'postgres'
+        ? {
+            extra: { options: '-c timezone=Asia/Seoul', max: 5 },
+            uuidExtension: 'pgcrypto',
+            installExtensions: false,
+          }
+        : { timezone: '+09:00' }),
       username: this.configService.get<string>('DATABASE_USER'),
       password: this.configService.get<string>('DATABASE_PASSWORD'),
       port: this.configService.get<number>('DATABASE_PORT'),
       host: this.configService.get<string>('DATABASE_HOST'),
       database: this.configService.get<string>('DATABASE_NAME'),
-      timezone: '+09:00',
       entities: [
         Article,
         ArticleLike,

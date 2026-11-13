@@ -59,6 +59,7 @@ import { HealthModule } from './health/health.module';
       cache: true,
       isGlobal: true,
       envFilePath: '.env',
+      ignoreEnvFile: process.env.REHEARSAL_MODE === 'true',
     }),
     TypeOrmModule.forRootAsync({
       imports: [DatabaseModule],

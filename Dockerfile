@@ -1,26 +1,24 @@
-# Node.js 이미지를 베이스로 사용
-FROM node:18-alpine
-
-USER root
-RUN apk update && apk add --no-cache mariadb-client
-
-# 작업 디렉토리 생성
+FROM node:18.20.8-alpine AS build
 WORKDIR /app
-
-# 패키지 설치를 위한 package.json 복사
 COPY package*.json ./
+RUN npm ci --no-audit --no-fund
+COPY tsconfig*.json nest-cli.json ./
+COPY src ./src
+RUN npm run build && npm prune --omit=dev --no-audit --no-fund
 
-# 패키지 설치
-RUN npm install
-
-# 소스 코드 복사
-COPY . .
-
-# 빌드
-RUN npm run build
-
-# 포트를 노출
+FROM node:18.20.8-alpine
+ARG SOURCE_REVISION
+LABEL org.opencontainers.image.revision=$SOURCE_REVISION
+WORKDIR /app
+ENV NODE_ENV=production TZ=Asia/Seoul
+COPY --from=build /app/node_modules ./node_modules
+COPY --from=build /app/dist ./dist
+COPY package*.json ./
+COPY scripts/migration ./scripts/migration
+# Preserve CSV seed files needed by the existing location import endpoint.
+COPY src/location/data ./dist/location/data
+RUN mkdir -p uploads && chown node:node uploads
+USER node
 EXPOSE 3000
-
-# 애플리케이션 실행
-CMD ["npm", "run", "start:prod"]
+HEALTHCHECK --interval=10s --timeout=3s --start-period=20s --retries=5 CMD node -e "require('http').get('http://127.0.0.1:3000/health', r => process.exit(r.statusCode === 200 ? 0 : 1)).on('error', () => process.exit(1))"
+CMD ["node", "dist/main.js"]

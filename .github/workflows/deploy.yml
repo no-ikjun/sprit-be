@@ -1,97 +1,22 @@
-name: CI/CD with Docker
-
+name: Validate source (deployment is manual)
 on:
   push:
     branches: ['production']
   pull_request:
     branches: ['production']
   workflow_dispatch:
-
+permissions:
+  contents: read
 jobs:
-  build-and-deploy:
+  validate:
     runs-on: ubuntu-latest
-
     steps:
-      # 1. 코드 체크아웃
-      - name: Checkout Code
-        uses: actions/checkout@v3
-
-      # 2. Docker 로그인
-      - name: Log in to DockerHub
-        uses: docker/login-action@v2
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
         with:
-          username: ${{ secrets.DOCKER_USERNAME }}
-          password: ${{ secrets.DOCKER_PASSWORD }}
-
-      # 3. Docker 이미지 빌드 및 푸시
-      - name: Build and Push Docker Image
-        run: |
-          docker build -t ${{ secrets.DOCKER_USERNAME }}/sprit:latest .
-          docker push ${{ secrets.DOCKER_USERNAME }}/sprit:latest
-
-      # 4. SSH를 통해 Lightsail 서버로 배포
-      - name: Deploy to Lightsail via SSH
-        uses: appleboy/ssh-action@v1.1.0
-        with:
-          host: ${{ secrets.LIGHTSAIL_HOST }}
-          username: ${{ secrets.LIGHTSAIL_USERNAME }}
-          key: ${{ secrets.LIGHTSAIL_SSH_KEY }}
-          port: ${{ secrets.SSH_PORT }}
-          script: |
-            set -Eeuo pipefail
-
-            APP_NAME="sprit"
-            IMAGE="${{ secrets.DOCKER_USERNAME }}/sprit:latest"
-            ENV_PATH="/home/ubuntu/.env"
-            HOST_PORT="3000"
-            CONTAINER_PORT="3000"
-
-            echo "[1/5] Clean old container if exists"
-            EXISTING_IDS=$(docker ps -aq -f name="^${APP_NAME}$" || true)
-            if [ -n "${EXISTING_IDS}" ]; then
-              echo "Stopping and removing existing container..."
-              docker stop ${EXISTING_IDS} || true
-              docker rm -f ${EXISTING_IDS} || true
-            fi
-
-            # 완전히 제거될 때까지 대기
-            for i in {1..5}; do
-              if [ -z "$(docker ps -aq -f name="^${APP_NAME}$")" ]; then
-                echo "Old container removed ✅"
-                break
-              fi
-              echo "Waiting for container removal..."
-              sleep 2
-            done
-
-            echo "[2/5] Refresh .env (from GitHub Secret)"
-            # here-doc으로 개행/특수문자 안전하게 기록
-            cat > "${ENV_PATH}" <<'EOF'
-            ${{ secrets.ENV_FILE }}
-            EOF
-            chmod 600 "${ENV_PATH}"
-
-            echo "[3/5] Pull latest image"
-            docker pull "${IMAGE}"
-
-            echo "[4/5] Run new container"
-            docker run -d --name "${APP_NAME}" \
-              -p ${HOST_PORT}:${CONTAINER_PORT} \
-              --env-file "${ENV_PATH}" \
-              --restart always \
-              --health-cmd="curl -fsS http://localhost:${CONTAINER_PORT}/health || exit 1" \
-              --health-interval=10s --health-retries=5 --health-timeout=2s \
-              "${IMAGE}"
-
-            echo "[5/5] Verify container is up"
-            # 헬스체크(선택): /health 엔드포인트가 없다면 이 블록은 넘어가도 OK
-            for i in {1..15}; do
-              STATUS=$(docker inspect --format='{{json .State.Health.Status}}' "${APP_NAME}" 2>/dev/null || echo '"starting"')
-              if [ "${STATUS}" = '"healthy"' ]; then
-                echo "Container is healthy ✅"
-                break
-              fi
-              sleep 2
-            done
-
-            docker ps --filter "name=^${APP_NAME}$" --format "table {{.Names}}\t{{.Status}}\t{{.Ports}}"
+          node-version: '18.20.8'
+          cache: npm
+      - run: npm ci
+      - run: npm run build
+# Production deployment is deliberately not triggered by PRs/pushes.
+# Preserve server-side database secrets; follow docs/POSTGRESQL-CUTOVER.md.

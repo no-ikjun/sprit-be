@@ -26,9 +26,19 @@ export class UserRepository {
   }
 
   async findOneByUserId(userId: string): Promise<User> {
-    return await this.userReposiotry.findOne({
-      where: { user_id: userId },
-    });
+    if (this.userReposiotry.manager.connection.options.type === 'postgres') {
+      // Preserve MariaDB general_ci/PAD SPACE and its clustered-PK first match.
+      // The importer verifies every legacy login selection before committing.
+      return this.userReposiotry
+        .createQueryBuilder('user')
+        .where(
+          'rtrim(sprit_fold(user.user_id)) = rtrim(sprit_fold(:userId)) COLLATE "C"',
+          { userId },
+        )
+        .orderBy('sprit_fold(user.user_uuid) COLLATE "C"', 'ASC')
+        .getOne();
+    }
+    return this.userReposiotry.findOne({ where: { user_id: userId } });
   }
 
   async setNewUser(userData: CreateUserDto): Promise<void> {

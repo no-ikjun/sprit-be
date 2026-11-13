@@ -15,7 +15,7 @@ export type LocationSource =
 
 @Entity('location')
 export class Location {
-  @PrimaryColumn('uuid')
+  @PrimaryColumn({ type: 'varchar', length: 255 })
   location_uuid: string;
 
   @Column({ nullable: false })
@@ -63,9 +63,9 @@ export class Location {
   @Column({ nullable: true })
   externalId: string;
 
-  @CreateDateColumn({ type: 'datetime' })
+  @CreateDateColumn()
   created_at: Date;
 
-  @UpdateDateColumn({ type: 'datetime' })
+  @UpdateDateColumn()
   updated_at: Date;
 }

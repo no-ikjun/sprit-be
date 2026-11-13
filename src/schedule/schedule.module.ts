@@ -35,7 +35,9 @@ import { ProfileRepository } from 'src/profile/profile.repository';
 
 @Module({
   imports: [
-    NestScheduleModule.forRoot(),
+    ...(process.env.REHEARSAL_MODE === 'true'
+      ? []
+      : [NestScheduleModule.forRoot()]),
     HttpModule,
     TypeOrmModule.forFeature([
       Book,
