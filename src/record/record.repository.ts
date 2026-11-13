@@ -327,7 +327,6 @@ export class RecordRepository {
         const bookInfo = await this.bookService.findByBookUuid(
           record.book_uuid,
         );
-        console.log(bookInfo);
         if (!recordsByBookUuid[bookInfo.book_uuid]) {
           // 새로운 book_uuid라면 객체 생성
           recordsByBookUuid[bookInfo.book_uuid] = {
@@ -358,12 +357,12 @@ export class RecordRepository {
     month: number,
     kind: string,
   ): Promise<MonthlyRecordResponseType> {
-    const presentMonthStart = new Date(Date.UTC(year, month, 1));
-    const presentMonthEnd = new Date(
-      Date.UTC(year, month + 1, 0, 23, 59, 59, 999),
-    );
-    const pastMonthStart = new Date(Date.UTC(year, month - 1, 1));
-    const pastMonthEnd = new Date(Date.UTC(year, month, 0, 23, 59, 59, 999));
+    // This endpoint keeps its existing zero-based month contract.
+    // Use KST local boundaries, consistent with daily/weekly record queries.
+    const presentMonthStart = new Date(year, month, 1);
+    const presentMonthEnd = new Date(year, month + 1, 0, 23, 59, 59, 999);
+    const pastMonthStart = new Date(year, month - 1, 1);
+    const pastMonthEnd = new Date(year, month, 0, 23, 59, 59, 999);
 
     let presentMonthCount = 0;
     let pastMonthCount = 0;

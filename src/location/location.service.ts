@@ -536,10 +536,10 @@ export class LocationService {
 
     const rows = spots.map((s) => this.spotToEntity(s));
 
-    await this.locationRepo.upsert(rows, {
-      conflictPaths: ['name', 'roadAddress'],
-      skipUpdateIfNoValuesChanged: true,
-    });
+    // Production has only the primary-key constraint. MySQL previously inserted
+    // these freshly generated IDs; PostgreSQL cannot infer a nonexistent unique
+    // (name, roadAddress) constraint. Preserve that append behavior and all rows.
+    await this.locationRepo.insert(rows);
     return rows.length;
   }
 

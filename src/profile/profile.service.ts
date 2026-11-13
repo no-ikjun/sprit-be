@@ -7,7 +7,7 @@ import * as path from 'path';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Profile } from 'src/global/entities/profile.entity';
 import { User } from 'src/global/entities/user.entity';
-import { Like, Not, Repository } from 'typeorm';
+import { Like, Not, Raw, Repository } from 'typeorm';
 import { Book } from 'src/global/entities/book.entity';
 import { ProfileRecommendBook } from 'src/global/entities/profile_recommend_book.entity';
 import { ProfileResponseType } from 'src/global/types/response.type';
@@ -104,7 +104,7 @@ export class ProfileService {
     // 2. 프로필이 이미 존재하는지 확인
     let profile = await this.profileRepository.findOne({
       where: { user: { user_uuid } },
-      relations: ['user', 'recommend_list'],
+      relations: ['user', 'recommend_list', 'recommend_list.book'],
     });
 
     if (!profile) {
@@ -145,7 +145,7 @@ export class ProfileService {
   async getProfile(user_uuid: string): Promise<ProfileResponseType> {
     const profile = await this.profileRepository.findOne({
       where: { user: { user_uuid } },
-      relations: ['user', 'recommend_list'],
+      relations: ['user', 'recommend_list', 'recommend_list.book'],
     });
 
     if (!profile) {
@@ -192,10 +192,16 @@ export class ProfileService {
     // 프로필 전체 ID를 무작위로 가져와 20개의 ID를 샘플링
     const randomIds = await this.profileRepository
       .createQueryBuilder('profile')
-      .select('profile.user_uuid')
-      .orderBy('RAND()')
+      .select('profile.user_uuid', 'user_uuid')
+      .orderBy(
+        this.profileRepository.manager.connection.options.type === 'postgres'
+          ? 'RANDOM()'
+          : 'RAND()',
+      )
       .limit(20)
       .getRawMany();
+
+    if (randomIds.length === 0) return [];
 
     // 추천 프로필을 해당 ID 목록을 기준으로 조회
     const profiles = await this.profileRepository
@@ -227,11 +233,21 @@ export class ProfileService {
     const profiles = await this.profileRepository.find({
       where: {
         user: {
-          user_nickname: Like(`%${nickname}%`),
+          user_nickname:
+            this.profileRepository.manager.connection.options.type ===
+            'postgres'
+              ? Raw(
+                  (alias) =>
+                    `sprit_fold(${alias}) LIKE sprit_fold(:nickname) COLLATE "C"`,
+                  {
+                    nickname: `%${nickname}%`,
+                  },
+                )
+              : Like(`%${nickname}%`),
           user_uuid: Not(user_uuid),
         },
       },
-      relations: ['user', 'recommend_list'],
+      relations: ['user', 'recommend_list', 'recommend_list.book'],
     });
     return profiles.map((profile) => ({
       user_uuid: profile.user.user_uuid,

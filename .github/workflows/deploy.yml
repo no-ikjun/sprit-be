@@ -1,97 +1,105 @@
-name: CI/CD with Docker
+name: CI/CD (k3s)
 
 on:
   push:
-    branches: ['production']
+    branches: [production]
   pull_request:
-    branches: ['production']
+    branches: [main, production]
   workflow_dispatch:
 
+permissions:
+  contents: read
+
+# Never cancel an in-flight production deployment. The host also locks across repos.
+concurrency:
+  group: k3s-${{ github.ref }}
+  cancel-in-progress: false
+
+env:
+  APP: sprit
+  IMAGE_REPOSITORY: docker.io/ikjunchoi/sprit
+
 jobs:
-  build-and-deploy:
+  validate:
     runs-on: ubuntu-latest
-
+    timeout-minutes: 15
     steps:
-      # 1. 코드 체크아웃
-      - name: Checkout Code
-        uses: actions/checkout@v3
+      - uses: actions/checkout@v4
+      - name: Require the production branch for manual deployments
+        if: github.event_name == 'workflow_dispatch'
+        env:
+          SELECTED_REF: ${{ github.ref }}
+        run: |
+          if [ "$SELECTED_REF" != 'refs/heads/production' ]; then
+            echo 'Select production in the Run workflow branch dropdown.' >&2
+            exit 1
+          fi
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '18.20.8'
+          cache: npm
+          cache-dependency-path: package-lock.json
+      - name: Install dependencies
+        working-directory: .
+        run: npm ci --no-audit --no-fund
+      - name: Build application
+        working-directory: .
+        run: npm run build
+      - name: Check PostgreSQL runtime contract
+        run: node scripts/ci/check-postgres-contract.cjs
+      - name: Validate deploy helper syntax
+        run: bash -n scripts/ci/deploy-k3s.sh
 
-      # 2. Docker 로그인
-      - name: Log in to DockerHub
-        uses: docker/login-action@v2
+  publish:
+    needs: validate
+    if: github.ref == 'refs/heads/production' && (github.event_name == 'push' || github.event_name == 'workflow_dispatch')
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    outputs:
+      digest: ${{ steps.image.outputs.digest }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: docker/setup-buildx-action@v3
+      - name: Log in to Docker Hub
+        uses: docker/login-action@v3
         with:
           username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_PASSWORD }}
-
-      # 3. Docker 이미지 빌드 및 푸시
-      - name: Build and Push Docker Image
-        run: |
-          docker build -t ${{ secrets.DOCKER_USERNAME }}/sprit:latest .
-          docker push ${{ secrets.DOCKER_USERNAME }}/sprit:latest
-
-      # 4. SSH를 통해 Lightsail 서버로 배포
-      - name: Deploy to Lightsail via SSH
-        uses: appleboy/ssh-action@v1.1.0
+      - name: Build and publish immutable release
+        id: image
+        uses: docker/build-push-action@v6
         with:
-          host: ${{ secrets.LIGHTSAIL_HOST }}
-          username: ${{ secrets.LIGHTSAIL_USERNAME }}
-          key: ${{ secrets.LIGHTSAIL_SSH_KEY }}
-          port: ${{ secrets.SSH_PORT }}
-          script: |
-            set -Eeuo pipefail
+          context: .
+          file: Dockerfile
+          platforms: linux/amd64
+          push: true
+          tags: ${{ env.IMAGE_REPOSITORY }}:sha-${{ github.sha }}-${{ github.run_id }}-${{ github.run_attempt }}
+          labels: |
+            org.opencontainers.image.revision=${{ github.sha }}
+            org.opencontainers.image.source=https://github.com/${{ github.repository }}
+          build-args: |
+            SOURCE_REVISION=${{ github.sha }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
 
-            APP_NAME="sprit"
-            IMAGE="${{ secrets.DOCKER_USERNAME }}/sprit:latest"
-            ENV_PATH="/home/ubuntu/.env"
-            HOST_PORT="3000"
-            CONTAINER_PORT="3000"
-
-            echo "[1/5] Clean old container if exists"
-            EXISTING_IDS=$(docker ps -aq -f name="^${APP_NAME}$" || true)
-            if [ -n "${EXISTING_IDS}" ]; then
-              echo "Stopping and removing existing container..."
-              docker stop ${EXISTING_IDS} || true
-              docker rm -f ${EXISTING_IDS} || true
-            fi
-
-            # 완전히 제거될 때까지 대기
-            for i in {1..5}; do
-              if [ -z "$(docker ps -aq -f name="^${APP_NAME}$")" ]; then
-                echo "Old container removed ✅"
-                break
-              fi
-              echo "Waiting for container removal..."
-              sleep 2
-            done
-
-            echo "[2/5] Refresh .env (from GitHub Secret)"
-            # here-doc으로 개행/특수문자 안전하게 기록
-            cat > "${ENV_PATH}" <<'EOF'
-            ${{ secrets.ENV_FILE }}
-            EOF
-            chmod 600 "${ENV_PATH}"
-
-            echo "[3/5] Pull latest image"
-            docker pull "${IMAGE}"
-
-            echo "[4/5] Run new container"
-            docker run -d --name "${APP_NAME}" \
-              -p ${HOST_PORT}:${CONTAINER_PORT} \
-              --env-file "${ENV_PATH}" \
-              --restart always \
-              --health-cmd="curl -fsS http://localhost:${CONTAINER_PORT}/health || exit 1" \
-              --health-interval=10s --health-retries=5 --health-timeout=2s \
-              "${IMAGE}"
-
-            echo "[5/5] Verify container is up"
-            # 헬스체크(선택): /health 엔드포인트가 없다면 이 블록은 넘어가도 OK
-            for i in {1..15}; do
-              STATUS=$(docker inspect --format='{{json .State.Health.Status}}' "${APP_NAME}" 2>/dev/null || echo '"starting"')
-              if [ "${STATUS}" = '"healthy"' ]; then
-                echo "Container is healthy ✅"
-                break
-              fi
-              sleep 2
-            done
-
-            docker ps --filter "name=^${APP_NAME}$" --format "table {{.Names}}\t{{.Status}}\t{{.Ports}}"
+  deploy:
+    needs: publish
+    if: github.ref == 'refs/heads/production' && (github.event_name == 'push' || github.event_name == 'workflow_dispatch')
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+      - name: Deploy and verify on Lightsail
+        env:
+          IMAGE: ${{ env.IMAGE_REPOSITORY }}@${{ needs.publish.outputs.digest }}
+          LIGHTSAIL_HOST: ${{ secrets.LIGHTSAIL_HOST }}
+          LIGHTSAIL_USERNAME: ${{ secrets.LIGHTSAIL_USERNAME }}
+          LIGHTSAIL_SSH_KEY: ${{ secrets.LIGHTSAIL_SSH_KEY }}
+          SSH_PORT: ${{ secrets.SSH_PORT }}
+        run: bash scripts/ci/deploy-k3s.sh
+      - name: Record deployment
+        env:
+          RELEASE_IMAGE: ${{ env.IMAGE_REPOSITORY }}@${{ needs.publish.outputs.digest }}
+        run: |
+          printf '### %s deployment\n\nCommit: `%s`\n\nImage: `%s`\n' \
+            "$APP" "$GITHUB_SHA" "$RELEASE_IMAGE" >> "$GITHUB_STEP_SUMMARY"

@@ -6,6 +6,7 @@ import { getMessaging } from 'firebase-admin/messaging';
 @Injectable()
 export class GlobalFcmService {
   constructor(private readonly configService: ConfigService) {
+    if (process.env.REHEARSAL_MODE === 'true') return;
     if (getApps().length === 0) {
       initializeApp({
         credential: cert({
@@ -27,6 +28,7 @@ export class GlobalFcmService {
     sound = 'default',
     data?: { [key: string]: string },
   ) {
+    if (process.env.REHEARSAL_MODE === 'true') return;
     getMessaging()
       .send({
         notification: {
